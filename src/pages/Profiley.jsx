@@ -1,13 +1,11 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
+
 import LeftPanel from "../components/layout/LeftPanel";
 import RightPanel from "../components/layout/RightPanel";
 
 import { initialData } from "../constants/initialData";
 import { initialSections } from "../constants/initialSections";
-import { colorThemes } from "../constants/colorThemes";
-import { templates } from "../constants/templates";
 import { initialConfig } from "../constants/initialConfig";
-
 
 const Profiley = () => {
   const [data, setData] = useState(initialData);
@@ -17,17 +15,21 @@ const Profiley = () => {
 
   const toggleSectionVisibility = (id) => {
     setSectionOrder((prev) =>
-      prev.map((s) =>
-        s.id === id ? { ...s, visible: !s.visible } : s
+      prev.map((section) =>
+        section.id === id
+          ? { ...section, visible: !section.visible }
+          : section
       )
     );
   };
 
-  const handleDragStart = (_, index) => setDraggedIndex(index);
+  const handleDragStart = (_, index) => {
+    setDraggedIndex(index);
+  };
 
   const handleDragOver = (e, index) => {
     e.preventDefault();
-    if (index === draggedIndex) return;
+    if (draggedIndex === null || draggedIndex === index) return;
 
     const updated = [...sectionOrder];
     const [moved] = updated.splice(draggedIndex, 1);
@@ -37,10 +39,12 @@ const Profiley = () => {
     setSectionOrder(updated);
   };
 
-  const handleDragEnd = () => setDraggedIndex(null);
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+  };
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex bg-gray-100">
       <LeftPanel
         sectionOrder={sectionOrder}
         toggleSectionVisibility={toggleSectionVisibility}
@@ -50,7 +54,7 @@ const Profiley = () => {
       />
 
       <RightPanel>
-        <div className="p-8 text-gray-400 text-center">
+        <div className="flex items-center justify-center h-full text-gray-400">
           Resume preview (coming next)
         </div>
       </RightPanel>
