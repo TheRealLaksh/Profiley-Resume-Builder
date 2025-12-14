@@ -59,7 +59,7 @@ const PreviewPanel = ({ data, config, sectionOrder, activeTemplate }) => {
                 allowTaint: true,
                 backgroundColor: '#ffffff' // Ensure white background
             },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            jsPDF: { unit: 'mm', format: 'a3', orientation: 'portrait' }
         };
 
         try {
@@ -175,7 +175,7 @@ const PreviewPanel = ({ data, config, sectionOrder, activeTemplate }) => {
 
             return (
                 <div className={`${pageClass} flex ${reverse ? 'flex-row-reverse' : 'flex-row'}`}>
-                    <div className={`${sidebarWidth} flex-shrink-0 p-5 min-h-[297mm] ${sidebarBgClass} ${sidebarTextClass} flex flex-col gap-4`}>
+                   <div className={`${sidebarWidth} flex-shrink-0 p-5 min-h-[297mm] ${sidebarBgClass} ${sidebarTextClass} flex flex-col gap-4 min-w-0`}>
                         {config.showPhoto && (
                             <div className={`w-24 h-24 mx-auto mb-2 overflow-hidden border-2 ${currentTheme.border} ${config.photoShape}`}>
                                 {renderPhoto()}
@@ -238,7 +238,7 @@ const PreviewPanel = ({ data, config, sectionOrder, activeTemplate }) => {
                             </div>
                         </div>
 
-                        <div className={`flex gap-3 mt-2 text-xs text-gray-500 overflow-hidden ${config.headerAlign === 'text-center' ? 'justify-center' : ''}`}>
+                        <div className={`flex gap-3 mt-2 text-xs text-gray-500 overflow-hidden min-w-0 ${config.headerAlign === 'text-center' ? 'justify-center' : ''}`}>
                             <ContactItem icon={Mail} text={data.personal.email} config={config} />
                             <ContactItem icon={Phone} text={data.personal.phone} config={config} />
                             <ContactItem icon={MapPin} text={data.personal.location} config={config} />
