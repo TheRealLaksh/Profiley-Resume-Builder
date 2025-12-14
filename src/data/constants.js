@@ -99,6 +99,7 @@ export const templates = {
   modern: {
     name: 'Modern',
     config: {
+      layoutType: 'sidebar',
       layoutReverse: false,
       sidebarBg: 'gray',
       headerAlign: 'text-left',
@@ -114,6 +115,7 @@ export const templates = {
   minimal: {
     name: 'Minimal',
     config: {
+      layoutType: 'single',
       layoutReverse: false,
       sidebarBg: 'none',
       headerAlign: 'text-left',
@@ -129,6 +131,7 @@ export const templates = {
   creative: {
     name: 'Creative',
     config: {
+      layoutType: 'sidebar',
       layoutReverse: true,
       sidebarBg: 'theme',
       headerAlign: 'text-center',
@@ -144,6 +147,7 @@ export const templates = {
   ats: {
     name: 'ATS Friendly',
     config: {
+      layoutType: 'single',
       layoutReverse: false,
       sidebarBg: 'none',
       headerAlign: 'text-left',
@@ -155,14 +159,14 @@ export const templates = {
       showIcons: false,
       showSectionIcons: false,
       borderStyle: 'none',
-      themeColor: 'noir',
-      layoutMode: 'single-column'
+      themeColor: 'noir'
     }
   },
   // --- NEW TEMPLATES ---
   executive: {
     name: 'Executive',
     config: {
+      layoutType: 'sidebar',
       layoutReverse: true,
       sidebarBg: 'theme',
       headerAlign: 'text-right',
@@ -178,6 +182,7 @@ export const templates = {
   elegant: {
     name: 'Elegant',
     config: {
+      layoutType: 'single',
       layoutReverse: false,
       sidebarBg: 'none',
       headerAlign: 'text-center',
@@ -194,6 +199,7 @@ export const templates = {
   tech: {
     name: 'Tech',
     config: {
+      layoutType: 'sidebar',
       layoutReverse: false,
       sidebarBg: 'gray',
       headerAlign: 'text-left',
@@ -210,8 +216,9 @@ export const templates = {
   bold: {
     name: 'Bold',
     config: {
+      layoutType: 'single',
       layoutReverse: false,
-      sidebarBg: 'theme',
+      sidebarBg: 'none',
       headerAlign: 'text-left',
       photoShape: 'rounded-none',
       fontFamily: 'font-oswald',
@@ -228,6 +235,7 @@ export const templates = {
   academic: {
     name: 'Academic',
     config: {
+      layoutType: 'grid', // Uses the new 2-column grid in main area
       layoutReverse: false,
       sidebarBg: 'none',
       headerAlign: 'text-center',
@@ -245,6 +253,7 @@ export const templates = {
   compact: {
     name: 'Compact',
     config: {
+      layoutType: 'sidebar',
       layoutReverse: true,
       sidebarBg: 'gray',
       headerAlign: 'text-left',
@@ -265,6 +274,7 @@ export const initialConfig = {
   themeColor: 'midnight',
   fontFamily: 'font-inter',
   paperTint: 'bg-white',
+  layoutType: 'sidebar', // Default layout
   layoutReverse: false,
   headerAlign: 'text-left',
   sidebarBg: 'none', 

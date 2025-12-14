@@ -7,7 +7,7 @@ import {
 import html2pdf from 'html2pdf.js';
 import { colorThemes, templates } from '../../data/constants';
 
-// --- Helper Components (Defined outside to prevent re-renders) ---
+// --- Helper Components ---
 
 const IconRenderer = ({ icon: Icon, size = 16, className = "" }) => {
     if (!Icon) return null;
@@ -71,7 +71,6 @@ const SkillTag = ({ skill, config, theme }) => {
             </div>
         );
     } else {
-        // List or comma
         return (
             <span className="text-sm font-medium mr-4 mb-1 block">
                 • {skill.name}
@@ -82,13 +81,19 @@ const SkillTag = ({ skill, config, theme }) => {
 
 // --- Main Component ---
 
-const PreviewPanel = ({ data, config, sections, activeTemplate }) => {
+const PreviewPanel = ({ data, config, sectionOrder }) => {
     const resumeRef = useRef();
 
-    // Safe fallback for theme and config
+    // 1. Safe access to sections (Fixes "filter of undefined" crash)
+    const sections = sectionOrder || [];
+
+    // 2. Safe theme fallback
     const currentTheme = colorThemes[config.themeColor] || colorThemes.midnight;
-    const tplConfig = templates[activeTemplate]?.config || templates.modern.config;
-    const finalConfig = { ...tplConfig, ...config };
+
+    // 3. Determine Layout Mode (Sidebar vs Single Column)
+    // If layoutType is explicitly set, use it. Otherwise, guess based on sidebarBg.
+    // Sidebar layouts usually have a background color (gray/theme) or are explicitly 'sidebar'.
+    const isSidebarLayout = config.layoutType === 'sidebar' || (config.layoutType !== 'single' && config.sidebarBg !== 'none');
 
     const handleDownload = () => {
         const element = resumeRef.current;
@@ -112,7 +117,7 @@ const PreviewPanel = ({ data, config, sections, activeTemplate }) => {
                 );
             case 'experience':
                 return data.experience.map((exp, idx) => (
-                    <div key={idx} className={`mb-4 break-inside-avoid ${finalConfig.entryBox === 'boxed' ? 'p-3 border rounded-lg bg-gray-50' : ''}`}>
+                    <div key={idx} className={`mb-4 break-inside-avoid ${config.entryBox === 'boxed' ? 'p-3 border rounded-lg bg-gray-50' : ''}`}>
                         <div className="flex justify-between items-baseline mb-1">
                             <h4 className="font-bold text-gray-900">{exp.role}</h4>
                             <span className="text-xs font-mono text-gray-500 whitespace-nowrap ml-2">{exp.year}</span>
@@ -138,9 +143,9 @@ const PreviewPanel = ({ data, config, sections, activeTemplate }) => {
                 ));
             case 'skills':
                 return (
-                    <div className={`flex flex-wrap ${finalConfig.skillStyle === 'bars' ? 'flex-col' : 'gap-2'}`}>
+                    <div className={`flex flex-wrap ${config.skillStyle === 'bars' ? 'flex-col' : 'gap-2'}`}>
                         {data.skills.map((skill, idx) => (
-                            <SkillTag key={idx} skill={skill} config={finalConfig} theme={currentTheme} />
+                            <SkillTag key={idx} skill={skill} config={config} theme={currentTheme} />
                         ))}
                     </div>
                 );
@@ -157,14 +162,18 @@ const PreviewPanel = ({ data, config, sections, activeTemplate }) => {
                         ))}
                     </ul>
                 );
+            case 'custom':
+                 // Handle dynamic custom sections
+                 const customSec = data.custom?.[sectionId];
+                 return customSec ? (
+                    <div className="text-sm text-gray-700 whitespace-pre-line">{customSec.content}</div>
+                 ) : null;
             default:
                 return null;
         }
     };
 
     const renderLayout = () => {
-        const isSidebarLayout = ['modern', 'creative', 'tech', 'executive', 'compact'].includes(activeTemplate);
-        
         const sidebarSectionIds = ['skills', 'achievements', 'community']; 
         const mainSectionIds = ['summary', 'experience', 'education'];
 
@@ -172,35 +181,34 @@ const PreviewPanel = ({ data, config, sections, activeTemplate }) => {
         const sidebarSections = sections.filter(s => s.visible && sidebarSectionIds.includes(s.id));
         const allSections = sections.filter(s => s.visible);
 
-        const pageClass = `w-[210mm] min-h-[297mm] bg-white shadow-2xl mx-auto overflow-hidden relative text-gray-800 ${finalConfig.fontFamily}`;
-        const headerClass = `flex flex-col gap-4 mb-6 ${finalConfig.headerAlign === 'text-center' ? 'items-center text-center' : finalConfig.headerAlign === 'text-right' ? 'items-end text-right' : 'items-start text-left'}`;
+        const pageClass = `w-[210mm] min-h-[297mm] bg-white shadow-2xl mx-auto overflow-hidden relative text-gray-800 ${config.fontFamily}`;
+        const headerClass = `flex flex-col gap-4 mb-6 ${config.headerAlign === 'text-center' ? 'items-center text-center' : config.headerAlign === 'text-right' ? 'items-end text-right' : 'items-start text-left'}`;
 
         // 1. Sidebar Layouts
         if (isSidebarLayout) {
-            const reverse = finalConfig.layoutReverse;
-            // FIXED: Using flex-1 for main width ensures it fits perfectly with the gap
+            const reverse = config.layoutReverse;
             const sidebarWidth = 'w-[32%]'; 
             
-            const sidebarBgClass = finalConfig.sidebarBg === 'theme' ? currentTheme.bg : finalConfig.sidebarBg === 'gray' ? 'bg-slate-100' : 'bg-transparent border-r border-gray-100';
-            const sidebarTextClass = finalConfig.sidebarBg === 'theme' || finalConfig.sidebarBg === 'gray' ? 'text-gray-800' : 'text-gray-600';
+            const sidebarBgClass = config.sidebarBg === 'theme' ? currentTheme.bg : config.sidebarBg === 'gray' ? 'bg-slate-100' : 'bg-transparent border-r border-gray-100';
+            const sidebarTextClass = config.sidebarBg === 'theme' || config.sidebarBg === 'gray' ? 'text-gray-800' : 'text-gray-600';
 
             return (
                 <div className={`${pageClass} flex ${reverse ? 'flex-row-reverse' : 'flex-row'}`}>
                     {/* SIDEBAR */}
                     <div className={`${sidebarWidth} flex-shrink-0 p-8 min-h-full ${sidebarBgClass} ${sidebarTextClass} flex flex-col gap-6`}>
-                        {finalConfig.showPhoto && data.personal.photoUrl && (
-                            <div className={`w-32 h-32 mx-auto mb-4 overflow-hidden border-4 ${currentTheme.border} ${finalConfig.photoShape}`}>
+                        {config.showPhoto && data.personal.photoUrl && (
+                            <div className={`w-32 h-32 mx-auto mb-4 overflow-hidden border-4 ${currentTheme.border} ${config.photoShape}`}>
                                 <img src={data.personal.photoUrl} alt="Profile" className="w-full h-full object-cover" />
                             </div>
                         )}
 
                         <div className="space-y-3 mb-6">
                             <h3 className={`uppercase tracking-widest text-xs font-bold mb-3 opacity-70 border-b pb-1 ${currentTheme.border}`}>Contact</h3>
-                            <ContactItem icon={Mail} text={data.personal.email} config={finalConfig} />
-                            <ContactItem icon={Phone} text={data.personal.phone} config={finalConfig} />
-                            <ContactItem icon={MapPin} text={data.personal.location} config={finalConfig} />
-                            <ContactItem icon={Linkedin} text="LinkedIn" link={data.personal.linkedin} config={finalConfig} />
-                            <ContactItem icon={Globe} text="Portfolio" link={data.personal.portfolio} config={finalConfig} />
+                            <ContactItem icon={Mail} text={data.personal.email} config={config} />
+                            <ContactItem icon={Phone} text={data.personal.phone} config={config} />
+                            <ContactItem icon={MapPin} text={data.personal.location} config={config} />
+                            <ContactItem icon={Linkedin} text="LinkedIn" link={data.personal.linkedin} config={config} />
+                            <ContactItem icon={Globe} text="Portfolio" link={data.personal.portfolio} config={config} />
                         </div>
 
                         {sidebarSections.map(section => (
@@ -213,10 +221,10 @@ const PreviewPanel = ({ data, config, sections, activeTemplate }) => {
                         ))}
                     </div>
 
-                    {/* MAIN CONTENT (Fixed width issue) */}
+                    {/* MAIN CONTENT */}
                     <div className={`flex-1 p-10 flex flex-col min-w-0`}>
                         <div className={`${headerClass} border-b pb-6 mb-6 ${currentTheme.border}`}>
-                            <h1 className={`${finalConfig.nameSize} ${finalConfig.nameWeight} ${currentTheme.text} leading-tight`}>
+                            <h1 className={`${config.nameSize} ${config.nameWeight} ${currentTheme.text} leading-tight`}>
                                 {data.personal.name}
                             </h1>
                             <p className="text-xl font-medium text-gray-500 tracking-tight">{data.personal.title}</p>
@@ -225,7 +233,7 @@ const PreviewPanel = ({ data, config, sections, activeTemplate }) => {
                         <div className="space-y-8">
                             {mainSections.map(section => (
                                 <div key={section.id}>
-                                    <SectionHeader title={section.label} icon={section.icon} config={finalConfig} theme={currentTheme} />
+                                    <SectionHeader title={section.label} icon={section.icon} config={config} theme={currentTheme} />
                                     {renderSectionContent(section.id)}
                                 </div>
                             ))}
@@ -239,45 +247,46 @@ const PreviewPanel = ({ data, config, sections, activeTemplate }) => {
         else {
             return (
                 <div className={`${pageClass} p-10 md:p-14`}>
-                     <div className={`${headerClass} ${activeTemplate === 'bold' ? 'border-b-4 border-black pb-6' : ''}`}>
+                     <div className={`${headerClass} ${config.themeColor === 'noir' ? 'border-b-4 border-black pb-6' : ''}`}>
                         <div className="flex items-center gap-6 w-full">
-                            {finalConfig.showPhoto && data.personal.photoUrl && (
+                            {config.showPhoto && data.personal.photoUrl && (
                                 <img 
                                     src={data.personal.photoUrl} 
                                     alt="Profile" 
-                                    className={`w-28 h-28 object-cover border-2 border-gray-100 shadow-sm ${finalConfig.photoShape}`} 
+                                    className={`w-28 h-28 object-cover border-2 border-gray-100 shadow-sm ${config.photoShape}`} 
                                 />
                             )}
                             <div className="flex-grow">
-                                <h1 className={`${finalConfig.nameSize} ${finalConfig.nameWeight} ${currentTheme.text} mb-1`}>
+                                <h1 className={`${config.nameSize} ${config.nameWeight} ${currentTheme.text} mb-1`}>
                                     {data.personal.name}
                                 </h1>
                                 <p className="text-xl text-gray-600 font-medium">{data.personal.title}</p>
                             </div>
                         </div>
                         
-                        <div className={`flex flex-wrap gap-4 mt-4 text-sm text-gray-500 ${finalConfig.headerAlign === 'text-center' ? 'justify-center' : ''}`}>
-                             <ContactItem icon={Mail} text={data.personal.email} config={finalConfig} />
-                             <ContactItem icon={Phone} text={data.personal.phone} config={finalConfig} />
-                             <ContactItem icon={MapPin} text={data.personal.location} config={finalConfig} />
-                             <ContactItem icon={Globe} text="Portfolio" link={data.personal.portfolio} config={finalConfig} />
+                        <div className={`flex flex-wrap gap-4 mt-4 text-sm text-gray-500 ${config.headerAlign === 'text-center' ? 'justify-center' : ''}`}>
+                             <ContactItem icon={Mail} text={data.personal.email} config={config} />
+                             <ContactItem icon={Phone} text={data.personal.phone} config={config} />
+                             <ContactItem icon={MapPin} text={data.personal.location} config={config} />
+                             <ContactItem icon={Globe} text="Portfolio" link={data.personal.portfolio} config={config} />
                         </div>
                     </div>
 
                     <div className="space-y-6 mt-8">
                          {sections.find(s => s.id === 'summary' && s.visible) && (
                             <div>
-                                <SectionHeader title="Profile Summary" icon={User} config={finalConfig} theme={currentTheme} />
+                                <SectionHeader title="Profile Summary" icon={User} config={config} theme={currentTheme} />
                                 {renderSectionContent('summary')}
                             </div>
                          )}
 
-                         {activeTemplate === 'compact' || activeTemplate === 'academic' ? (
+                         {/* Logic for 2-column grid in Single Layout (Compact/Academic) */}
+                         {config.layoutType === 'grid' ? (
                             <div className="grid grid-cols-12 gap-8">
                                 <div className="col-span-8 space-y-6">
                                     {sections.filter(s => ['experience', 'education'].includes(s.id) && s.visible).map(section => (
                                         <div key={section.id}>
-                                            <SectionHeader title={section.label} icon={section.icon} config={finalConfig} theme={currentTheme} />
+                                            <SectionHeader title={section.label} icon={section.icon} config={config} theme={currentTheme} />
                                             {renderSectionContent(section.id)}
                                         </div>
                                     ))}
@@ -285,7 +294,7 @@ const PreviewPanel = ({ data, config, sections, activeTemplate }) => {
                                 <div className="col-span-4 space-y-6 border-l pl-6 border-gray-100">
                                      {sections.filter(s => ['skills', 'achievements', 'community'].includes(s.id) && s.visible).map(section => (
                                         <div key={section.id}>
-                                            <SectionHeader title={section.label} icon={section.icon} config={finalConfig} theme={currentTheme} />
+                                            <SectionHeader title={section.label} icon={section.icon} config={config} theme={currentTheme} />
                                             {renderSectionContent(section.id)}
                                         </div>
                                     ))}
@@ -294,7 +303,7 @@ const PreviewPanel = ({ data, config, sections, activeTemplate }) => {
                          ) : (
                              allSections.filter(s => s.id !== 'summary').map(section => (
                                 <div key={section.id} className={['skills', 'achievements'].includes(section.id) ? 'mb-4' : 'mb-8'}>
-                                    <SectionHeader title={section.label} icon={section.icon} config={finalConfig} theme={currentTheme} />
+                                    <SectionHeader title={section.label} icon={section.icon} config={config} theme={currentTheme} />
                                     {renderSectionContent(section.id)}
                                 </div>
                              ))
@@ -309,7 +318,7 @@ const PreviewPanel = ({ data, config, sections, activeTemplate }) => {
         <div className="flex flex-col gap-4 items-center">
             <div className="w-full max-w-[210mm] flex justify-between items-center bg-white p-3 rounded-lg shadow-sm border border-gray-200">
                 <span className="text-sm font-medium text-gray-500 px-2">
-                    A4 Preview • {activeTemplate ? activeTemplate.charAt(0).toUpperCase() + activeTemplate.slice(1) : 'Modern'} Template
+                    A4 Preview
                 </span>
                 <button 
                     onClick={handleDownload}
