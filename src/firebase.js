@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, addDoc, getDoc, doc } from "firebase/firestore";
+import { getFirestore, collection, addDoc, getDoc, doc, setDoc } from "firebase/firestore"; // Added setDoc
 
 const firebaseConfig = {
   apiKey: "AIzaSyDfSuJZtkW0kTklIWIVR0sIrcbDXcwKoVM",
@@ -14,18 +14,12 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+// Save with Auto-ID (Random)
 export const saveResumeToDB = async (resumeData) => {
   try {
-    // 1. Sanitize: Remove 'undefined' values which cause Firestore to crash
     const cleanData = JSON.parse(JSON.stringify(resumeData));
-
-    // 2. Size Check: Firestore document limit is 1MB (1,048,576 bytes)
-    // We check the size of the stringified JSON to catch large images early
     const payloadSize = new Blob([JSON.stringify(cleanData)]).size;
-    
-    if (payloadSize > 950000) { // Limit to ~950KB to be safe
-        throw new Error("Profile is too large (Max 1MB). Please remove the photo or use a smaller image.");
-    }
+    if (payloadSize > 950000) throw new Error("Profile is too large (Max 1MB). Remove the photo or use a smaller one.");
 
     const docRef = await addDoc(collection(db, "resumes"), {
       ...cleanData,
@@ -34,6 +28,32 @@ export const saveResumeToDB = async (resumeData) => {
     return docRef.id;
   } catch (e) {
     console.error("Error adding document: ", e);
+    throw e;
+  }
+};
+
+// NEW: Save with Custom Slug
+export const saveResumeWithSlug = async (slug, resumeData) => {
+  try {
+    const cleanData = JSON.parse(JSON.stringify(resumeData));
+    const payloadSize = new Blob([JSON.stringify(cleanData)]).size;
+    if (payloadSize > 950000) throw new Error("Profile is too large (Max 1MB).");
+
+    const docRef = doc(db, "resumes", slug);
+    
+    // Check if taken
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      throw new Error("URL unavailable");
+    }
+
+    // Save with custom ID
+    await setDoc(docRef, {
+      ...cleanData,
+      createdAt: new Date().toISOString()
+    });
+    return slug;
+  } catch (e) {
     throw e;
   }
 };
