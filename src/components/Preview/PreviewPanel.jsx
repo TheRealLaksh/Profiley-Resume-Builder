@@ -1,8 +1,9 @@
 import React, { useRef } from 'react';
 import {
-    Mail, Phone, MapPin, Linkedin, Globe,
-    Briefcase, User, GraduationCap, Code, Award, Heart
+  Mail, Phone, MapPin, Linkedin, Globe,
+  Briefcase, User, GraduationCap, Code, Award, Heart, FileText
 } from 'lucide-react';
+
 import html2pdf from 'html2pdf.js';
 import { colorThemes } from '../../data/constants';
 import { IconRenderer, ContactItem, SectionHeader, SkillTag } from './PreviewHelpers';
@@ -141,8 +142,16 @@ const PreviewPanel = ({ data, config, sectionOrder, activeTemplate }) => {
         const sidebarSectionIds = config.sidebarSections || ['education', 'skills', 'community'];
         const mainSectionIds = config.mainSections || ['summary', 'experience', 'achievements'];
 
-        const mainSections = sections.filter(s => s.visible && mainSectionIds.includes(s.id));
-        const sidebarSections = sections.filter(s => s.visible && sidebarSectionIds.includes(s.id));
+        const sidebarSections = sections.filter(
+            s => s.visible && sidebarSectionIds.includes(s.id)
+        );
+
+        const mainSections = sections.filter(
+            s =>
+                s.visible &&
+                !sidebarSectionIds.includes(s.id) // everything else goes to main
+        );
+
         const allSections = sections.filter(s => s.visible);
 
         const pageClass = `w-[210mm] min-h-[297mm] bg-white shadow-2xl mx-auto overflow-hidden relative text-gray-800 ${config.fontFamily}`;
@@ -175,7 +184,7 @@ const PreviewPanel = ({ data, config, sectionOrder, activeTemplate }) => {
 
             return (
                 <div className={`${pageClass} flex ${reverse ? 'flex-row-reverse' : 'flex-row'}`}>
-                   <div className={`${sidebarWidth} flex-shrink-0 p-5 min-h-[297mm] ${sidebarBgClass} ${sidebarTextClass} flex flex-col gap-4 min-w-0`}>
+                    <div className={`${sidebarWidth} flex-shrink-0 p-5 min-h-[297mm] ${sidebarBgClass} ${sidebarTextClass} flex flex-col gap-4 min-w-0`}>
                         {config.showPhoto && (
                             <div className={`w-24 h-24 mx-auto mb-2 overflow-hidden border-2 ${currentTheme.border} ${config.photoShape}`}>
                                 {renderPhoto()}
@@ -275,7 +284,7 @@ const PreviewPanel = ({ data, config, sectionOrder, activeTemplate }) => {
                                 </div>
                             </div>
                         ) : (
-                            allSections.filter(s => s.id !== 'summary').map(section => (
+                            allSections.map(section => (
                                 <div key={section.id} className={['skills', 'achievements'].includes(section.id) ? 'mb-2' : 'mb-4'}>
                                     <SectionHeader title={section.label} icon={sectionIcons[section.id]} config={config} theme={currentTheme} />
                                     {renderSectionContent(section.id)}
