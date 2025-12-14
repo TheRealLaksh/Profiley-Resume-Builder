@@ -21,15 +21,16 @@ const EditorPanel = ({
     const fileInputRef = useRef(null);
 
     // Helper for conditional styling
-    const panelClass = darkMode ? 'bg-slate-900 border-slate-700 text-slate-100' : 'bg-gray-50 border-gray-200 text-gray-800';
-    const cardClass = darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200';
-    const textClass = darkMode ? 'text-slate-200' : 'text-gray-800';
-    const subTextClass = darkMode ? 'text-slate-400' : 'text-gray-500';
+    // CHANGED: slate to neutral
+    const panelClass = darkMode ? 'bg-neutral-900 border-neutral-700 text-neutral-100' : 'bg-gray-50 border-gray-200 text-gray-800';
+    const cardClass = darkMode ? 'bg-neutral-800 border-neutral-700' : 'bg-white border-gray-200';
+    const textClass = darkMode ? 'text-neutral-200' : 'text-gray-800';
+    const subTextClass = darkMode ? 'text-neutral-400' : 'text-gray-500';
     const inputClass = darkMode 
-        ? 'bg-slate-900 border-slate-700 text-white focus:ring-blue-500' 
+        ? 'bg-neutral-900 border-neutral-700 text-white focus:ring-blue-500' 
         : 'bg-white border-gray-300 text-gray-900 focus:ring-blue-500';
     const buttonClass = darkMode 
-        ? 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-200' 
+        ? 'bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-neutral-200' 
         : 'bg-white hover:bg-gray-50 border-gray-200 text-gray-700';
 
     // --- Handlers (Existing logic preserved) ---
@@ -124,7 +125,8 @@ const EditorPanel = ({
         <div className={`w-full md:w-1/3 lg:w-1/4 border-r h-screen overflow-y-auto custom-scrollbar flex flex-col shadow-xl z-10 transition-colors duration-300 ${panelClass}`}>
             
             {/* Top Toolbar: Logo, Undo/Redo, Theme, Share */}
-            <div className={`p-4 border-b sticky top-0 z-20 shadow-sm flex flex-col gap-4 ${darkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-200'}`}>
+            {/* CHANGED: bg-slate-900 border-slate-700 to bg-neutral-900 border-neutral-700 */}
+            <div className={`p-4 border-b sticky top-0 z-20 shadow-sm flex flex-col gap-4 ${darkMode ? 'bg-neutral-900 border-neutral-700' : 'bg-white border-gray-200'}`}>
                 <div className="flex justify-between items-center">
                     <h1 className="text-xl font-extrabold flex items-center tracking-tight">
                         <Layout className="mr-2 text-blue-600 fill-blue-100" /> Profiley
@@ -136,7 +138,8 @@ const EditorPanel = ({
                         <button onClick={redo} disabled={!canRedo} className={`p-1.5 rounded-md transition-all ${!canRedo ? 'opacity-30 cursor-not-allowed' : 'hover:bg-blue-50 hover:text-blue-600'}`} title="Redo">
                             <RotateCw size={18} />
                         </button>
-                        <div className={`w-px h-4 mx-1 ${darkMode ? 'bg-slate-700' : 'bg-gray-300'}`}></div>
+                        {/* CHANGED: bg-slate-700 to bg-neutral-700 */}
+                        <div className={`w-px h-4 mx-1 ${darkMode ? 'bg-neutral-700' : 'bg-gray-300'}`}></div>
                         <button onClick={toggleDarkMode} className="p-1.5 rounded-md hover:bg-blue-50 hover:text-blue-600 transition-all" title="Toggle Theme">
                             {darkMode ? <Sun size={18} /> : <Moon size={18} />}
                         </button>
@@ -144,10 +147,12 @@ const EditorPanel = ({
                 </div>
 
                 {/* Tabs */}
-                <div className={`flex p-1 rounded-xl border ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-gray-100 border-gray-200'}`}>
-                    <button onClick={() => setActiveTab('sections')} className={`flex-1 py-1.5 text-xs font-bold uppercase tracking-wide rounded-lg transition-all ${!['design', 'export'].includes(activeTab) ? `${darkMode ? 'bg-slate-700 text-blue-400' : 'bg-white text-blue-600'} shadow-sm` : `${subTextClass} hover:opacity-80`}`}>Content</button>
-                    <button onClick={() => setActiveTab('design')} className={`flex-1 py-1.5 text-xs font-bold uppercase tracking-wide rounded-lg transition-all ${activeTab === 'design' ? `${darkMode ? 'bg-slate-700 text-blue-400' : 'bg-white text-blue-600'} shadow-sm` : `${subTextClass} hover:opacity-80`}`}>Design</button>
-                    <button onClick={() => setActiveTab('export')} className={`flex-1 py-1.5 text-xs font-bold uppercase tracking-wide rounded-lg transition-all ${activeTab === 'export' ? `${darkMode ? 'bg-slate-700 text-blue-400' : 'bg-white text-blue-600'} shadow-sm` : `${subTextClass} hover:opacity-80`}`}>Export</button>
+                {/* CHANGED: bg-slate-800 border-slate-700 to bg-neutral-800 border-neutral-700 */}
+                <div className={`flex p-1 rounded-xl border ${darkMode ? 'bg-neutral-800 border-neutral-700' : 'bg-gray-100 border-gray-200'}`}>
+                    {/* CHANGED: bg-slate-700 to bg-neutral-700 (for active tab) */}
+                    <button onClick={() => setActiveTab('sections')} className={`flex-1 py-1.5 text-xs font-bold uppercase tracking-wide rounded-lg transition-all ${!['design', 'export'].includes(activeTab) ? `${darkMode ? 'bg-neutral-700 text-blue-400' : 'bg-white text-blue-600'} shadow-sm` : `${subTextClass} hover:opacity-80`}`}>Content</button>
+                    <button onClick={() => setActiveTab('design')} className={`flex-1 py-1.5 text-xs font-bold uppercase tracking-wide rounded-lg transition-all ${activeTab === 'design' ? `${darkMode ? 'bg-neutral-700 text-blue-400' : 'bg-white text-blue-600'} shadow-sm` : `${subTextClass} hover:opacity-80`}`}>Design</button>
+                    <button onClick={() => setActiveTab('export')} className={`flex-1 py-1.5 text-xs font-bold uppercase tracking-wide rounded-lg transition-all ${activeTab === 'export' ? `${darkMode ? 'bg-neutral-700 text-blue-400' : 'bg-white text-blue-600'} shadow-sm` : `${subTextClass} hover:opacity-80`}`}>Export</button>
                 </div>
             </div>
 
@@ -162,14 +167,16 @@ const EditorPanel = ({
                                     <div className="grid grid-cols-2 gap-2">
                                         <button 
                                             onClick={() => setPdfQuality('screen')}
-                                            className={`p-3 rounded-lg border flex flex-col items-center justify-center gap-2 transition-all ${pdfQuality === 'screen' ? 'border-blue-500 bg-blue-50 text-blue-700 ring-1 ring-blue-500' : `${darkMode ? 'border-slate-600 hover:bg-slate-700' : 'border-gray-200 hover:bg-gray-50'}`}`}
+                                            // CHANGED: border-slate-600 hover:bg-slate-700 to border-neutral-600 hover:bg-neutral-700
+                                            className={`p-3 rounded-lg border flex flex-col items-center justify-center gap-2 transition-all ${pdfQuality === 'screen' ? 'border-blue-500 bg-blue-50 text-blue-700 ring-1 ring-blue-500' : `${darkMode ? 'border-neutral-600 hover:bg-neutral-700' : 'border-gray-200 hover:bg-gray-50'}`}`}
                                         >
                                             <Monitor size={20} />
                                             <span className="text-xs font-semibold">Screen (Fast)</span>
                                         </button>
                                         <button 
                                             onClick={() => setPdfQuality('print')}
-                                            className={`p-3 rounded-lg border flex flex-col items-center justify-center gap-2 transition-all ${pdfQuality === 'print' ? 'border-blue-500 bg-blue-50 text-blue-700 ring-1 ring-blue-500' : `${darkMode ? 'border-slate-600 hover:bg-slate-700' : 'border-gray-200 hover:bg-gray-50'}`}`}
+                                            // CHANGED: border-slate-600 hover:bg-slate-700 to border-neutral-600 hover:bg-neutral-700
+                                            className={`p-3 rounded-lg border flex flex-col items-center justify-center gap-2 transition-all ${pdfQuality === 'print' ? 'border-blue-500 bg-blue-50 text-blue-700 ring-1 ring-blue-500' : `${darkMode ? 'border-neutral-600 hover:bg-neutral-700' : 'border-gray-200 hover:bg-gray-50'}`}`}
                                         >
                                             <Printer size={20} />
                                             <span className="text-xs font-semibold">Print (HD)</span>
@@ -178,7 +185,8 @@ const EditorPanel = ({
                                     <p className="text-[10px] mt-2 text-gray-400">Print quality renders at 3x resolution (300 DPI equivalent) but takes longer to generate.</p>
                                 </div>
                                 
-                                <div className={`h-px w-full ${darkMode ? 'bg-slate-700' : 'bg-gray-200'}`}></div>
+                                {/* CHANGED: bg-slate-700 to bg-neutral-700 */}
+                                <div className={`h-px w-full ${darkMode ? 'bg-neutral-700' : 'bg-gray-200'}`}></div>
 
                                 <div>
                                     <label className={`block text-xs font-bold uppercase tracking-wide mb-2 ${subTextClass}`}>Shareable Link</label>
@@ -202,7 +210,8 @@ const EditorPanel = ({
                             <h3 className={`text-sm font-bold mb-3 flex items-center uppercase tracking-wider ${textClass}`}><Layout size={16} className="mr-2 opacity-50"/> Templates</h3>
                             <div className="grid grid-cols-2 gap-3">
                                 {Object.entries(templates).map(([key, tpl]) => (
-                                    <button key={key} onClick={() => applyTemplate(key)} className={`flex flex-col items-center p-2 border rounded-lg transition-all group ${darkMode ? 'border-slate-600 hover:border-blue-500 hover:bg-slate-700' : 'border-gray-200 hover:border-blue-500 hover:bg-blue-50'}`}>
+                                    // CHANGED: border-slate-600 hover:bg-slate-700 to border-neutral-600 hover:bg-neutral-700
+                                    <button key={key} onClick={() => applyTemplate(key)} className={`flex flex-col items-center p-2 border rounded-lg transition-all group ${darkMode ? 'border-neutral-600 hover:border-blue-500 hover:bg-neutral-700' : 'border-gray-200 hover:border-blue-500 hover:bg-blue-50'}`}>
                                         <div className="w-full h-16 bg-gray-100 rounded mb-2 overflow-hidden relative">
                                             {/* Visuals */}
                                             {key === 'modern' && <div className="w-full h-full bg-white flex"><div className="w-1/3 bg-slate-800 h-full"></div><div className="w-2/3 h-full"></div></div>}
@@ -288,13 +297,15 @@ const EditorPanel = ({
                              {/* Specific Edit Forms (Using inputClass for styling) */}
                              {activeTab === 'sections' && (
                                 <div className="space-y-4">
-                                    <div className={`flex justify-between items-center border-b pb-2 ${darkMode ? 'border-slate-700' : 'border-gray-100'}`}>
+                                    {/* CHANGED: border-slate-700 to border-neutral-700 */}
+                                    <div className={`flex justify-between items-center border-b pb-2 ${darkMode ? 'border-neutral-700' : 'border-gray-100'}`}>
                                         <h3 className={`font-bold ${textClass}`}>Reorder & Toggle</h3>
                                         <button onClick={addCustomSection} className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded hover:bg-blue-100 font-semibold flex items-center gap-1"><FilePlus size={14} /> Add Custom</button>
                                     </div>
                                     <div className="space-y-2">
                                         {sectionOrder.map((section, index) => (
-                                            <div key={section.id} draggable onDragStart={(e) => handleDragStart(e, index)} onDragOver={(e) => handleDragOver(e, index)} onDragEnd={handleDragEnd} className={`flex items-center gap-3 p-3 rounded-lg border cursor-move transition-colors ${draggedItemIndex === index ? 'opacity-50 border-blue-400' : darkMode ? 'bg-slate-900 border-slate-700 hover:border-slate-500' : 'bg-gray-50 border-gray-200 hover:border-blue-300'}`}>
+                                            // CHANGED: bg-slate-900 border-slate-700 hover:border-slate-500 to bg-neutral-900 border-neutral-700 hover:border-neutral-500
+                                            <div key={section.id} draggable onDragStart={(e) => handleDragStart(e, index)} onDragOver={(e) => handleDragOver(e, index)} onDragEnd={handleDragEnd} className={`flex items-center gap-3 p-3 rounded-lg border cursor-move transition-colors ${draggedItemIndex === index ? 'opacity-50 border-blue-400' : darkMode ? 'bg-neutral-900 border-neutral-700 hover:border-neutral-500' : 'bg-gray-50 border-gray-200 hover:border-blue-300'}`}>
                                                 <GripVertical size={16} className="text-gray-400" />
                                                 <span className={`flex-grow text-sm font-medium ${textClass}`}>{section.label}</span>
                                                 <button onClick={() => setSectionOrder(prev => prev.map(sec => sec.id === section.id ? { ...sec, visible: !sec.visible } : sec))} className={`p-1.5 rounded-md transition-colors ${section.visible ? 'text-gray-600 hover:bg-gray-200' : 'text-gray-400 hover:bg-gray-100'}`} title={section.visible ? "Hide" : "Show"}>
@@ -309,7 +320,8 @@ const EditorPanel = ({
                              {/* Personal Edit */}
                              {activeTab === 'personal' && (
                                 <div className="space-y-4">
-                                     <h3 className={`font-bold border-b pb-2 ${textClass} ${darkMode ? 'border-slate-700' : 'border-gray-100'}`}>Personal Details</h3>
+                                     {/* CHANGED: border-slate-700 to border-neutral-700 */}
+                                     <h3 className={`font-bold border-b pb-2 ${textClass} ${darkMode ? 'border-neutral-700' : 'border-gray-100'}`}>Personal Details</h3>
                                      <div className="mb-4">
                                         <div className="flex items-center gap-4">
                                             <div className="relative w-16 h-16 rounded-full overflow-hidden bg-gray-100 border border-gray-300 flex-shrink-0">
@@ -343,16 +355,19 @@ const EditorPanel = ({
                              {/* Standard List Sections (Experience, Education, etc.) */}
                              {['experience', 'education'].includes(activeTab) && (
                                 <div className="space-y-6">
-                                    <div className={`flex justify-between items-center border-b pb-2 ${darkMode ? 'border-slate-700' : 'border-gray-100'}`}>
+                                    {/* CHANGED: border-slate-700 to border-neutral-700 */}
+                                    <div className={`flex justify-between items-center border-b pb-2 ${darkMode ? 'border-neutral-700' : 'border-gray-100'}`}>
                                         <h3 className={`font-bold ${textClass}`}>{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</h3>
                                         <button onClick={() => addItem(activeTab, activeTab === 'experience' ? { id: Date.now(), role: '', company: '', year: '', details: '' } : { id: Date.now(), institution: '', degree: '', year: '', details: '' })} className="text-blue-600 hover:bg-blue-50 p-1.5 rounded-full transition-colors"><Plus size={20}/></button>
                                     </div>
                                     {data[activeTab].map((item, index) => (
-                                        <div key={item.id} className={`p-4 rounded-lg border relative group ${darkMode ? 'bg-slate-900 border-slate-700' : 'bg-gray-50 border-gray-200'}`}>
+                                        // CHANGED: bg-slate-900 border-slate-700 to bg-neutral-900 border-neutral-700
+                                        // CHANGED: border-slate-600 to border-neutral-600 (inputs)
+                                        <div key={item.id} className={`p-4 rounded-lg border relative group ${darkMode ? 'bg-neutral-900 border-neutral-700' : 'bg-gray-50 border-gray-200'}`}>
                                             <button onClick={() => removeItem(activeTab, index)} className="absolute top-2 right-2 text-gray-400 hover:text-red-500 transition-colors"><Trash2 size={16}/></button>
-                                            <input type="text" value={item.role || item.institution} onChange={(e) => handleArrayChange(activeTab, index, activeTab === 'experience' ? 'role' : 'institution', e.target.value)} placeholder={activeTab === 'experience' ? 'Role' : 'Institution'} className={`w-full mb-2 p-1.5 bg-transparent border-b focus:border-blue-500 outline-none font-medium text-sm ${darkMode ? 'border-slate-600 text-white' : 'border-gray-300 text-gray-900'}`} />
-                                            <input type="text" value={item.company || item.degree} onChange={(e) => handleArrayChange(activeTab, index, activeTab === 'experience' ? 'company' : 'degree', e.target.value)} placeholder={activeTab === 'experience' ? 'Company' : 'Degree'} className={`w-full mb-2 p-1.5 bg-transparent border-b focus:border-blue-500 outline-none text-sm ${darkMode ? 'border-slate-600 text-gray-300' : 'border-gray-300 text-gray-700'}`} />
-                                            <input type="text" value={item.year} onChange={(e) => handleArrayChange(activeTab, index, 'year', e.target.value)} placeholder="Year/Duration" className={`w-full mb-2 p-1.5 bg-transparent border-b focus:border-blue-500 outline-none text-xs ${darkMode ? 'border-slate-600 text-gray-400' : 'border-gray-300 text-gray-500'}`} />
+                                            <input type="text" value={item.role || item.institution} onChange={(e) => handleArrayChange(activeTab, index, activeTab === 'experience' ? 'role' : 'institution', e.target.value)} placeholder={activeTab === 'experience' ? 'Role' : 'Institution'} className={`w-full mb-2 p-1.5 bg-transparent border-b focus:border-blue-500 outline-none font-medium text-sm ${darkMode ? 'border-neutral-600 text-white' : 'border-gray-300 text-gray-900'}`} />
+                                            <input type="text" value={item.company || item.degree} onChange={(e) => handleArrayChange(activeTab, index, activeTab === 'experience' ? 'company' : 'degree', e.target.value)} placeholder={activeTab === 'experience' ? 'Company' : 'Degree'} className={`w-full mb-2 p-1.5 bg-transparent border-b focus:border-blue-500 outline-none text-sm ${darkMode ? 'border-neutral-600 text-gray-300' : 'border-gray-300 text-gray-700'}`} />
+                                            <input type="text" value={item.year} onChange={(e) => handleArrayChange(activeTab, index, 'year', e.target.value)} placeholder="Year/Duration" className={`w-full mb-2 p-1.5 bg-transparent border-b focus:border-blue-500 outline-none text-xs ${darkMode ? 'border-neutral-600 text-gray-400' : 'border-gray-300 text-gray-500'}`} />
                                             <textarea value={item.details} onChange={(e) => handleArrayChange(activeTab, index, 'details', e.target.value)} placeholder="Details..." rows={3} className={`w-full p-2 border rounded text-sm focus:ring-1 focus:ring-blue-500 outline-none ${inputClass}`} />
                                         </div>
                                     ))}
@@ -362,12 +377,14 @@ const EditorPanel = ({
                              {/* Simple List Sections (Skills, Achievements, etc.) handled similarly... */}
                              {activeTab === 'skills' && (
                                 <div className="space-y-4">
-                                     <div className={`flex justify-between items-center border-b pb-2 ${darkMode ? 'border-slate-700' : 'border-gray-100'}`}>
+                                     {/* CHANGED: border-slate-700 to border-neutral-700 */}
+                                     <div className={`flex justify-between items-center border-b pb-2 ${darkMode ? 'border-neutral-700' : 'border-gray-100'}`}>
                                         <h3 className={`font-bold ${textClass}`}>Skills</h3>
                                         <button onClick={() => addItem('skills', { name: '', level: 80 })} className="text-blue-600 hover:bg-blue-50 p-1.5 rounded-full"><Plus size={20}/></button>
                                     </div>
                                     {data.skills.map((skill, index) => (
-                                        <div key={index} className={`flex flex-col gap-2 p-2 border rounded-md mb-2 ${darkMode ? 'bg-slate-900 border-slate-700' : 'bg-gray-50 border-gray-200'}`}>
+                                        // CHANGED: bg-slate-900 border-slate-700 to bg-neutral-900 border-neutral-700
+                                        <div key={index} className={`flex flex-col gap-2 p-2 border rounded-md mb-2 ${darkMode ? 'bg-neutral-900 border-neutral-700' : 'bg-gray-50 border-gray-200'}`}>
                                             <div className="flex gap-2 items-center">
                                                 <input type="text" value={skill.name} onChange={(e) => handleSkillChange(index, 'name', e.target.value)} placeholder="Skill" className={`flex-grow p-2 border rounded-md outline-none text-sm ${inputClass}`} />
                                                 <button onClick={() => removeItem('skills', index)} className="text-gray-400 hover:text-red-500"><Trash2 size={16}/></button>
@@ -381,7 +398,8 @@ const EditorPanel = ({
                              {/* Summary */}
                              {activeTab === 'summary' && (
                                 <div className="space-y-4">
-                                    <h3 className={`font-bold border-b pb-2 ${textClass} ${darkMode ? 'border-slate-700' : 'border-gray-100'}`}>Profile Summary</h3>
+                                    {/* CHANGED: border-slate-700 to border-neutral-700 */}
+                                    <h3 className={`font-bold border-b pb-2 ${textClass} ${darkMode ? 'border-neutral-700' : 'border-gray-100'}`}>Profile Summary</h3>
                                     <textarea name="summary" value={data.personal.summary} onChange={handlePersonalChange} placeholder="Write a professional summary..." rows={8} className={`w-full p-2.5 border rounded-md outline-none text-sm ${inputClass}`} /> {/* FIXED: Removed 'Mx' */}
                                 </div>
                              )}

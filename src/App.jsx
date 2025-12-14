@@ -22,10 +22,11 @@ const Styles = () => (
       body { display: none; }
     }
     
+    /* Custom Scrollbar for Dark Mode (Updated to Neutral Gray) */
     .dark ::-webkit-scrollbar { width: 8px; }
-    .dark ::-webkit-scrollbar-track { background: #1e293b; }
-    .dark ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
-    .dark ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+    .dark ::-webkit-scrollbar-track { background: #171717; } /* neutral-900 */
+    .dark ::-webkit-scrollbar-thumb { background: #525252; border-radius: 4px; } /* neutral-600 */
+    .dark ::-webkit-scrollbar-thumb:hover { background: #737373; } /* neutral-500 */
   `}</style>
 );
 
@@ -36,7 +37,8 @@ const App = () => {
   const [activeTab, setActiveTab] = useState('sections');
   const [draggedItemIndex, setDraggedItemIndex] = useState(null);
 
-  const [darkMode, setDarkMode] = useState(false);
+  // CHANGED: Default is now true
+  const [darkMode, setDarkMode] = useState(true);
   const [pdfQuality, setPdfQuality] = useState('screen'); 
   const [history, setHistory] = useState([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
@@ -223,7 +225,8 @@ const App = () => {
 
   if (isLoading) {
     return (
-      <div className={`min-h-screen flex flex-col items-center justify-center font-sans transition-colors duration-300 ${darkMode ? 'dark bg-slate-900 text-white' : 'bg-gray-100 text-gray-600'}`}>
+      // CHANGED: bg-slate-900 to bg-neutral-900
+      <div className={`min-h-screen flex flex-col items-center justify-center font-sans transition-colors duration-300 ${darkMode ? 'dark bg-neutral-900 text-white' : 'bg-gray-100 text-gray-600'}`}>
         <Loader2 className="animate-spin mb-4 text-blue-600" size={48} />
         <p className="font-medium animate-pulse">Fetching profile...</p>
       </div>
@@ -231,16 +234,18 @@ const App = () => {
   }
 
   return (
-    <div className={`min-h-screen flex flex-col ${isReadOnly ? 'items-center justify-center' : 'md:flex-row'} font-sans transition-colors duration-300 ${darkMode ? 'dark bg-slate-900' : 'bg-gray-100'}`}>
+    // CHANGED: bg-slate-900 to bg-neutral-900
+    <div className={`min-h-screen flex flex-col ${isReadOnly ? 'items-center justify-center' : 'md:flex-row'} font-sans transition-colors duration-300 ${darkMode ? 'dark bg-neutral-900' : 'bg-gray-100'}`}>
       <Styles />
 
       {/* Share Modal */}
       {showShareModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className={`w-full max-w-md p-6 rounded-xl shadow-2xl ${darkMode ? 'bg-slate-800 text-white' : 'bg-white text-gray-900'}`}>
+          {/* CHANGED: bg-slate-800 to bg-neutral-800 */}
+          <div className={`w-full max-w-md p-6 rounded-xl shadow-2xl ${darkMode ? 'bg-neutral-800 text-white' : 'bg-white text-gray-900'}`}>
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-xl font-bold flex items-center gap-2"><LinkIcon size={20} className="text-blue-500"/> Share Resume</h3>
-              <button onClick={() => setShowShareModal(false)} className="p-1 hover:bg-gray-200 dark:hover:bg-slate-700 rounded-full"><X size={20}/></button>
+              <button onClick={() => setShowShareModal(false)} className="p-1 hover:bg-gray-200 dark:hover:bg-neutral-700 rounded-full"><X size={20}/></button>
             </div>
             
             <p className="text-sm opacity-70 mb-4">Create a public link for your resume. Anyone with this link can view your profile.</p>
@@ -248,7 +253,8 @@ const App = () => {
             <div className="mb-4">
               <label className="block text-xs font-bold uppercase tracking-wide mb-2 opacity-60">Custom URL (Optional)</label>
               <div className="flex items-center">
-                <span className={`px-3 py-3 border border-r-0 rounded-l-lg text-sm ${darkMode ? 'bg-slate-700 border-slate-600 text-slate-400' : 'bg-gray-100 border-gray-300 text-gray-500'}`}>
+                {/* CHANGED: bg-slate-700/border-slate-600 to bg-neutral-700/border-neutral-600 */}
+                <span className={`px-3 py-3 border border-r-0 rounded-l-lg text-sm ${darkMode ? 'bg-neutral-700 border-neutral-600 text-neutral-400' : 'bg-gray-100 border-gray-300 text-gray-500'}`}>
                   profiley.lakshp.live/
                 </span>
                 <input 
@@ -256,7 +262,8 @@ const App = () => {
                   value={customSlug} 
                   onChange={(e) => setCustomSlug(e.target.value)}
                   placeholder="my-resume"
-                  className={`flex-grow p-3 text-sm border rounded-r-lg outline-none ${darkMode ? 'bg-slate-900 border-slate-600 focus:border-blue-500' : 'bg-white border-gray-300 focus:border-blue-500'}`} 
+                  // CHANGED: bg-slate-900/border-slate-600 to bg-neutral-900/border-neutral-600
+                  className={`flex-grow p-3 text-sm border rounded-r-lg outline-none ${darkMode ? 'bg-neutral-900 border-neutral-600 focus:border-blue-500' : 'bg-white border-gray-300 focus:border-blue-500'}`} 
                 />
               </div>
               {shareError && <p className="text-red-500 text-xs mt-2 font-medium">{shareError}</p>}
@@ -304,7 +311,8 @@ const App = () => {
       )}
 
       {/* Preview */}
-      <div className={`${isReadOnly ? 'w-full max-w-5xl h-screen' : 'w-full md:w-2/3 lg:w-3/4 h-screen'} overflow-y-auto p-4 md:p-8 flex flex-col items-center relative transition-colors duration-300 ${darkMode ? 'bg-slate-800' : 'bg-gray-200'}`}>
+      {/* CHANGED: bg-slate-800 to bg-neutral-800 */}
+      <div className={`${isReadOnly ? 'w-full max-w-5xl h-screen' : 'w-full md:w-2/3 lg:w-3/4 h-screen'} overflow-y-auto p-4 md:p-8 flex flex-col items-center relative transition-colors duration-300 ${darkMode ? 'bg-neutral-800' : 'bg-gray-200'}`}>
         
         {isReadOnly && (
           <div className="mb-6 px-6 py-3 bg-blue-600 text-white rounded-full shadow-lg font-semibold text-sm flex items-center gap-2">
@@ -314,7 +322,8 @@ const App = () => {
 
         <div className="fixed bottom-8 right-8 z-50 flex flex-col gap-3">
            {!isReadOnly && (
-             <div className={`flex items-center gap-2 px-4 py-2 rounded-lg shadow-lg backdrop-blur-sm text-xs font-semibold ${isAutoSaving ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'} transition-all duration-300 ${darkMode ? 'text-green-400 bg-slate-900/80' : 'text-green-700 bg-white/80'}`}>
+             // CHANGED: text-green-400 bg-slate-900 to text-green-400 bg-neutral-900
+             <div className={`flex items-center gap-2 px-4 py-2 rounded-lg shadow-lg backdrop-blur-sm text-xs font-semibold ${isAutoSaving ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'} transition-all duration-300 ${darkMode ? 'text-green-400 bg-neutral-900/80' : 'text-green-700 bg-white/80'}`}>
                <Save size={14} /> Auto-saved
              </div>
            )}
@@ -330,7 +339,8 @@ const App = () => {
 
         <PreviewPanel data={data} config={config} sectionOrder={sectionOrder} />
         
-        <div className={`mt-8 mb-20 text-xs font-medium uppercase tracking-widest ${darkMode ? 'text-slate-500' : 'text-gray-400'}`}>
+        {/* CHANGED: text-slate-500 to text-neutral-500 */}
+        <div className={`mt-8 mb-20 text-xs font-medium uppercase tracking-widest ${darkMode ? 'text-neutral-500' : 'text-gray-400'}`}>
           Profiley • Resume Builder
         </div>
       </div>
