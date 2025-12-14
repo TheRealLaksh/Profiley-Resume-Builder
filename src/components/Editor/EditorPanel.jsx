@@ -3,7 +3,7 @@ import React, { useRef } from 'react';
 import { 
     Layout, Palette, Columns, Type, Settings, FileText, Layers, Plus, 
     GripVertical, Eye, EyeOff, User, Upload, X, Trash2, Briefcase, GraduationCap, Code, Award, Heart, FilePlus,
-    RotateCcw, RotateCw, Moon, Sun, Share2, Download, Monitor, Printer
+    RotateCcw, RotateCw, Moon, Sun, Share2, Loader2, Monitor, Printer
 } from 'lucide-react';
 import { EditorSection, Toggle, Select, ColorButton } from '../UI/FormElements';
 import { colorThemes, templates } from '../../data/constants';
@@ -13,9 +13,9 @@ const EditorPanel = ({
     sectionOrder, setSectionOrder, applyTemplate, 
     draggedItemIndex, setDraggedItemIndex, 
     handleDragStart, handleDragOver, handleDragEnd,
-    // New Props
+    // Props
     darkMode, toggleDarkMode, undo, redo, canUndo, canRedo, 
-    pdfQuality, setPdfQuality, handleShare
+    pdfQuality, setPdfQuality, handleShare, isSharing
 }) => {
     
     const fileInputRef = useRef(null);
@@ -64,12 +64,6 @@ const EditorPanel = ({
     const handleArrayChange = (section, index, field, value) => {
         const newSection = [...data[section]];
         newSection[index][field] = value;
-        setData({ ...data, [section]: newSection });
-    };
-
-    const handleSimpleArrayChange = (section, index, value) => {
-        const newSection = [...data[section]];
-        newSection[index] = value;
         setData({ ...data, [section]: newSection });
     };
 
@@ -184,11 +178,13 @@ const EditorPanel = ({
                                     <label className={`block text-xs font-bold uppercase tracking-wide mb-2 ${subTextClass}`}>Shareable Link</label>
                                     <button 
                                         onClick={handleShare}
-                                        className={`w-full p-3 rounded-lg border flex items-center justify-center gap-2 transition-all font-semibold text-sm ${buttonClass}`}
+                                        disabled={isSharing}
+                                        className={`w-full p-3 rounded-lg border flex items-center justify-center gap-2 transition-all font-semibold text-sm ${buttonClass} ${isSharing ? 'opacity-50 cursor-wait' : ''}`}
                                     >
-                                        <Share2 size={16} /> Generate Public Link (Read-Only)
+                                        {isSharing ? <Loader2 className="animate-spin" size={16} /> : <Share2 size={16} />}
+                                        {isSharing ? 'Generating Link...' : 'Generate Public Link'}
                                     </button>
-                                    <p className="text-[10px] mt-2 text-gray-400 text-center">Currently generates a downloadable snapshot due to serverless environment.</p>
+                                    <p className="text-[10px] mt-2 text-gray-400 text-center">Creates a permanent link to your current version.</p>
                                 </div>
                             </div>
                         </div>

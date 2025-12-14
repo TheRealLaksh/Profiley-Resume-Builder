@@ -1,9 +1,12 @@
 // src/App.jsx
-import React, { useState, useEffect, useCallback } from 'react';
-import { Download, Moon, Sun, RotateCcw, RotateCw, Share2, Save } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { 
+  Download, Moon, Sun, RotateCcw, RotateCw, Share2, Save, Loader2 
+} from 'lucide-react';
 import html2pdf from 'html2pdf.js';
 import EditorPanel from './components/Editor/EditorPanel';
 import PreviewPanel from './components/Preview/PreviewPanel';
+import { saveResumeToDB, fetchResumeFromDB } from './firebase'; // Ensure firebase.js exists
 import {
   initialData,
   initialConfig,
@@ -41,21 +44,59 @@ const App = () => {
   const [history, setHistory] = useState([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [isAutoSaving, setIsAutoSaving] = useState(false);
+  
+  // DB Loading States
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSharing, setIsSharing] = useState(false);
 
-  // --- Initialization (Auto-load) ---
+  // --- Initialization (Load from DB URL or LocalStorage) ---
   useEffect(() => {
-    const savedData = localStorage.getItem('profiley_data');
-    const savedConfig = localStorage.getItem('profiley_config');
-    const savedOrder = localStorage.getItem('profiley_order');
-    
-    if (savedData) setData(JSON.parse(savedData));
-    if (savedConfig) setConfig(JSON.parse(savedConfig));
-    if (savedOrder) setSectionOrder(JSON.parse(savedOrder));
+    const init = async () => {
+      setIsLoading(true);
+
+      // 1. Check for ID in URL (Shared Resume)
+      const params = new URLSearchParams(window.location.search);
+      const resumeId = params.get('id');
+
+      if (resumeId) {
+        try {
+          const fetched = await fetchResumeFromDB(resumeId);
+          if (fetched) {
+            setData(fetched.data);
+            setConfig(fetched.config);
+            setSectionOrder(fetched.sectionOrder);
+            setIsLoading(false);
+            return; // Exit early if found
+          } else {
+            alert("Resume not found or expired. Loading default data.");
+            // Remove the invalid ID from URL without reload
+            window.history.replaceState({}, document.title, "/");
+          }
+        } catch (error) {
+          console.error("Error loading shared resume:", error);
+        }
+      }
+
+      // 2. Fallback to LocalStorage
+      const savedData = localStorage.getItem('profiley_data');
+      const savedConfig = localStorage.getItem('profiley_config');
+      const savedOrder = localStorage.getItem('profiley_order');
+      
+      if (savedData) setData(JSON.parse(savedData));
+      if (savedConfig) setConfig(JSON.parse(savedConfig));
+      if (savedOrder) setSectionOrder(JSON.parse(savedOrder));
+      
+      setIsLoading(false);
+    };
+
+    init();
   }, []);
 
   // --- Auto-Save & History Logic ---
   useEffect(() => {
-    const timeoutId = setTimeout(() => { // FIXED: Removed 'yb'
+    if (isLoading) return; // Don't auto-save while fetching
+
+    const timeoutId = setTimeout(() => {
       // Save to LocalStorage
       localStorage.setItem('profiley_data', JSON.stringify(data));
       localStorage.setItem('profiley_config', JSON.stringify(config));
@@ -78,7 +119,7 @@ const App = () => {
     }, 1000); // 1s debounce
 
     return () => clearTimeout(timeoutId);
-  }, [data, config, sectionOrder]);
+  }, [data, config, sectionOrder, isLoading]);
 
   // --- Actions ---
   const handleUndo = () => {
@@ -87,7 +128,7 @@ const App = () => {
       setData(prevState.data);
       setConfig(prevState.config);
       setSectionOrder(prevState.sectionOrder);
-      setHistoryIndex(historyIndex - 1); // FIXED: Removed 'uj'
+      setHistoryIndex(historyIndex - 1);
     }
   };
 
@@ -102,23 +143,30 @@ const App = () => {
   };
 
   const applyTemplate = (templateKey) => {
-    const template = templates[templateKey]; // FIXED: Removed 'SJ'
+    const template = templates[templateKey];
     if (template) {
-      // Merge template config with current config, allowing subsequent edits
       setConfig(prev => ({ ...prev, ...template.config }));
     }
   };
 
-  const handleShare = () => {
-    // Simulation of sharing functionality
-    const jsonString = `data:text/json;chatset=utf-8,${encodeURIComponent(
-      JSON.stringify({ data, config, sectionOrder })
-    )}`;
-    const link = document.createElement("a");
-    link.href = jsonString;
-    link.download = `${data.personal.name.replace(/\s+/g, "_")}_profiley_data.json`;
-    link.click();
-    alert("Public link generation requires a backend.\n\nFor now, we've downloaded a JSON snapshot of your resume that you can share or import later.");
+  const handleShare = async () => {
+    setIsSharing(true);
+    try {
+      // Save entire state to Firestore
+      const resumeId = await saveResumeToDB({ data, config, sectionOrder });
+      
+      // Construct URL
+      const shareUrl = `${window.location.origin}/?id=${resumeId}`;
+      
+      // Copy to clipboard
+      await navigator.clipboard.writeText(shareUrl);
+      alert(`Resume saved!\n\nShareable link copied to clipboard:\n${shareUrl}`);
+    } catch (error) {
+      console.error("Share failed:", error);
+      alert("Failed to generate link. Check console for details.");
+    } finally {
+      setIsSharing(false);
+    }
   };
 
   const downloadPDF = () => {
@@ -170,6 +218,17 @@ const App = () => {
 
   const handleDragEnd = () => setDraggedItemIndex(null);
 
+  // --- Render Loading Screen ---
+  if (isLoading) {
+    return (
+      <div className={`min-h-screen flex flex-col items-center justify-center font-sans transition-colors duration-300 ${darkMode ? 'dark bg-slate-900 text-white' : 'bg-gray-100 text-gray-600'}`}>
+        <Loader2 className="animate-spin mb-4" size={48} />
+        <p className="font-medium">Loading Profile...</p>
+      </div>
+    );
+  }
+
+  // --- Render Main App ---
   return (
     <div className={`min-h-screen flex flex-col md:flex-row font-sans transition-colors duration-300 ${darkMode ? 'dark bg-slate-900' : 'bg-gray-100'}`}>
       <Styles />
@@ -189,7 +248,7 @@ const App = () => {
         handleDragStart={handleDragStart}
         handleDragOver={handleDragOver}
         handleDragEnd={handleDragEnd}
-        // New Props
+        // Props
         darkMode={darkMode}
         toggleDarkMode={() => setDarkMode(!darkMode)}
         undo={handleUndo}
@@ -199,7 +258,7 @@ const App = () => {
         pdfQuality={pdfQuality}
         setPdfQuality={setPdfQuality}
         handleShare={handleShare}
-        isAutoSaving={isAutoSaving}
+        isSharing={isSharing} // Pass sharing state
       />
 
       {/* Preview Area */}
