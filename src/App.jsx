@@ -34,16 +34,21 @@ const App = () => {
 
   const handleDragStart = (e, index) => {
     setDraggedItemIndex(index);
+    // Firefox requires dataTransfer data to be set
     e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/html", e.target.parentNode);
+    e.dataTransfer.setDragImage(e.target.parentNode, 20, 20);
   };
 
   const handleDragOver = (e, index) => {
     e.preventDefault();
     if (draggedItemIndex === null || draggedItemIndex === index) return;
+    
     const newOrder = [...sectionOrder];
     const draggedItem = newOrder[draggedItemIndex];
     newOrder.splice(draggedItemIndex, 1);
     newOrder.splice(index, 0, draggedItem);
+    
     setSectionOrder(newOrder);
     setDraggedItemIndex(index);
   };
@@ -77,10 +82,10 @@ const App = () => {
 
       {/* Preview Side */}
       <div className="w-full md:w-2/3 lg:w-3/4 bg-gray-200 h-screen overflow-y-auto print:h-auto print:overflow-visible p-4 md:p-8 flex flex-col items-center print:bg-white print:p-0 print:block relative">
-         <div className="fixed bottom-8 right-8 print:hidden z-50">
+         <div className="fixed bottom-8 right-8 print:hidden z-50 animate-bounce-subtle">
             <button 
               onClick={printDocument}
-              className="flex items-center gap-2 px-8 py-4 rounded-full shadow-2xl transition-all hover:scale-105 font-bold cursor-pointer text-white bg-blue-600 hover:bg-blue-700"
+              className="flex items-center gap-2 px-8 py-4 rounded-full shadow-2xl transition-all hover:scale-105 hover:shadow-blue-500/30 font-bold cursor-pointer text-white bg-blue-600 hover:bg-blue-700"
             >
               <Download size={22} /> <span className="text-lg">Download PDF</span>
             </button>
@@ -90,6 +95,7 @@ const App = () => {
             data={data} 
             config={config} 
             sectionOrder={sectionOrder} 
+            printDocument={printDocument}
          />
          
          <div className="mt-8 text-gray-400 text-xs font-medium uppercase tracking-widest print:hidden">
