@@ -11,7 +11,6 @@ export const initialData = {
     summary:
       "Disciplined Grade XII student with a focused ambition in Artificial Intelligence and Machine Learning. Proactive problem-solver with hands-on experience in full-stack web development (Django, Python) and algorithmic problem-solving. National-level shooter and active badminton player with strong leadership skills honed as House Captain."
   },
-
   education: [
     {
       id: 1,
@@ -30,7 +29,6 @@ export const initialData = {
         "Secured 87.8% overall. Achieved 94% in Mathematics. Served as House Captain."
     }
   ],
-
   experience: [
     {
       id: 1,
@@ -57,7 +55,6 @@ export const initialData = {
         "Built a full-stack gig platform using Django and Python. Developed REST APIs and auth systems."
     }
   ],
-
   skills: [
     { name: "Artificial Intelligence & ML", level: 90 },
     { name: "Data Science", level: 85 },
@@ -66,19 +63,16 @@ export const initialData = {
     { name: "Algorithmic Problem Solving", level: 85 },
     { name: "Leadership & Teamwork", level: 90 }
   ],
-
   achievements: [
     "Regional Winner, VVM National Science Competition (2023)",
     "National-level Shooter: 34th Rank in All-India U-17 Competition",
     "2nd Position: Website Development, AFS Tech Ramble",
     "2nd Position: Robowars – Impetus ’25"
   ],
-
   community: [
     "Volunteered at local orphanage and home for specially-abled children.",
     "Organized independent crowdfunding campaign for underprivileged children (2022).",
     "Member of Round Square Organizing Committee."
   ],
-
   custom: {}
 };

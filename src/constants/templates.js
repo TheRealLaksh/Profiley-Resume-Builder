@@ -14,7 +14,6 @@ export const templates = {
       themeColor: "midnight"
     }
   },
-
   minimal: {
     name: "Minimal",
     config: {
@@ -30,7 +29,6 @@ export const templates = {
       themeColor: "noir"
     }
   },
-
   creative: {
     name: "Creative",
     config: {
@@ -46,7 +44,6 @@ export const templates = {
       themeColor: "coral"
     }
   },
-
   ats: {
     name: "ATS Friendly",
     config: {

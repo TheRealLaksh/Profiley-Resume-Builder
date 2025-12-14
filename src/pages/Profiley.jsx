@@ -2,43 +2,58 @@ import React, { useState, useRef } from "react";
 import LeftPanel from "../components/layout/LeftPanel";
 import RightPanel from "../components/layout/RightPanel";
 
-/* ✅ IMPORTED CONSTANTS */
 import { initialData } from "../constants/initialData";
-import { initialConfig } from "../constants/initialConfig";
-import { initialSections } from "../constants/sections";
-import { colorThemes } from "../constants/themes";
+import { initialSections } from "../constants/initialSections";
+import { colorThemes } from "../constants/colorThemes";
 import { templates } from "../constants/templates";
+import { initialConfig } from "../constants/initialConfig";
+
 
 const Profiley = () => {
   const [data, setData] = useState(initialData);
   const [config, setConfig] = useState(initialConfig);
   const [sectionOrder, setSectionOrder] = useState(initialSections);
-  const fileInputRef = useRef(null);
+  const [draggedIndex, setDraggedIndex] = useState(null);
 
   const toggleSectionVisibility = (id) => {
     setSectionOrder((prev) =>
-      prev.map((section) =>
-        section.id === id
-          ? { ...section, visible: !section.visible }
-          : section
+      prev.map((s) =>
+        s.id === id ? { ...s, visible: !s.visible } : s
       )
     );
   };
 
-  const printDocument = () => {
-    const original = document.title;
-    document.title = `${data.personal.name || "Resume"}_CV`;
-    window.print();
-    setTimeout(() => (document.title = original), 500);
+  const handleDragStart = (_, index) => setDraggedIndex(index);
+
+  const handleDragOver = (e, index) => {
+    e.preventDefault();
+    if (index === draggedIndex) return;
+
+    const updated = [...sectionOrder];
+    const [moved] = updated.splice(draggedIndex, 1);
+    updated.splice(index, 0, moved);
+
+    setDraggedIndex(index);
+    setSectionOrder(updated);
   };
 
+  const handleDragEnd = () => setDraggedIndex(null);
+
   return (
-    <div className="min-h-screen bg-gray-100 flex">
+    <div className="min-h-screen flex">
       <LeftPanel
         sectionOrder={sectionOrder}
         toggleSectionVisibility={toggleSectionVisibility}
+        onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
+        onDragEnd={handleDragEnd}
       />
-      <RightPanel />
+
+      <RightPanel>
+        <div className="p-8 text-gray-400 text-center">
+          Resume preview (coming next)
+        </div>
+      </RightPanel>
     </div>
   );
 };
