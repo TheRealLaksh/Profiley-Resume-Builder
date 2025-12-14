@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
-import { 
-    Mail, Phone, MapPin, Linkedin, Globe, 
-    Briefcase, User, GraduationCap, Code, Award, Heart 
+import {
+    Mail, Phone, MapPin, Linkedin, Globe,
+    Briefcase, User, GraduationCap, Code, Award, Heart
 } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
 import { colorThemes } from '../../data/constants';
@@ -23,16 +23,53 @@ const PreviewPanel = ({ data, config, sectionOrder, activeTemplate }) => {
         community: Heart
     };
 
-    const handleDownload = () => {
+    const handleDownload = async () => {
         const element = resumeRef.current;
+
+        // 1. Clone the element to avoid messing with the displayed preview
+        const clone = element.cloneNode(true);
+
+        // 2. Remove the scaling classes from the clone
+        // We strip the Tailwind scale classes so the clone renders at 100% size
+        clone.classList.remove('scale-[0.6]', 'sm:scale-[0.8]', 'lg:scale-100', 'origin-top', 'transition-transform', 'duration-300');
+
+        // 3. Force the clone to be standard A4 width/height to ensure perfect capture
+        clone.style.transform = 'scale(1)';
+        clone.style.width = '210mm';
+        clone.style.minHeight = '297mm';
+        clone.style.margin = '0 auto';
+
+        // 4. Append clone to a temporary container off-screen
+        const container = document.createElement('div');
+        container.style.position = 'absolute';
+        container.style.top = '-10000px';
+        container.style.left = '-10000px';
+        container.appendChild(clone);
+        document.body.appendChild(container);
+
         const opt = {
             margin: 0,
             filename: `${data.personal.name.replace(/\s+/g, '_')}_Resume.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true, logging: false },
+            html2canvas: {
+                scale: 2, // Higher scale for better resolution
+                useCORS: true,
+                logging: false,
+                scrollY: 0, // Critical: prevents vertical scroll clipping
+                windowWidth: document.documentElementPc // Ensure full width capture
+            },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
-        html2pdf().set(opt).from(element).save();
+
+        try {
+            // 5. Generate PDF from the clone
+            await html2pdf().set(opt).from(clone).save();
+        } catch (error) {
+            console.error("PDF Generation failed", error);
+        } finally {
+            // 6. Cleanup the temporary container
+            document.body.removeChild(container);
+        }
     };
 
     const renderSectionContent = (sectionId) => {
@@ -93,14 +130,14 @@ const PreviewPanel = ({ data, config, sectionOrder, activeTemplate }) => {
             default:
                 const customSec = data.custom?.[sectionId];
                 return customSec ? (
-                   <div className="text-xs text-gray-700 whitespace-pre-line">{customSec.content}</div>
+                    <div className="text-xs text-gray-700 whitespace-pre-line">{customSec.content}</div>
                 ) : null;
         }
     };
 
     const renderLayout = () => {
-        const sidebarSectionIds = config.sidebarSections || ['education', 'skills', 'community']; 
-        const mainSectionIds = config.mainSections || ['summary', 'experience', 'achievements']; 
+        const sidebarSectionIds = config.sidebarSections || ['education', 'skills', 'community'];
+        const mainSectionIds = config.mainSections || ['summary', 'experience', 'achievements'];
 
         const mainSections = sections.filter(s => s.visible && mainSectionIds.includes(s.id));
         const sidebarSections = sections.filter(s => s.visible && sidebarSectionIds.includes(s.id));
@@ -113,10 +150,10 @@ const PreviewPanel = ({ data, config, sectionOrder, activeTemplate }) => {
             if (!config.showPhoto) return null;
             if (data.personal.photoUrl) {
                 return (
-                    <img 
-                        src={data.personal.photoUrl} 
-                        alt="Profile" 
-                        className={`w-full h-full object-cover`} 
+                    <img
+                        src={data.personal.photoUrl}
+                        alt="Profile"
+                        className={`w-full h-full object-cover`}
                     />
                 );
             }
@@ -129,8 +166,8 @@ const PreviewPanel = ({ data, config, sectionOrder, activeTemplate }) => {
 
         if (isSidebarLayout) {
             const reverse = config.layoutReverse;
-            const sidebarWidth = 'w-[30%]'; 
-            
+            const sidebarWidth = 'w-[30%]';
+
             const sidebarBgClass = config.sidebarBg === 'theme' ? currentTheme.bg : config.sidebarBg === 'gray' ? 'bg-slate-100' : 'bg-transparent border-r border-gray-100';
             const sidebarTextClass = config.sidebarBg === 'theme' || config.sidebarBg === 'gray' ? 'text-gray-800' : 'text-gray-600';
 
@@ -184,7 +221,7 @@ const PreviewPanel = ({ data, config, sectionOrder, activeTemplate }) => {
         } else {
             return (
                 <div className={`${pageClass} p-6 md:p-8`}>
-                     <div className={`${headerClass} ${config.themeColor === 'noir' ? 'border-b-2 border-black pb-3' : ''}`}>
+                    <div className={`${headerClass} ${config.themeColor === 'noir' ? 'border-b-2 border-black pb-3' : ''}`}>
                         <div className="flex items-center gap-4 w-full">
                             {config.showPhoto && (
                                 <div className={`w-20 h-20 flex-shrink-0 overflow-hidden border border-gray-100 shadow-sm ${config.photoShape}`}>
@@ -198,25 +235,25 @@ const PreviewPanel = ({ data, config, sectionOrder, activeTemplate }) => {
                                 <p className="text-sm text-gray-600 font-medium">{data.personal.title}</p>
                             </div>
                         </div>
-                        
+
                         <div className={`flex flex-wrap gap-3 mt-2 text-xs text-gray-500 ${config.headerAlign === 'text-center' ? 'justify-center' : ''}`}>
-                             <ContactItem icon={Mail} text={data.personal.email} config={config} />
-                             <ContactItem icon={Phone} text={data.personal.phone} config={config} />
-                             <ContactItem icon={MapPin} text={data.personal.location} config={config} />
-                             <ContactItem icon={Globe} text="Portfolio" link={data.personal.portfolio} config={config} />
+                            <ContactItem icon={Mail} text={data.personal.email} config={config} />
+                            <ContactItem icon={Phone} text={data.personal.phone} config={config} />
+                            <ContactItem icon={MapPin} text={data.personal.location} config={config} />
+                            <ContactItem icon={Globe} text="Portfolio" link={data.personal.portfolio} config={config} />
                         </div>
                     </div>
 
                     <div className="space-y-3 mt-4">
-                         {sections.find(s => s.id === 'summary' && s.visible) && (
+                        {sections.find(s => s.id === 'summary' && s.visible) && (
                             <div>
                                 <SectionHeader title="Profile Summary" icon={User} config={config} theme={currentTheme} />
                                 {renderSectionContent('summary')}
                             </div>
-                         )}
+                        )}
 
-                         {/* 2-column grid for Compact/Academic */}
-                         {config.layoutType === 'grid' ? (
+                        {/* 2-column grid for Compact/Academic */}
+                        {config.layoutType === 'grid' ? (
                             <div className="grid grid-cols-12 gap-4">
                                 <div className="col-span-8 space-y-3">
                                     {sections.filter(s => ['experience', 'education'].includes(s.id) && s.visible).map(section => (
@@ -227,7 +264,7 @@ const PreviewPanel = ({ data, config, sectionOrder, activeTemplate }) => {
                                     ))}
                                 </div>
                                 <div className="col-span-4 space-y-3 border-l pl-4 border-gray-100">
-                                     {sections.filter(s => ['skills', 'achievements', 'community'].includes(s.id) && s.visible).map(section => (
+                                    {sections.filter(s => ['skills', 'achievements', 'community'].includes(s.id) && s.visible).map(section => (
                                         <div key={section.id}>
                                             <SectionHeader title={section.label} icon={sectionIcons[section.id]} config={config} theme={currentTheme} />
                                             {renderSectionContent(section.id)}
@@ -235,14 +272,14 @@ const PreviewPanel = ({ data, config, sectionOrder, activeTemplate }) => {
                                     ))}
                                 </div>
                             </div>
-                         ) : (
-                             allSections.filter(s => s.id !== 'summary').map(section => (
+                        ) : (
+                            allSections.filter(s => s.id !== 'summary').map(section => (
                                 <div key={section.id} className={['skills', 'achievements'].includes(section.id) ? 'mb-2' : 'mb-4'}>
                                     <SectionHeader title={section.label} icon={sectionIcons[section.id]} config={config} theme={currentTheme} />
                                     {renderSectionContent(section.id)}
                                 </div>
-                             ))
-                         )}
+                            ))
+                        )}
                     </div>
                 </div>
             );
@@ -255,7 +292,7 @@ const PreviewPanel = ({ data, config, sectionOrder, activeTemplate }) => {
                 <span className="text-sm font-medium text-gray-500 px-2">
                     A4 Preview • {activeTemplate ? activeTemplate.charAt(0).toUpperCase() + activeTemplate.slice(1) : 'Modern'}
                 </span>
-                <button 
+                <button
                     onClick={handleDownload}
                     className="flex items-center gap-2 bg-gray-900 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800 transition-colors shadow-lg shadow-gray-200"
                 >
