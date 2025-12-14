@@ -1,16 +1,42 @@
 // src/App.jsx
-import React, { useState } from 'react';
-import { Download, Loader2 } from 'lucide-react'; // Added Loader icon
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
+import React, { useState, useEffect } from 'react';
+import { Download } from 'lucide-react';
 import EditorPanel from './components/Editor/EditorPanel';
 import PreviewPanel from './components/Preview/PreviewPanel';
 import { initialData, initialConfig, initialSections, templates } from './data/constants';
 
-// Google Fonts Import
-const Fonts = () => (
+// --- STYLES: Google Fonts & Smart Print CSS ---
+const Styles = () => (
   <style>{`
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&family=Lora:ital,wght@0,400;0,700;1,400&family=Merriweather:wght@300;400;700&family=Oswald:wght@400;700&family=Playfair+Display:wght@400;700&family=Raleway:wght@400;700&family=Roboto+Mono:wght@400;700&display=swap');
+    
+    @media print {
+      @page {
+        size: A4;
+        margin: 0mm; /* Remove browser default margins */
+      }
+      body {
+        margin: 0;
+        padding: 0;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        background-color: white;
+      }
+      
+      /* Hide everything except the resume */
+      body > *:not(#root) { display: none; }
+      
+      /* Force the Resume container to scale */
+      #cv-document {
+        width: 210mm !important; /* Force A4 width */
+        min-height: 297mm !important; /* Force A4 height */
+        margin: 0 !important;
+        box-shadow: none !important;
+        /* Apply the calculated scale */
+        transform: scale(var(--print-scale, 1));
+        transform-origin: top left;
+      }
+    }
   `}</style>
 );
 
@@ -20,7 +46,6 @@ const App = () => {
   const [sectionOrder, setSectionOrder] = useState(initialSections);
   const [activeTab, setActiveTab] = useState('sections');
   const [draggedItemIndex, setDraggedItemIndex] = useState(null);
-  const [isDownloading, setIsDownloading] = useState(false); // State for loading feedback
 
   // --- Handlers ---
   const applyTemplate = (templateKey) => {
@@ -40,12 +65,10 @@ const App = () => {
   const handleDragOver = (e, index) => {
     e.preventDefault();
     if (draggedItemIndex === null || draggedItemIndex === index) return;
-    
     const newOrder = [...sectionOrder];
     const draggedItem = newOrder[draggedItemIndex];
     newOrder.splice(draggedItemIndex, 1);
     newOrder.splice(index, 0, draggedItem);
-    
     setSectionOrder(newOrder);
     setDraggedItemIndex(index);
   };
@@ -54,60 +77,44 @@ const App = () => {
     setDraggedItemIndex(null);
   };
 
-  // --- NEW DOWNLOAD LOGIC ---
-  const downloadPDF = async () => {
-    setIsDownloading(true);
+  // --- SMART DOWNLOAD LOGIC ---
+  const printDocument = () => {
     const element = document.getElementById('cv-document');
-    if (!element) {
-      setIsDownloading(false);
-      return;
+    if (!element) return;
+
+    // 1. Calculate Scaling
+    // A4 Height in px (approx) at 96 DPI is 1123px. 
+    // We add a tiny buffer (1120px) to prevent bleed-over.
+    const A4_HEIGHT_PX = 1120; 
+    const actualHeight = element.scrollHeight;
+    
+    let scale = 1;
+    // Only scale DOWN if content is too tall. Never scale up (it looks weird).
+    if (actualHeight > A4_HEIGHT_PX) {
+      scale = A4_HEIGHT_PX / actualHeight;
     }
 
-    try {
-      // 1. Capture the element as a high-quality Canvas
-      // Scale 2 or 3 gives sharper text in the PDF
-      const canvas = await html2canvas(element, {
-        scale: 2, 
-        useCORS: true, // Important for external images like profile pics
-        logging: false,
-        backgroundColor: '#ffffff' // Ensure white background
-      });
+    // 2. Set CSS Variable for the Print Media Query
+    document.documentElement.style.setProperty('--print-scale', scale);
 
-      // 2. Convert Canvas to JPG Data URL
-      const imgData = canvas.toDataURL('image/jpeg', 1.0);
+    // 3. Set Filename
+    const safeName = (data.personal.name || 'Resume').replace(/\s+/g, '_');
+    const originalTitle = document.title;
+    document.title = `${safeName}_CV`;
 
-      // 3. Calculate Dimensions to fit A4
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
-      
-      const imgWidth = canvas.width;
-      const imgHeight = canvas.height;
-      
-      // Calculate ratio to fit width perfectly
-      const ratio = pdfWidth / imgWidth;
-      const finalHeight = imgHeight * ratio;
+    // 4. Print
+    window.print();
 
-      // 4. Add Image to PDF
-      // If content is shorter than A4, it just sits at top
-      // If content is longer, we might need multiple pages (basic version fits to one page logic for now)
-      pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, finalHeight);
-
-      // 5. Save
-      const safeName = (data.personal.name || 'Resume').replace(/\s+/g, '_');
-      pdf.save(`${safeName}_CV.pdf`);
-
-    } catch (error) {
-      console.error("Failed to generate PDF", error);
-      alert("Something went wrong while generating the PDF.");
-    } finally {
-      setIsDownloading(false);
-    }
+    // 5. Cleanup
+    setTimeout(() => {
+      document.title = originalTitle;
+      document.documentElement.style.removeProperty('--print-scale');
+    }, 500);
   };
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col md:flex-row font-sans">
-      <Fonts />
+      <Styles />
       
       {/* Editor Side */}
       <EditorPanel 
@@ -124,16 +131,10 @@ const App = () => {
       <div className="w-full md:w-2/3 lg:w-3/4 bg-gray-200 h-screen overflow-y-auto print:h-auto print:overflow-visible p-4 md:p-8 flex flex-col items-center print:bg-white print:p-0 print:block relative">
          <div className="fixed bottom-8 right-8 print:hidden z-50 animate-bounce-subtle">
             <button 
-              onClick={downloadPDF}
-              disabled={isDownloading}
-              className={`flex items-center gap-2 px-8 py-4 rounded-full shadow-2xl transition-all hover:scale-105 hover:shadow-blue-500/30 font-bold cursor-pointer text-white ${isDownloading ? 'bg-gray-500' : 'bg-blue-600 hover:bg-blue-700'}`}
+              onClick={printDocument}
+              className="flex items-center gap-2 px-8 py-4 rounded-full shadow-2xl transition-all hover:scale-105 hover:shadow-blue-500/30 font-bold cursor-pointer text-white bg-blue-600 hover:bg-blue-700"
             >
-              {isDownloading ? (
-                <Loader2 size={22} className="animate-spin" />
-              ) : (
-                <Download size={22} />
-              )}
-              <span className="text-lg">{isDownloading ? 'Converting...' : 'Download PDF'}</span>
+              <Download size={22} /> <span className="text-lg">Download PDF</span>
             </button>
          </div>
          

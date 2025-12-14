@@ -6,8 +6,7 @@ import {
 } from 'lucide-react';
 import { colorThemes } from '../../data/constants';
 
-const PreviewPanel = ({ data, config, sectionOrder, printDocument }) => {
-  // Helpers specifically for Preview
+const PreviewPanel = ({ data, config, sectionOrder }) => {
   const theme = colorThemes[config.themeColor];
   
   const paddingClass = config.spacingScale === 'compact' 
@@ -90,24 +89,17 @@ const PreviewPanel = ({ data, config, sectionOrder, printDocument }) => {
                <EntryWrapper key={exp.id}>
                  <div className={`relative ${config.timeline ? 'pl-6' : ''}`}>
                    {config.timeline && <div className={`absolute left-[-5px] top-1.5 w-3 h-3 rounded-full border-2 border-white ${theme.fill}`}></div>}
-                   
                    <div className={`flex justify-between items-baseline mb-1 ${config.dateAlign === 'below' ? 'flex-col' : ''}`}>
                      <h3 className="font-bold text-gray-900 text-lg">{exp.role}</h3>
                      {config.dateAlign === 'inline' ? null : (
                        <span className={`text-xs font-bold ${theme.text} ${theme.bg} px-2 py-1 rounded whitespace-nowrap ${config.dateAlign === 'below' ? 'mt-1 w-fit' : ''}`}>{exp.year}</span>
                      )}
                    </div>
-                   
                    <div className="flex items-center gap-2 mb-2">
                      <div className={`text-sm ${config.companyStyle} ${theme.text}`}>{exp.company}</div>
-                     {config.dateAlign === 'inline' && (
-                        <span className="text-xs text-gray-500">| {exp.year}</span>
-                     )}
+                     {config.dateAlign === 'inline' && <span className="text-xs text-gray-500">| {exp.year}</span>}
                    </div>
-
-                   <p className={`text-gray-600 leading-relaxed text-justify text-sm`}>
-                     {exp.details}
-                   </p>
+                   <p className={`text-gray-600 leading-relaxed text-justify text-sm`}>{exp.details}</p>
                  </div>
                </EntryWrapper>
              ))}
@@ -165,7 +157,6 @@ const PreviewPanel = ({ data, config, sectionOrder, printDocument }) => {
           <h2 className={headerClasses()}>
               {config.showSectionIcons && <Code size={20} className={`${theme.icon} mr-1`} />} {sec.label}
           </h2>
-          
           {config.skillStyle === 'tags' && (
             <div className="flex flex-wrap gap-2">
               {data.skills.map((skill, idx) => (
@@ -175,7 +166,6 @@ const PreviewPanel = ({ data, config, sectionOrder, printDocument }) => {
               ))}
             </div>
           )}
-
           {config.skillStyle === 'list' && (
             <ul className="space-y-1">
               {data.skills.map((skill, idx) => (
@@ -185,14 +175,11 @@ const PreviewPanel = ({ data, config, sectionOrder, printDocument }) => {
               ))}
             </ul>
           )}
-
            {config.skillStyle === 'bars' && (
             <div className="space-y-3">
               {data.skills.map((skill, idx) => (
                 <div key={idx} className="break-inside-avoid">
-                  <div className="flex justify-between text-xs font-semibold text-gray-700 mb-1">
-                     <span>{skill.name}</span>
-                  </div>
+                  <div className="flex justify-between text-xs font-semibold text-gray-700 mb-1"><span>{skill.name}</span></div>
                   <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
                      <div className={`h-full ${theme.fill}`} style={{ width: `${skill.level}%` }}></div>
                   </div>
@@ -200,11 +187,8 @@ const PreviewPanel = ({ data, config, sectionOrder, printDocument }) => {
               ))}
             </div>
           )}
-
           {config.skillStyle === 'comma' && (
-            <div className="text-gray-700 text-sm leading-relaxed">
-              {data.skills.map(s => s.name).join(', ')}.
-            </div>
+            <div className="text-gray-700 text-sm leading-relaxed">{data.skills.map(s => s.name).join(', ')}.</div>
           )}
           <Divider />
         </section>
@@ -235,9 +219,7 @@ const PreviewPanel = ({ data, config, sectionOrder, printDocument }) => {
           <h2 className={headerClasses()}>
               {config.showSectionIcons && <FileText size={20} className={`${theme.icon} mr-1`} />} {sec.label}
           </h2>
-          <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">
-            {data.custom[sec.id].content}
-          </div>
+          <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">{data.custom[sec.id].content}</div>
           <Divider />
        </section>
       );
@@ -268,6 +250,20 @@ const PreviewPanel = ({ data, config, sectionOrder, printDocument }) => {
         </>
       )}
       {config.borderStyle === 'rounded' && <div className={`absolute inset-5 sm:inset-6 md:inset-8 border-2 rounded-2xl pointer-events-none ${theme.border}`} style={{ zIndex: 5 }}></div>}
+      {config.borderStyle === 'minimal' && (
+        <>
+          <div className={`absolute top-6 left-6 right-6 border-t-2 pointer-events-none ${theme.border}`} style={{ zIndex: 5 }}></div>
+          <div className={`absolute bottom-6 left-6 right-6 border-b-2 pointer-events-none ${theme.border}`} style={{ zIndex: 5 }}></div>
+        </>
+      )}
+      {config.borderStyle === 'corners' && (
+        <>
+          <div className={`absolute top-6 left-6 w-16 h-16 border-t-4 border-l-4 pointer-events-none ${theme.border}`} style={{ zIndex: 5 }}></div>
+          <div className={`absolute top-6 right-6 w-16 h-16 border-t-4 border-r-4 pointer-events-none ${theme.border}`} style={{ zIndex: 5 }}></div>
+          <div className={`absolute bottom-6 left-6 w-16 h-16 border-b-4 border-l-4 pointer-events-none ${theme.border}`} style={{ zIndex: 5 }}></div>
+          <div className={`absolute bottom-6 right-6 w-16 h-16 border-b-4 border-r-4 pointer-events-none ${theme.border}`} style={{ zIndex: 5 }}></div>
+        </>
+      )}
       
       {/* Main Content */}
       <div className={`relative z-10 flex flex-col flex-grow ${paddingClass}`}>
@@ -287,26 +283,10 @@ const PreviewPanel = ({ data, config, sectionOrder, printDocument }) => {
                 <p className={`text-xl mt-2 font-medium ${config.jobTitleColor === 'theme' ? theme.text : config.jobTitleColor === 'gray' ? 'text-gray-600' : 'text-black'}`}>{data.personal.title}</p>
                 
                 <div className={`flex flex-wrap gap-x-4 gap-y-2 mt-4 text-sm text-gray-600 ${config.contactLayout === 'grid' ? 'grid grid-cols-2' : config.contactLayout === 'stack' ? 'flex-col' : ''} ${config.headerAlign === 'text-center' ? 'justify-center items-center' : config.headerAlign === 'text-right' ? 'justify-end items-end' : ''}`}>
-                  {data.personal.email && (
-                    <div className="flex items-center gap-1.5">
-                      <SocialIconWrapper><Mail size={14} /></SocialIconWrapper> <span>{data.personal.email}</span>
-                    </div>
-                  )}
-                  {data.personal.phone && (
-                    <div className="flex items-center gap-1.5">
-                      <SocialIconWrapper><Phone size={14} /></SocialIconWrapper> <span>{data.personal.phone}</span>
-                    </div>
-                  )}
-                  {data.personal.linkedin && (
-                    <div className="flex items-center gap-1.5">
-                      <SocialIconWrapper><Linkedin size={14} /></SocialIconWrapper> <a href={data.personal.linkedin} className={`hover:underline ${theme.text}`}>LinkedIn</a>
-                    </div>
-                  )}
-                  {data.personal.portfolio && (
-                    <div className="flex items-center gap-1.5">
-                      <SocialIconWrapper><Globe size={14} /></SocialIconWrapper> <a href={data.personal.portfolio} className={`hover:underline ${theme.text}`}>Portfolio</a>
-                    </div>
-                  )}
+                  {data.personal.email && <div className="flex items-center gap-1.5"><SocialIconWrapper><Mail size={14} /></SocialIconWrapper> <span>{data.personal.email}</span></div>}
+                  {data.personal.phone && <div className="flex items-center gap-1.5"><SocialIconWrapper><Phone size={14} /></SocialIconWrapper> <span>{data.personal.phone}</span></div>}
+                  {data.personal.linkedin && <div className="flex items-center gap-1.5"><SocialIconWrapper><Linkedin size={14} /></SocialIconWrapper> <a href={data.personal.linkedin} className={`hover:underline ${theme.text}`}>LinkedIn</a></div>}
+                  {data.personal.portfolio && <div className="flex items-center gap-1.5"><SocialIconWrapper><Globe size={14} /></SocialIconWrapper> <a href={data.personal.portfolio} className={`hover:underline ${theme.text}`}>Portfolio</a></div>}
                 </div>
               </div>
             </div>
