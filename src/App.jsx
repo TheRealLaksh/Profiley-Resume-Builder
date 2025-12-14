@@ -1,7 +1,7 @@
 // src/App.jsx
 import React, { useState, useEffect } from 'react';
 import { 
-  Download, Moon, Sun, RotateCcw, RotateCw, Share2, Save, Loader2 
+  Download, Moon, Sun, RotateCcw, RotateCw, Share2, Save, Loader2, FilePlus 
 } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
 import EditorPanel from './components/Editor/EditorPanel';
@@ -40,14 +40,15 @@ const App = () => {
 
   // New Features State
   const [darkMode, setDarkMode] = useState(false);
-  const [pdfQuality, setPdfQuality] = useState('screen'); // 'screen' or 'print'
+  const [pdfQuality, setPdfQuality] = useState('screen'); 
   const [history, setHistory] = useState([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [isAutoSaving, setIsAutoSaving] = useState(false);
   
-  // DB Loading States
+  // DB & View Mode States
   const [isLoading, setIsLoading] = useState(true);
   const [isSharing, setIsSharing] = useState(false);
+  const [isReadOnly, setIsReadOnly] = useState(false); // NEW: Track if we are in "Preview Mode"
 
   // --- Initialization (Load from DB URL or LocalStorage) ---
   useEffect(() => {
@@ -67,11 +68,12 @@ const App = () => {
             if (fetched.config) setConfig(fetched.config);
             if (fetched.sectionOrder) setSectionOrder(fetched.sectionOrder);
             
+            // ACTIVATE READ-ONLY MODE
+            setIsReadOnly(true); 
             setIsLoading(false);
-            return; // Exit early if found in DB
+            return; // Exit early to skip localStorage load
           } else {
             alert("Resume not found or expired. Loading your saved data.");
-            // Remove the invalid ID from URL without reload
             window.history.replaceState({}, document.title, "/");
           }
         } catch (error) {
@@ -79,7 +81,7 @@ const App = () => {
         }
       }
 
-      // 2. Fallback to LocalStorage
+      // 2. Fallback to LocalStorage (Only if NOT a valid shared link)
       const savedData = localStorage.getItem('profiley_data');
       const savedConfig = localStorage.getItem('profiley_config');
       const savedOrder = localStorage.getItem('profiley_order');
@@ -96,7 +98,8 @@ const App = () => {
 
   // --- Auto-Save & History Logic ---
   useEffect(() => {
-    if (isLoading) return; // Don't auto-save while still fetching
+    // CRITICAL: Do not auto-save if in Read-Only mode (don't overwrite viewer's data)
+    if (isLoading || isReadOnly) return; 
 
     const timeoutId = setTimeout(() => {
       // Save to LocalStorage
@@ -106,22 +109,21 @@ const App = () => {
       setIsAutoSaving(true);
       setTimeout(() => setIsAutoSaving(false), 1000);
 
-      // Add to History (only if different from current head)
+      // Add to History
       const currentState = { data, config, sectionOrder };
       const lastState = history[historyIndex];
       
       if (!lastState || JSON.stringify(lastState) !== JSON.stringify(currentState)) {
         const newHistory = history.slice(0, historyIndex + 1);
         newHistory.push(currentState);
-        // Limit history to 50 steps
         if (newHistory.length > 50) newHistory.shift();
         setHistory(newHistory);
         setHistoryIndex(newHistory.length - 1);
       }
-    }, 1000); // 1s debounce
+    }, 1000); 
 
     return () => clearTimeout(timeoutId);
-  }, [data, config, sectionOrder, isLoading]);
+  }, [data, config, sectionOrder, isLoading, isReadOnly]);
 
   // --- Actions ---
   const handleUndo = () => {
@@ -154,28 +156,20 @@ const App = () => {
   const handleShare = async () => {
     setIsSharing(true);
     try {
-      // Save entire state to Firestore
       const resumeId = await saveResumeToDB({ data, config, sectionOrder });
-      
-      // Construct URL
       const shareUrl = `${window.location.origin}/?id=${resumeId}`;
-      
-      // Copy to clipboard
       await navigator.clipboard.writeText(shareUrl);
       alert(`Resume saved successfully!\n\nShareable link copied to clipboard:\n${shareUrl}`);
     } catch (error) {
       console.error("Share failed:", error);
-      
-      // Friendly Error Handling
       let message = "Failed to generate link.";
       if (error.message.includes("Missing or insufficient permissions")) {
-        message += "\n\nReason: Database Permission Denied.\nMake sure your Firestore Security Rules are set to 'Test Mode' (allow read, write: if true;)";
+        message += "\n\nReason: Database Permission Denied.\nMake sure your Firestore Security Rules are set to 'Test Mode'.";
       } else if (error.message.includes("too large")) {
         message += `\n\nReason: ${error.message}`;
       } else {
         message += `\n\nReason: ${error.message}`;
       }
-      
       alert(message);
     } finally {
       setIsSharing(false);
@@ -188,7 +182,6 @@ const App = () => {
 
     const fileName = (data.personal.name || 'Resume').replace(/\s+/g, '_') + '_CV.pdf';
 
-    // Quality Settings
     const scale = pdfQuality === 'print' ? 3 : 1.5; 
     const imageQuality = pdfQuality === 'print' ? 0.98 : 0.8;
 
@@ -213,7 +206,7 @@ const App = () => {
     html2pdf().set(opt).from(element).save();
   };
 
-  // --- Drag and Drop Handlers ---
+  // --- Drag and Drop Handlers (Only active when editor is present) ---
   const handleDragStart = (e, index) => {
     setDraggedItemIndex(index);
     e.dataTransfer.effectAllowed = 'move';
@@ -236,52 +229,66 @@ const App = () => {
     return (
       <div className={`min-h-screen flex flex-col items-center justify-center font-sans transition-colors duration-300 ${darkMode ? 'dark bg-slate-900 text-white' : 'bg-gray-100 text-gray-600'}`}>
         <Loader2 className="animate-spin mb-4 text-blue-600" size={48} />
-        <p className="font-medium animate-pulse">Fetching your profile...</p>
+        <p className="font-medium animate-pulse">Fetching profile...</p>
       </div>
     );
   }
 
   // --- Render Main App ---
   return (
-    <div className={`min-h-screen flex flex-col md:flex-row font-sans transition-colors duration-300 ${darkMode ? 'dark bg-slate-900' : 'bg-gray-100'}`}>
+    <div className={`min-h-screen flex flex-col ${isReadOnly ? 'items-center justify-center' : 'md:flex-row'} font-sans transition-colors duration-300 ${darkMode ? 'dark bg-slate-900' : 'bg-gray-100'}`}>
       <Styles />
 
-      {/* Editor Panel */}
-      <EditorPanel
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        data={data}
-        setData={setData}
-        config={config}
-        setConfig={setConfig}
-        sectionOrder={sectionOrder}
-        setSectionOrder={setSectionOrder}
-        applyTemplate={applyTemplate}
-        draggedItemIndex={draggedItemIndex}
-        handleDragStart={handleDragStart}
-        handleDragOver={handleDragOver}
-        handleDragEnd={handleDragEnd}
-        // Props
-        darkMode={darkMode}
-        toggleDarkMode={() => setDarkMode(!darkMode)}
-        undo={handleUndo}
-        redo={handleRedo}
-        canUndo={historyIndex > 0}
-        canRedo={historyIndex < history.length - 1}
-        pdfQuality={pdfQuality}
-        setPdfQuality={setPdfQuality}
-        handleShare={handleShare}
-        isSharing={isSharing} // Pass sharing state
-      />
+      {/* EDITOR PANEL: Only render if NOT in Read-Only mode.
+      */}
+      {!isReadOnly && (
+        <EditorPanel
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          data={data}
+          setData={setData}
+          config={config}
+          setConfig={setConfig}
+          sectionOrder={sectionOrder}
+          setSectionOrder={setSectionOrder}
+          applyTemplate={applyTemplate}
+          draggedItemIndex={draggedItemIndex}
+          handleDragStart={handleDragStart}
+          handleDragOver={handleDragOver}
+          handleDragEnd={handleDragEnd}
+          darkMode={darkMode}
+          toggleDarkMode={() => setDarkMode(!darkMode)}
+          undo={handleUndo}
+          redo={handleRedo}
+          canUndo={historyIndex > 0}
+          canRedo={historyIndex < history.length - 1}
+          pdfQuality={pdfQuality}
+          setPdfQuality={setPdfQuality}
+          handleShare={handleShare}
+          isSharing={isSharing}
+        />
+      )}
 
-      {/* Preview Area */}
-      <div className={`w-full md:w-2/3 lg:w-3/4 h-screen overflow-y-auto p-4 md:p-8 flex flex-col items-center relative transition-colors duration-300 ${darkMode ? 'bg-slate-800' : 'bg-gray-200'}`}>
+      {/* PREVIEW AREA: Adjust width based on mode 
+      */}
+      <div className={`${isReadOnly ? 'w-full max-w-5xl h-screen' : 'w-full md:w-2/3 lg:w-3/4 h-screen'} overflow-y-auto p-4 md:p-8 flex flex-col items-center relative transition-colors duration-300 ${darkMode ? 'bg-slate-800' : 'bg-gray-200'}`}>
         
+        {/* Read-Only Banner */}
+        {isReadOnly && (
+          <div className="mb-6 px-6 py-3 bg-blue-600 text-white rounded-full shadow-lg font-semibold text-sm flex items-center gap-2">
+            <Share2 size={16} /> You are viewing a shared resume
+          </div>
+        )}
+
         {/* Floating Action Buttons */}
         <div className="fixed bottom-8 right-8 z-50 flex flex-col gap-3">
-           <div className={`flex items-center gap-2 px-4 py-2 rounded-lg shadow-lg backdrop-blur-sm text-xs font-semibold ${isAutoSaving ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'} transition-all duration-300 ${darkMode ? 'text-green-400 bg-slate-900/80' : 'text-green-700 bg-white/80'}`}>
-             <Save size={14} /> Auto-saved
-           </div>
+           
+           {/* Auto-save Indicator (Only if editing) */}
+           {!isReadOnly && (
+             <div className={`flex items-center gap-2 px-4 py-2 rounded-lg shadow-lg backdrop-blur-sm text-xs font-semibold ${isAutoSaving ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'} transition-all duration-300 ${darkMode ? 'text-green-400 bg-slate-900/80' : 'text-green-700 bg-white/80'}`}>
+               <Save size={14} /> Auto-saved
+             </div>
+           )}
 
            <button
             onClick={downloadPDF}
@@ -290,6 +297,17 @@ const App = () => {
             <Download size={20} />
             Download PDF
           </button>
+
+          {/* "Create Yours" Button (Only if read-only) */}
+          {isReadOnly && (
+             <button 
+               onClick={() => window.location.href = window.location.origin} // Reloads to root without ID
+               className="flex items-center justify-center gap-2 px-6 py-3 rounded-full shadow-xl transition-all hover:scale-105 font-bold text-gray-900 bg-white hover:bg-gray-50 border border-gray-200"
+             >
+                <FilePlus size={20} className="text-blue-600" />
+                Create Yours
+             </button>
+           )}
         </div>
 
         <PreviewPanel
