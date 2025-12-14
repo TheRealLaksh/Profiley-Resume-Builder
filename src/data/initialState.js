@@ -2,59 +2,72 @@ export const initialData = {
   personal: {
     name: "Laksh Pradhwani",
     title: "Aspiring AI & ML Engineer | Full Stack Developer",
-    email: "laksh.pradhwani@example.com", 
-    phone: "+91 98765 43210", 
+    email: "contact@lakshp.live", 
+    phone: "xxxxxxxxxxxxx", 
     location: "Varanasi, India",
     linkedin: "https://www.linkedin.com/in/laksh-pradhwani/",
     portfolio: "https://www.lakshp.live/",
     photoUrl: "", 
-    summary: "Disciplined Grade XII student with a focused ambition in Artificial Intelligence and Machine Learning. Proactive problem-solver with hands-on experience in full-stack web development and algorithmic problem-solving."
+    summary: "Disciplined Grade XII student with a focused ambition in Artificial Intelligence and Machine Learning. Proactive problem-solver with hands-on experience in full-stack web development and algorithmic problem-solving. Proven track record in hackathons, national-level sports, and leadership roles."
   },
   education: [
     {
       id: 1,
       institution: "Sunbeam School Lahartara",
-      degree: "Grade XII - PCM with CS",
+      degree: "Grade XII - PCM with Computer Science",
       year: "2024 - Present",
-      details: "Pursuing rigorous coursework in Physics, Chemistry, Math, and CS."
+      details: "Pursuing rigorous coursework in Physics, Chemistry, Math, and CS. Regional Winner of VVM National Science Competition (2023)."
     },
     {
       id: 2,
       institution: "Chinmaya Int. Res. School",
       degree: "Class X",
-      year: "2024",
-      details: "Secured 87.8% overall. Achieved 94% in Mathematics. House Captain."
+      year: "Completed 2024",
+      details: "Secured 87.8% overall with 94% in Mathematics. Served as House Captain and member of Round Square Organizing Committee."
     }
   ],
   experience: [
     {
       id: 1,
-      role: "AI Intern",
-      company: "IIT Madras",
-      year: "2023",
-      details: "Completed intensive program focused on Data Science, Data Engineering, and supervised learning models."
+      role: "Full Stack Developer",
+      company: "Unified Mentor",
+      year: "Oct 2025 - Dec 2025",
+      details: "Developed user-centric apps: Helios (music player), Calibridge (calendar exporter), CogniSync (academic platform), and MarketBridge."
     },
     {
       id: 2,
-      role: "Full Stack Developer",
-      company: "Unified Mentor",
-      year: "2024",
-      details: "Developed user-centric applications including Helios (music player) and Calibridge (calendar exporter)."
+      role: "Web Developer",
+      company: "MoreYeahs",
+      year: "Aug 2025 - Sep 2025",
+      details: "Built a full-stack gig platform using Django and Python; developed REST APIs, authentication systems, and CRUD functionality."
+    },
+    {
+      id: 3,
+      role: "IT Intern",
+      company: "Hotel Kavana",
+      year: "Jun 2025",
+      details: "Managed technical systems and operational IT requirements in a professional hospitality environment."
     }
   ],
   skills: [
     { name: "Python & Django", level: 95 },
+    { name: "React.js & Redux", level: 90 },
     { name: "Machine Learning", level: 85 },
-    { name: "React.js", level: 90 },
+    { name: "REST APIs", level: 90 },
     { name: "Leadership", level: 90 }
   ],
   achievements: [
     "Regional Winner, VVM National Science Competition (2023)",
+    "2nd Position, AFS Tech Ramble – Web Wizards (Website Dev)",
+    "2nd Position, Robowars – Impetus ’25",
+    "Top 100 National Rank, Shri Shakti Institute Quiz (Witnessed ISRO Launch)",
     "National-level Shooter: 34th Rank All-India U-17"
   ],
   community: [
-    "Volunteered at local orphanage.",
-    "Organized crowdfunding campaign."
+    "Organized crowdfunding campaign for underprivileged children (2022).",
+    "Volunteered at local orphanage & home for specially-abled children.",
+    "Press Corps member for G20 MUN.",
+    "Active participant in CHEMUN, IIMUN, and TISB MUN."
   ],
   custom: {}
 };
