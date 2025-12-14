@@ -35,8 +35,8 @@ const PreviewPanel = ({ data, config, sectionOrder, activeTemplate }) => {
 
         // 3. Force the clone to be standard A4 width/height to ensure perfect capture
         clone.style.transform = 'scale(1)';
-        clone.style.width = '210mm';
-        clone.style.minHeight = '297mm';
+        clone.style.width = '280mm';
+        clone.style.minHeight = '350mm';
         clone.style.margin = '0 auto';
 
         // 4. Append clone to a temporary container off-screen
@@ -52,13 +52,13 @@ const PreviewPanel = ({ data, config, sectionOrder, activeTemplate }) => {
             filename: `${data.personal.name.replace(/\s+/g, '_')}_Resume.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
             html2canvas: {
-                scale: 2, // Higher scale for better resolution
+                scale: 6, // Higher scale for better resolution
                 useCORS: true,
                 logging: false,
                 scrollY: 0, // Critical: prevents vertical scroll clipping
                 windowWidth: document.documentElementPc // Ensure full width capture
             },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            jsPDF: { unit: 'mm', format: 'a3', orientation: 'portrait' }
         };
 
         try {
