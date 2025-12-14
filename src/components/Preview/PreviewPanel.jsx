@@ -46,19 +46,20 @@ const PreviewPanel = ({ data, config, sectionOrder, activeTemplate }) => {
         container.style.left = '-10000px';
         container.appendChild(clone);
         document.body.appendChild(container);
-
         const opt = {
             margin: 0,
             filename: `${data.personal.name.replace(/\s+/g, '_')}_Resume.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
             html2canvas: {
-                scale: 6, // Higher scale for better resolution
+                scale: 3, // Higher scale for crisp text
                 useCORS: true,
                 logging: false,
-                scrollY: 0, // Critical: prevents vertical scroll clipping
-                windowWidth: document.documentElementPc // Ensure full width capture
+                scrollY: 0,
+                letterRendering: true, // Crucial for text kerning/glitches
+                allowTaint: true,
+                backgroundColor: '#ffffff' // Ensure white background
             },
-            jsPDF: { unit: 'mm', format: 'a3', orientation: 'portrait' }
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
         try {
@@ -108,7 +109,8 @@ const PreviewPanel = ({ data, config, sectionOrder, activeTemplate }) => {
                 ));
             case 'skills':
                 return (
-                    <div className={`flex flex-wrap ${config.skillStyle === 'bars' ? 'flex-col' : 'gap-1.5'}`}>
+                    // REMOVED 'gap-1.5' because we are handling it in SkillTag now for better PDF support
+                    <div className={`flex flex-wrap ${config.skillStyle === 'bars' ? 'flex-col' : ''}`}>
                         {data.skills.map((skill, idx) => (
                             <SkillTag key={idx} skill={skill} config={config} theme={currentTheme} />
                         ))}
@@ -173,7 +175,7 @@ const PreviewPanel = ({ data, config, sectionOrder, activeTemplate }) => {
 
             return (
                 <div className={`${pageClass} flex ${reverse ? 'flex-row-reverse' : 'flex-row'}`}>
-                    <div className={`${sidebarWidth} flex-shrink-0 p-5 min-h-full ${sidebarBgClass} ${sidebarTextClass} flex flex-col gap-4`}>
+                    <div className={`${sidebarWidth} flex-shrink-0 p-5 min-h-[297mm] ${sidebarBgClass} ${sidebarTextClass} flex flex-col gap-4`}>
                         {config.showPhoto && (
                             <div className={`w-24 h-24 mx-auto mb-2 overflow-hidden border-2 ${currentTheme.border} ${config.photoShape}`}>
                                 {renderPhoto()}
