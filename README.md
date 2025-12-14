@@ -1,7 +1,7 @@
 <div align="center">
 
   <img
-    src="https://capsule-render.vercel.app/api?type=waving&amp;color=0f172a&amp;height=300&amp;section=header&amp;text=Profiley&amp;fontSize=90&amp;animation=fadeIn&amp;fontAlignY=50&amp;desc=The%20Architect%20of%20Professional%20Identity&amp;descAlign=50&amp;descAlignY=51&amp;fontColor=38bdf8"
+    src="https://capsule-render.vercel.app/api?type=waving&amp;color=0f172a&amp;height=300&amp;section=header&amp;text=Profiley&amp;fontSize=88&amp;fontColor=38bdf8&amp;fontAlignY=40&amp;desc=The%20Architect%20of%20Professional%20Identity&amp;descAlignY=65&amp;descSize=22"
     alt="Profiley Banner"
     width="100%"
   />
