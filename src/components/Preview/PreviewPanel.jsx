@@ -1,4 +1,3 @@
-// src/components/Preview/PreviewPanel.jsx
 import React, { useRef } from 'react';
 import { 
     Mail, Phone, MapPin, Linkedin, Globe, 
@@ -100,8 +99,9 @@ const PreviewPanel = ({ data, config, sectionOrder, activeTemplate }) => {
     };
 
     const renderLayout = () => {
-        const sidebarSectionIds = ['education', 'skills', 'community']; 
-        const mainSectionIds = ['summary', 'experience', 'achievements']; 
+        // Updated to use config-defined sections or fallback to defaults
+        const sidebarSectionIds = config.sidebarSections || ['education', 'skills', 'community']; 
+        const mainSectionIds = config.mainSections || ['summary', 'experience', 'achievements']; 
 
         const mainSections = sections.filter(s => s.visible && mainSectionIds.includes(s.id));
         const sidebarSections = sections.filter(s => s.visible && sidebarSectionIds.includes(s.id));
