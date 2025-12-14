@@ -1,7 +1,8 @@
+// src/components/UI/FormElements.jsx
 import React from 'react';
 import { Trash2 } from 'lucide-react';
 
-export const EditorSection = ({ title, icon: Icon, id, onDelete, activeTab, setActiveTab }) => (
+export const EditorSection = ({ title, icon: Icon, id, activeTab, setActiveTab, onDelete }) => (
   <div className="flex items-center gap-2 mb-2">
     <button
       onClick={() => setActiveTab(id)}
@@ -47,11 +48,13 @@ export const Select = ({ label, value, onChange, options }) => (
   </div>
 );
 
-export const ColorButton = ({ theme, selected, onClick }) => (
-  <button 
-    onClick={onClick}
-    title={theme.name}
-    className={`w-8 h-8 rounded-full ${theme.hex} shadow-sm transition-transform hover:scale-110 ${selected ? 'ring-2 ring-offset-2 ring-gray-400 scale-110' : ''}`}
-    aria-label={`Select ${theme.name} theme`}
-  />
-);
+export const ColorButton = ({ colorKey, theme, selected, onClick }) => {
+  return (
+    <button 
+      onClick={onClick}
+      title={theme.name}
+      className={`w-8 h-8 rounded-full ${theme.hex} shadow-sm transition-transform hover:scale-110 ${selected ? 'ring-2 ring-offset-2 ring-gray-400 scale-110' : ''}`}
+      aria-label={`Select ${theme.name} theme`}
+    />
+  );
+};

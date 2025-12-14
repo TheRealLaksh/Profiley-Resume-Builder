@@ -1,7 +1,4 @@
-import { 
-  User, Briefcase, GraduationCap, Award, Code, Heart, 
-  FileText 
-} from 'lucide-react';
+// src/data/constants.js
 
 export const initialData = {
   personal: {
@@ -77,12 +74,12 @@ export const initialData = {
 };
 
 export const initialSections = [
-  { id: 'summary', label: 'Profile Summary', visible: true, type: 'standard', icon: User },
-  { id: 'experience', label: 'Experience', visible: true, type: 'standard', icon: Briefcase },
-  { id: 'education', label: 'Education', visible: true, type: 'standard', icon: GraduationCap },
-  { id: 'skills', label: 'Skills', visible: true, type: 'standard', icon: Code },
-  { id: 'achievements', label: 'Achievements', visible: true, type: 'standard', icon: Award },
-  { id: 'community', label: 'Volunteering', visible: true, type: 'standard', icon: Heart }
+  { id: 'summary', label: 'Profile Summary', visible: true, type: 'standard' },
+  { id: 'experience', label: 'Experience', visible: true, type: 'standard' },
+  { id: 'education', label: 'Education', visible: true, type: 'standard' },
+  { id: 'skills', label: 'Skills', visible: true, type: 'standard' },
+  { id: 'achievements', label: 'Achievements', visible: true, type: 'standard' },
+  { id: 'community', label: 'Volunteering', visible: true, type: 'standard' }
 ];
 
 export const colorThemes = {
@@ -102,37 +99,101 @@ export const templates = {
   modern: {
     name: 'Modern',
     config: {
-      layoutReverse: false, sidebarBg: 'gray', headerAlign: 'text-left', photoShape: 'rounded-full', fontFamily: 'font-inter', sectionHeaderStyle: 'left-bar', skillStyle: 'tags', showPhoto: true, borderStyle: 'none', themeColor: 'midnight'
+      layoutReverse: false,
+      sidebarBg: 'gray',
+      headerAlign: 'text-left',
+      photoShape: 'rounded-full',
+      fontFamily: 'font-inter',
+      sectionHeaderStyle: 'left-bar',
+      skillStyle: 'tags',
+      showPhoto: true,
+      borderStyle: 'none',
+      themeColor: 'midnight'
     }
   },
   minimal: {
     name: 'Minimal',
     config: {
-      layoutReverse: false, sidebarBg: 'none', headerAlign: 'text-left', photoShape: 'rounded-full', fontFamily: 'font-inter', sectionHeaderStyle: 'underline', skillStyle: 'list', showPhoto: false, borderStyle: 'none', themeColor: 'noir'
+      layoutReverse: false,
+      sidebarBg: 'none',
+      headerAlign: 'text-left',
+      photoShape: 'rounded-full',
+      fontFamily: 'font-inter',
+      sectionHeaderStyle: 'underline',
+      skillStyle: 'list',
+      showPhoto: false,
+      borderStyle: 'none',
+      themeColor: 'noir'
     }
   },
   creative: {
     name: 'Creative',
     config: {
-      layoutReverse: true, sidebarBg: 'theme', headerAlign: 'text-center', photoShape: 'rounded-lg', fontFamily: 'font-raleway', sectionHeaderStyle: 'centered', skillStyle: 'bars', showPhoto: true, borderStyle: 'double', themeColor: 'coral'
+      layoutReverse: true,
+      sidebarBg: 'theme',
+      headerAlign: 'text-center',
+      photoShape: 'rounded-lg',
+      fontFamily: 'font-raleway',
+      sectionHeaderStyle: 'centered',
+      skillStyle: 'bars',
+      showPhoto: true,
+      borderStyle: 'double',
+      themeColor: 'coral'
     }
   },
   ats: {
     name: 'ATS Friendly',
     config: {
-      layoutReverse: false, sidebarBg: 'none', headerAlign: 'text-left', photoShape: 'rounded-none', fontFamily: 'font-sans', sectionHeaderStyle: 'underline', skillStyle: 'comma', showPhoto: false, showIcons: false, showSectionIcons: false, borderStyle: 'none', themeColor: 'noir', layoutMode: 'single-column'
+      layoutReverse: false,
+      sidebarBg: 'none',
+      headerAlign: 'text-left',
+      photoShape: 'rounded-none',
+      fontFamily: 'font-sans',
+      sectionHeaderStyle: 'underline',
+      skillStyle: 'comma',
+      showPhoto: false,
+      showIcons: false,
+      showSectionIcons: false,
+      borderStyle: 'none',
+      themeColor: 'noir',
+      layoutMode: 'single-column'
     }
   }
 };
 
 export const initialConfig = {
-  themeColor: 'midnight', fontFamily: 'font-inter', paperTint: 'bg-white',
-  layoutReverse: false, headerAlign: 'text-left', sidebarBg: 'none',
-  fontScale: 'text-base', spacingScale: 'normal',
-  nameSize: 'text-4xl', nameWeight: 'font-extrabold', uppercaseHeaders: true, jobTitleColor: 'theme', showPhoto: true, photoShape: 'rounded-full', photoBorder: 'none', contactLayout: 'row',
-  sectionHeaderStyle: 'underline', sectionTitleSize: 'text-lg', dividerStyle: 'none', borderStyle: 'none',
-  entryBox: 'clean', dateAlign: 'right', companyStyle: 'font-semibold', timeline: false,
-  skillStyle: 'tags', skillShape: 'rounded-md', socialStyle: 'simple', bulletStyle: 'disc', dateStyle: 'default',
-  showIcons: true, showSectionIcons: true, showSummary: true,
-  watermark: '', customFooter: '',
+  themeColor: 'midnight',
+  fontFamily: 'font-inter',
+  paperTint: 'bg-white',
+  layoutReverse: false,
+  headerAlign: 'text-left',
+  sidebarBg: 'none', 
+  fontScale: 'text-base', 
+  spacingScale: 'normal', 
+  nameSize: 'text-4xl',
+  nameWeight: 'font-extrabold',
+  uppercaseHeaders: true,
+  jobTitleColor: 'theme', 
+  showPhoto: true,
+  photoShape: 'rounded-full',
+  photoBorder: 'none',
+  contactLayout: 'row',
+  sectionHeaderStyle: 'underline',
+  sectionTitleSize: 'text-lg',
+  dividerStyle: 'none',
+  borderStyle: 'none',
+  entryBox: 'clean',
+  dateAlign: 'right',
+  companyStyle: 'font-semibold',
+  timeline: false,
+  skillStyle: 'tags',
+  skillShape: 'rounded-md',
+  socialStyle: 'simple',
+  bulletStyle: 'disc',
+  dateStyle: 'default',
+  showIcons: true,
+  showSectionIcons: true,
+  showSummary: true,
+  watermark: '',
+  customFooter: '',
 };

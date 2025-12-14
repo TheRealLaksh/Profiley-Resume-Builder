@@ -1,15 +1,15 @@
+// src/components/Preview/PreviewPanel.jsx
 import React from 'react';
 import { 
-  CheckCircle, User, Briefcase, GraduationCap, Award, Code, Heart, 
-  FileText, Mail, Phone, Linkedin, Globe 
+  User, Briefcase, GraduationCap, Award, Code, Heart, FileText,
+  Mail, Phone, Linkedin, Globe, CheckCircle
 } from 'lucide-react';
-import { colorThemes } from '../data';
+import { colorThemes } from '../../data/constants';
 
-const ResumePreview = ({ data, config, sectionOrder }) => {
-  
+const PreviewPanel = ({ data, config, sectionOrder, printDocument }) => {
+  // Helpers specifically for Preview
   const theme = colorThemes[config.themeColor];
-
-  // Helper Styles & Components
+  
   const paddingClass = config.spacingScale === 'compact' 
     ? 'p-6 md:p-8 print:p-6 gap-6'
     : config.spacingScale === 'spacious' 
@@ -54,65 +54,66 @@ const ResumePreview = ({ data, config, sectionOrder }) => {
     if (config.socialStyle === 'filled') return <div className={`p-1.5 rounded-full ${theme.fill} text-white`}>{children}</div>;
     if (config.socialStyle === 'circle') return <div className={`p-1.5 rounded-full border ${theme.border} ${theme.text}`}>{children}</div>;
     return <span className={theme.icon}>{children}</span>;
-  };
+  }
 
   const EntryWrapper = ({ children }) => {
     if (config.entryBox === 'boxed') return <div className="p-4 border rounded-lg bg-gray-50/50 mb-4 break-inside-avoid">{children}</div>;
     if (config.entryBox === 'line-left') return <div className={`border-l-4 ${theme.border} pl-4 mb-4 break-inside-avoid`}>{children}</div>;
     return <div className="mb-4 break-inside-avoid">{children}</div>;
-  };
+  }
 
+  // --- RENDER SECTIONS ---
   const renderSection = (sec) => {
     if (sec.id === 'summary' && data.personal.summary) {
       return (
-        <section key={sec.id}>
-          <h2 className={headerClasses()}>
-              {config.showSectionIcons && <User size={20} className={`${theme.icon} mr-1`} />} {sec.label}
-          </h2>
-          <p className={`text-gray-700 leading-relaxed text-justify`}>
-            {data.personal.summary}
-          </p>
-          <Divider />
-        </section>
+         <section key={sec.id}>
+           <h2 className={headerClasses()}>
+               {config.showSectionIcons && <User size={20} className={`${theme.icon} mr-1`} />} {sec.label}
+           </h2>
+           <p className={`text-gray-700 leading-relaxed text-justify`}>
+             {data.personal.summary}
+           </p>
+           <Divider />
+         </section>
       );
     }
     
     if (sec.id === 'experience') {
       return (
-        <section key={sec.id} className="relative">
-          <h2 className={headerClasses()}>
-              {config.showSectionIcons && <Briefcase size={20} className={`${theme.icon} mr-1`} />} {sec.label}
-          </h2>
-          {config.timeline && <div className={`absolute left-[7px] top-10 bottom-2 w-0.5 bg-gray-200`}></div>}
-          <div className={`flex flex-col gap-${config.spacingScale === 'compact' ? '4' : '6'}`}>
-            {data.experience.map((exp) => (
-              <EntryWrapper key={exp.id}>
-                <div className={`relative ${config.timeline ? 'pl-6' : ''}`}>
-                  {config.timeline && <div className={`absolute left-[-5px] top-1.5 w-3 h-3 rounded-full border-2 border-white ${theme.fill}`}></div>}
-                  
-                  <div className={`flex justify-between items-baseline mb-1 ${config.dateAlign === 'below' ? 'flex-col' : ''}`}>
-                    <h3 className="font-bold text-gray-900 text-lg">{exp.role}</h3>
-                    {config.dateAlign === 'inline' ? null : (
-                      <span className={`text-xs font-bold ${theme.text} ${theme.bg} px-2 py-1 rounded whitespace-nowrap ${config.dateAlign === 'below' ? 'mt-1 w-fit' : ''}`}>{exp.year}</span>
-                    )}
-                  </div>
-                  
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className={`text-sm ${config.companyStyle} ${theme.text}`}>{exp.company}</div>
-                    {config.dateAlign === 'inline' && (
-                      <span className="text-xs text-gray-500">| {exp.year}</span>
-                    )}
-                  </div>
+         <section key={sec.id} className="relative">
+           <h2 className={headerClasses()}>
+               {config.showSectionIcons && <Briefcase size={20} className={`${theme.icon} mr-1`} />} {sec.label}
+           </h2>
+           {config.timeline && <div className={`absolute left-[7px] top-10 bottom-2 w-0.5 bg-gray-200`}></div>}
+           <div className={`flex flex-col gap-${config.spacingScale === 'compact' ? '4' : '6'}`}>
+             {data.experience.map((exp) => (
+               <EntryWrapper key={exp.id}>
+                 <div className={`relative ${config.timeline ? 'pl-6' : ''}`}>
+                   {config.timeline && <div className={`absolute left-[-5px] top-1.5 w-3 h-3 rounded-full border-2 border-white ${theme.fill}`}></div>}
+                   
+                   <div className={`flex justify-between items-baseline mb-1 ${config.dateAlign === 'below' ? 'flex-col' : ''}`}>
+                     <h3 className="font-bold text-gray-900 text-lg">{exp.role}</h3>
+                     {config.dateAlign === 'inline' ? null : (
+                       <span className={`text-xs font-bold ${theme.text} ${theme.bg} px-2 py-1 rounded whitespace-nowrap ${config.dateAlign === 'below' ? 'mt-1 w-fit' : ''}`}>{exp.year}</span>
+                     )}
+                   </div>
+                   
+                   <div className="flex items-center gap-2 mb-2">
+                     <div className={`text-sm ${config.companyStyle} ${theme.text}`}>{exp.company}</div>
+                     {config.dateAlign === 'inline' && (
+                        <span className="text-xs text-gray-500">| {exp.year}</span>
+                     )}
+                   </div>
 
-                  <p className={`text-gray-600 leading-relaxed text-justify text-sm`}>
-                    {exp.details}
-                  </p>
-                </div>
-              </EntryWrapper>
-            ))}
-          </div>
-          <Divider />
-        </section>
+                   <p className={`text-gray-600 leading-relaxed text-justify text-sm`}>
+                     {exp.details}
+                   </p>
+                 </div>
+               </EntryWrapper>
+             ))}
+           </div>
+           <Divider />
+         </section>
       );
     }
 
@@ -185,15 +186,15 @@ const ResumePreview = ({ data, config, sectionOrder }) => {
             </ul>
           )}
 
-            {config.skillStyle === 'bars' && (
+           {config.skillStyle === 'bars' && (
             <div className="space-y-3">
               {data.skills.map((skill, idx) => (
                 <div key={idx} className="break-inside-avoid">
                   <div className="flex justify-between text-xs font-semibold text-gray-700 mb-1">
-                      <span>{skill.name}</span>
+                     <span>{skill.name}</span>
                   </div>
                   <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
-                      <div className={`h-full ${theme.fill}`} style={{ width: `${skill.level}%` }}></div>
+                     <div className={`h-full ${theme.fill}`} style={{ width: `${skill.level}%` }}></div>
                   </div>
                 </div>
               ))}
@@ -267,32 +268,20 @@ const ResumePreview = ({ data, config, sectionOrder }) => {
         </>
       )}
       {config.borderStyle === 'rounded' && <div className={`absolute inset-5 sm:inset-6 md:inset-8 border-2 rounded-2xl pointer-events-none ${theme.border}`} style={{ zIndex: 5 }}></div>}
-      {config.borderStyle === 'minimal' && (
-        <>
-          <div className={`absolute top-6 left-6 right-6 border-t-2 pointer-events-none ${theme.border}`} style={{ zIndex: 5 }}></div>
-          <div className={`absolute bottom-6 left-6 right-6 border-b-2 pointer-events-none ${theme.border}`} style={{ zIndex: 5 }}></div>
-        </>
-      )}
-      {config.borderStyle === 'corners' && (
-        <>
-          <div className={`absolute top-6 left-6 w-16 h-16 border-t-4 border-l-4 pointer-events-none ${theme.border}`} style={{ zIndex: 5 }}></div>
-          <div className={`absolute top-6 right-6 w-16 h-16 border-t-4 border-r-4 pointer-events-none ${theme.border}`} style={{ zIndex: 5 }}></div>
-          <div className={`absolute bottom-6 left-6 w-16 h-16 border-b-4 border-l-4 pointer-events-none ${theme.border}`} style={{ zIndex: 5 }}></div>
-          <div className={`absolute bottom-6 right-6 w-16 h-16 border-b-4 border-r-4 pointer-events-none ${theme.border}`} style={{ zIndex: 5 }}></div>
-        </>
-      )}
-
+      
       {/* Main Content */}
       <div className={`relative z-10 flex flex-col flex-grow ${paddingClass}`}>
+          {/* Header */}
           <header className={`border-b-2 ${theme.border} pb-6 ${config.headerAlign}`}>
             <div className={`flex gap-6 ${config.headerAlign === 'text-center' ? 'flex-col items-center justify-center' : config.headerAlign === 'text-right' ? 'flex-row-reverse items-center text-right' : 'flex-row items-center'}`}>
               
+              {/* Photo */}
               {config.showPhoto && data.personal.photoUrl && (
                 <div className={`flex-shrink-0 w-32 h-32 overflow-hidden ${config.photoBorder === 'thick' ? `border-4 ${theme.border}` : config.photoBorder === 'thin' ? `border-2 ${theme.border}` : ''} ${config.photoShape} ${config.headerAlign === 'text-center' ? 'mb-2' : ''}`}>
                   <img src={data.personal.photoUrl} alt={data.personal.name} className="w-full h-full object-cover" />
                 </div>
               )}
-  
+
               <div className="flex-grow">
                 <h1 className={`${config.nameSize} ${config.nameWeight} text-gray-900 uppercase tracking-tight leading-none`}>{data.personal.name}</h1>
                 <p className={`text-xl mt-2 font-medium ${config.jobTitleColor === 'theme' ? theme.text : config.jobTitleColor === 'gray' ? 'text-gray-600' : 'text-black'}`}>{data.personal.title}</p>
@@ -322,9 +311,9 @@ const ResumePreview = ({ data, config, sectionOrder }) => {
               </div>
             </div>
           </header>
-  
+
+          {/* Layout Grid */}
           <div className={`grid grid-cols-1 md:grid-cols-12 gap-8 flex-grow ${config.layoutReverse ? 'direction-rtl' : ''}`}>
-            
             {/* Main Column */}
             <div className={`md:col-span-8 flex flex-col gap-${config.spacingScale === 'compact' ? '4' : '8'} ${config.layoutReverse ? 'md:order-2' : 'md:order-1'}`}>
                {sectionOrder
@@ -332,7 +321,7 @@ const ResumePreview = ({ data, config, sectionOrder }) => {
                  .map(sec => renderSection(sec))
                }
             </div>
-  
+
             {/* Sidebar Column */}
             <div className={`md:col-span-4 flex flex-col gap-${config.spacingScale === 'compact' ? '5' : '8'} ${config.layoutReverse ? 'md:order-1 border-r pr-6' : 'md:order-2 border-l pl-6'} border-gray-200 ${sidebarClass} ${config.sidebarBg !== 'none' ? '-my-8 -mr-8 py-8 pr-8 pl-6' : ''} rounded-r-lg`}>
                {sectionOrder
@@ -342,14 +331,15 @@ const ResumePreview = ({ data, config, sectionOrder }) => {
             </div>
           </div>
 
+          {/* Custom Footer */}
           {config.customFooter && (
             <div className={`mt-auto pt-6 text-center text-xs text-gray-400 border-t ${config.dividerStyle === 'none' ? 'border-transparent' : 'border-gray-200'}`}>
               {config.customFooter}
             </div>
           )}
-        </div>
+      </div>
     </div>
   );
 };
 
-export default ResumePreview;
+export default PreviewPanel;
