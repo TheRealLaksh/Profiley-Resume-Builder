@@ -1,7 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore, collection, addDoc, getDoc, doc } from "firebase/firestore";
 
-
 const firebaseConfig = {
   apiKey: "AIzaSyDfSuJZtkW0kTklIWIVR0sIrcbDXcwKoVM",
   authDomain: "profiley-76c8a.firebaseapp.com",
@@ -17,8 +16,19 @@ const db = getFirestore(app);
 
 export const saveResumeToDB = async (resumeData) => {
   try {
+    // 1. Sanitize: Remove 'undefined' values which cause Firestore to crash
+    const cleanData = JSON.parse(JSON.stringify(resumeData));
+
+    // 2. Size Check: Firestore document limit is 1MB (1,048,576 bytes)
+    // We check the size of the stringified JSON to catch large images early
+    const payloadSize = new Blob([JSON.stringify(cleanData)]).size;
+    
+    if (payloadSize > 950000) { // Limit to ~950KB to be safe
+        throw new Error("Profile is too large (Max 1MB). Please remove the photo or use a smaller image.");
+    }
+
     const docRef = await addDoc(collection(db, "resumes"), {
-      ...resumeData,
+      ...cleanData,
       createdAt: new Date().toISOString()
     });
     return docRef.id;

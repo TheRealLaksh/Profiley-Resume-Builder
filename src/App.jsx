@@ -6,7 +6,7 @@ import {
 import html2pdf from 'html2pdf.js';
 import EditorPanel from './components/Editor/EditorPanel';
 import PreviewPanel from './components/Preview/PreviewPanel';
-import { saveResumeToDB, fetchResumeFromDB } from './firebase'; // Ensure firebase.js is set up
+import { saveResumeToDB, fetchResumeFromDB } from './firebase'; 
 import {
   initialData,
   initialConfig,
@@ -62,13 +62,15 @@ const App = () => {
         try {
           const fetched = await fetchResumeFromDB(resumeId);
           if (fetched) {
-            setData(fetched.data);
-            setConfig(fetched.config);
-            setSectionOrder(fetched.sectionOrder);
+            // Apply fetched data
+            if (fetched.data) setData(fetched.data);
+            if (fetched.config) setConfig(fetched.config);
+            if (fetched.sectionOrder) setSectionOrder(fetched.sectionOrder);
+            
             setIsLoading(false);
-            return; // Exit early if found
+            return; // Exit early if found in DB
           } else {
-            alert("Resume not found or expired. Loading default data.");
+            alert("Resume not found or expired. Loading your saved data.");
             // Remove the invalid ID from URL without reload
             window.history.replaceState({}, document.title, "/");
           }
@@ -94,7 +96,7 @@ const App = () => {
 
   // --- Auto-Save & History Logic ---
   useEffect(() => {
-    if (isLoading) return; // Don't auto-save while fetching
+    if (isLoading) return; // Don't auto-save while still fetching
 
     const timeoutId = setTimeout(() => {
       // Save to LocalStorage
@@ -160,10 +162,21 @@ const App = () => {
       
       // Copy to clipboard
       await navigator.clipboard.writeText(shareUrl);
-      alert(`Resume saved!\n\nShareable link copied to clipboard:\n${shareUrl}`);
+      alert(`Resume saved successfully!\n\nShareable link copied to clipboard:\n${shareUrl}`);
     } catch (error) {
       console.error("Share failed:", error);
-      alert("Failed to generate link. Check console for details.");
+      
+      // Friendly Error Handling
+      let message = "Failed to generate link.";
+      if (error.message.includes("Missing or insufficient permissions")) {
+        message += "\n\nReason: Database Permission Denied.\nMake sure your Firestore Security Rules are set to 'Test Mode' (allow read, write: if true;)";
+      } else if (error.message.includes("too large")) {
+        message += `\n\nReason: ${error.message}`;
+      } else {
+        message += `\n\nReason: ${error.message}`;
+      }
+      
+      alert(message);
     } finally {
       setIsSharing(false);
     }
@@ -176,7 +189,7 @@ const App = () => {
     const fileName = (data.personal.name || 'Resume').replace(/\s+/g, '_') + '_CV.pdf';
 
     // Quality Settings
-    const scale = pdfQuality === 'print' ? 3 : 1.5; // Higher scale for print
+    const scale = pdfQuality === 'print' ? 3 : 1.5; 
     const imageQuality = pdfQuality === 'print' ? 0.98 : 0.8;
 
     const opt = {
@@ -222,8 +235,8 @@ const App = () => {
   if (isLoading) {
     return (
       <div className={`min-h-screen flex flex-col items-center justify-center font-sans transition-colors duration-300 ${darkMode ? 'dark bg-slate-900 text-white' : 'bg-gray-100 text-gray-600'}`}>
-        <Loader2 className="animate-spin mb-4" size={48} />
-        <p className="font-medium">Loading Profile...</p>
+        <Loader2 className="animate-spin mb-4 text-blue-600" size={48} />
+        <p className="font-medium animate-pulse">Fetching your profile...</p>
       </div>
     );
   }
