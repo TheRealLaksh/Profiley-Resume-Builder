@@ -82,6 +82,7 @@ export const initialSections = [
 ];
 
 export const initialConfig = {
+  activeTemplate: 'leafy', // Changed default to 'leafy'
   themeColor: 'midnight',
   fontFamily: 'font-inter',
   paperTint: 'bg-white',

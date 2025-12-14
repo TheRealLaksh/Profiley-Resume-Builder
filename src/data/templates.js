@@ -1,4 +1,23 @@
 export const templates = {
+  leafy: {
+    name: 'Leafy',
+    config: {
+      layoutType: 'sidebar',
+      layoutReverse: false,
+      sidebarBg: 'theme',
+      headerAlign: 'text-left',
+      photoShape: 'rounded-xl',
+      fontFamily: 'font-raleway',
+      sectionHeaderStyle: 'box',
+      skillStyle: 'tags',
+      showPhoto: true,
+      borderStyle: 'rounded',
+      themeColor: 'forest',
+      // Custom section placement for Leafy
+      sidebarSections: ['education', 'skills'],
+      mainSections: ['summary', 'experience', 'achievements', 'community']
+    }
+  },
   modern: {
     name: 'Modern',
     config: {
@@ -150,22 +169,6 @@ export const templates = {
       dividerStyle: 'thick',
       borderStyle: 'double',
       themeColor: 'midnight'
-    }
-  },
-  leafy: {
-    name: 'Leafy',
-    config: {
-      layoutType: 'sidebar',
-      layoutReverse: false,
-      sidebarBg: 'theme',
-      headerAlign: 'text-left',
-      photoShape: 'rounded-xl',
-      fontFamily: 'font-raleway',
-      sectionHeaderStyle: 'box',
-      skillStyle: 'tags',
-      showPhoto: true,
-      borderStyle: 'rounded',
-      themeColor: 'forest'
     }
   }
 };
