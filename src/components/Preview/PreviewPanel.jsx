@@ -11,10 +11,10 @@ const PreviewPanel = ({ data, config, sectionOrder, printDocument }) => {
   const theme = colorThemes[config.themeColor];
   
   const paddingClass = config.spacingScale === 'compact' 
-    ? 'p-6 md:p-8 print:p-6 gap-6'
+    ? 'p-6 md:p-8 gap-6'
     : config.spacingScale === 'spacious' 
-      ? 'p-10 md:p-14 print:p-12 gap-10'
-      : 'p-8 md:p-12 print:p-8 gap-8';
+      ? 'p-10 md:p-14 gap-10'
+      : 'p-8 md:p-12 gap-8';
 
   const sidebarClass = config.sidebarBg === 'none' ? '' :
                        config.sidebarBg === 'gray' ? 'bg-gray-50' : 
@@ -248,7 +248,7 @@ const PreviewPanel = ({ data, config, sectionOrder, printDocument }) => {
   return (
     <div 
       id="cv-document"
-      className={`${config.paperTint} ${config.fontScale} ${config.fontFamily} w-full max-w-[21cm] min-h-[29.7cm] shadow-2xl md:p-0 print:w-full print:max-w-none print:shadow-none print:m-0 print:absolute print:top-0 print:left-0 print:z-50 relative overflow-hidden transition-colors duration-300`}
+      className={`${config.paperTint} ${config.fontScale} ${config.fontFamily} w-full max-w-[21cm] min-h-[29.7cm] shadow-2xl md:p-0 relative overflow-hidden transition-colors duration-300`}
     >
       {/* Watermark */}
       {config.watermark && (
