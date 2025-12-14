@@ -32,7 +32,7 @@ const ContentTab = ({
         ? 'bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-neutral-200' 
         : 'bg-white hover:bg-gray-50 border-gray-200 text-gray-700';
 
-    // --- Helper Functions (Moved here from EditorPanel) ---
+    // --- Helper Functions ---
     const handlePersonalChange = (e) => {
         setData({
             ...data,
@@ -67,6 +67,13 @@ const ContentTab = ({
         setData({ ...data, [section]: newSection });
     };
 
+    // Fix for Achievements/Community (Simple Lists)
+    const handleSimpleListChange = (section, index, value) => {
+        const newSection = [...data[section]];
+        newSection[index] = value;
+        setData({ ...data, [section]: newSection });
+    };
+
     const handleSkillChange = (index, field, value) => {
         const newSkills = [...data.skills];
         if (typeof newSkills[index] === 'string') {
@@ -74,6 +81,17 @@ const ContentTab = ({
         }
         newSkills[index][field] = value;
         setData({ ...data, skills: newSkills });
+    };
+
+    // Fix for Custom Sections
+    const handleCustomChange = (id, field, value) => {
+        setData(prev => ({
+            ...prev,
+            custom: {
+                ...prev.custom,
+                [id]: { ...prev.custom[id], [field]: value }
+            }
+        }));
     };
 
     const addItem = (section, template) => {
@@ -199,7 +217,7 @@ const ContentTab = ({
                     </div>
                 )}
 
-                {/* 4. Skills & Simple Lists */}
+                {/* 4. Skills (Objects) */}
                 {activeTab === 'skills' && (
                     <div className="space-y-4">
                         <div className={`flex justify-between items-center border-b pb-2 ${darkMode ? 'border-neutral-700' : 'border-gray-100'}`}>
@@ -217,12 +235,57 @@ const ContentTab = ({
                         ))}
                     </div>
                 )}
+
+                {/* 5. Simple Lists (Achievements, Community) */}
+                {['achievements', 'community'].includes(activeTab) && (
+                    <div className="space-y-4">
+                        <div className={`flex justify-between items-center border-b pb-2 ${darkMode ? 'border-neutral-700' : 'border-gray-100'}`}>
+                            <h3 className={`font-bold ${textClass}`}>{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</h3>
+                            <button onClick={() => addItem(activeTab, "")} className="text-blue-600 hover:bg-blue-50 p-1.5 rounded-full transition-colors"><Plus size={20}/></button>
+                        </div>
+                        {data[activeTab].map((item, index) => (
+                            <div key={index} className={`flex gap-2 items-center p-2 border rounded-md mb-2 ${darkMode ? 'bg-neutral-900 border-neutral-700' : 'bg-gray-50 border-gray-200'}`}>
+                                <input 
+                                    type="text" 
+                                    value={item} 
+                                    onChange={(e) => handleSimpleListChange(activeTab, index, e.target.value)} 
+                                    placeholder="Add item..." 
+                                    className={`flex-grow p-2 border rounded-md outline-none text-sm ${inputClass}`} 
+                                />
+                                <button onClick={() => removeItem(activeTab, index)} className="text-gray-400 hover:text-red-500"><Trash2 size={16}/></button>
+                            </div>
+                        ))}
+                    </div>
+                )}
                 
-                {/* 5. Summary */}
+                {/* 6. Summary */}
                 {activeTab === 'summary' && (
                     <div className="space-y-4">
                         <h3 className={`font-bold border-b pb-2 ${textClass} ${darkMode ? 'border-neutral-700' : 'border-gray-100'}`}>Profile Summary</h3>
                         <textarea name="summary" value={data.personal.summary} onChange={handlePersonalChange} placeholder="Write a professional summary..." rows={8} className={`w-full p-2.5 border rounded-md outline-none text-sm ${inputClass}`} />
+                    </div>
+                )}
+
+                {/* 7. Custom Sections */}
+                {activeTab.startsWith('custom-') && data.custom[activeTab] && (
+                    <div className="space-y-4">
+                        <div className={`flex justify-between items-center border-b pb-2 ${darkMode ? 'border-neutral-700' : 'border-gray-100'}`}>
+                            <h3 className={`font-bold ${textClass}`}>Custom Section</h3>
+                        </div>
+                        <input 
+                            type="text" 
+                            value={data.custom[activeTab].title} 
+                            onChange={(e) => handleCustomChange(activeTab, 'title', e.target.value)} 
+                            placeholder="Section Title" 
+                            className={`w-full p-2.5 border rounded-md outline-none text-sm mb-2 ${inputClass}`} 
+                        />
+                        <textarea 
+                            value={data.custom[activeTab].content} 
+                            onChange={(e) => handleCustomChange(activeTab, 'content', e.target.value)} 
+                            placeholder="Section Content..." 
+                            rows={8} 
+                            className={`w-full p-2.5 border rounded-md outline-none text-sm ${inputClass}`} 
+                        />
                     </div>
                 )}
             </div>
