@@ -67,6 +67,12 @@ const EditorPanel = ({
         setData({ ...data, [section]: newSection });
     };
 
+    const handleSimpleArrayChange = (section, index, value) => {
+        const newSection = [...data[section]];
+        newSection[index] = value;
+        setData({ ...data, [section]: newSection });
+    };
+
     const handleSkillChange = (index, field, value) => {
         const newSkills = [...data.skills];
         if (typeof newSkills[index] === 'string') {

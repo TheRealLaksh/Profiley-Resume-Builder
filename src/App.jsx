@@ -6,7 +6,7 @@ import {
 import html2pdf from 'html2pdf.js';
 import EditorPanel from './components/Editor/EditorPanel';
 import PreviewPanel from './components/Preview/PreviewPanel';
-import { saveResumeToDB, fetchResumeFromDB } from './firebase'; // Ensure firebase.js exists
+import { saveResumeToDB, fetchResumeFromDB } from './firebase'; // Ensure firebase.js is set up
 import {
   initialData,
   initialConfig,
