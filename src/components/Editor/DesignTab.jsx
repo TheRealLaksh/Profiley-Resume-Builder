@@ -90,7 +90,7 @@ const DesignTab = ({
                     <Columns size={16} className="mr-2 opacity-50"/> Layout & Structure
                 </h3>
                 <div className="space-y-1">
-                    {/* Added Layout Style Selector */}
+                    {/* Layout Style Selector */}
                     <Select 
                         label="Layout Style" 
                         value={config.layoutType} 
@@ -136,7 +136,7 @@ const DesignTab = ({
                 </div>
             </div>
 
-            {/* Visual Elements - New Section for better organization */}
+            {/* Visual Elements */}
             <div>
                  <h3 className={`text-sm font-bold mb-3 flex items-center uppercase tracking-wider ${textClass}`}>
                     <Star size={16} className="mr-2 opacity-50"/> Visual Elements
@@ -148,7 +148,6 @@ const DesignTab = ({
                         onChange={(v) => updateConfig('showPhoto', v)} 
                         darkMode={darkMode} 
                     />
-                    {/* Added Icon Toggles */}
                     <Toggle 
                         label="Contact Icons" 
                         value={config.showIcons} 

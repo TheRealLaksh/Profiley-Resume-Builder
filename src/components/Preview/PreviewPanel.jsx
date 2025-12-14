@@ -2,10 +2,10 @@
 import React, { useRef } from 'react';
 import { 
     Mail, Phone, MapPin, Linkedin, Globe, 
-    Briefcase, User 
+    Briefcase, User, GraduationCap, Code, Award, Heart 
 } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
-import { colorThemes, templates } from '../../data/constants';
+import { colorThemes } from '../../data/constants';
 
 // --- Helper Components ---
 
@@ -86,6 +86,16 @@ const PreviewPanel = ({ data, config, sectionOrder, activeTemplate }) => {
     const currentTheme = colorThemes[config.themeColor] || colorThemes.midnight;
     const isSidebarLayout = config.layoutType === 'sidebar' || (config.layoutType !== 'single' && config.sidebarBg !== 'none');
 
+    // MAPPING SECTIONS TO ICONS
+    const sectionIcons = {
+        summary: User,
+        experience: Briefcase,
+        education: GraduationCap,
+        skills: Code,
+        achievements: Award,
+        community: Heart
+    };
+
     const handleDownload = () => {
         const element = resumeRef.current;
         const opt = {
@@ -162,8 +172,7 @@ const PreviewPanel = ({ data, config, sectionOrder, activeTemplate }) => {
     };
 
     const renderLayout = () => {
-        // --- UPDATED GROUPING HERE ---
-        const sidebarSectionIds = ['education', 'skills', 'community']; // Education moved here
+        const sidebarSectionIds = ['education', 'skills', 'community']; 
         const mainSectionIds = ['summary', 'experience', 'achievements']; 
 
         const mainSections = sections.filter(s => s.visible && mainSectionIds.includes(s.id));
@@ -172,6 +181,24 @@ const PreviewPanel = ({ data, config, sectionOrder, activeTemplate }) => {
 
         const pageClass = `w-[210mm] min-h-[297mm] bg-white shadow-2xl mx-auto overflow-hidden relative text-gray-800 ${config.fontFamily}`;
         const headerClass = `flex flex-col gap-4 mb-6 ${config.headerAlign === 'text-center' ? 'items-center text-center' : config.headerAlign === 'text-right' ? 'items-end text-right' : 'items-start text-left'}`;
+
+        const renderPhoto = () => {
+            if (!config.showPhoto) return null;
+            if (data.personal.photoUrl) {
+                return (
+                    <img 
+                        src={data.personal.photoUrl} 
+                        alt="Profile" 
+                        className={`w-full h-full object-cover`} 
+                    />
+                );
+            }
+            return (
+                <div className="w-full h-full bg-gray-100 flex items-center justify-center text-gray-400">
+                    <User size={32} />
+                </div>
+            );
+        };
 
         if (isSidebarLayout) {
             const reverse = config.layoutReverse;
@@ -183,9 +210,9 @@ const PreviewPanel = ({ data, config, sectionOrder, activeTemplate }) => {
             return (
                 <div className={`${pageClass} flex ${reverse ? 'flex-row-reverse' : 'flex-row'}`}>
                     <div className={`${sidebarWidth} flex-shrink-0 p-8 min-h-full ${sidebarBgClass} ${sidebarTextClass} flex flex-col gap-6`}>
-                        {config.showPhoto && data.personal.photoUrl && (
+                        {config.showPhoto && (
                             <div className={`w-32 h-32 mx-auto mb-4 overflow-hidden border-4 ${currentTheme.border} ${config.photoShape}`}>
-                                <img src={data.personal.photoUrl} alt="Profile" className="w-full h-full object-cover" />
+                                {renderPhoto()}
                             </div>
                         )}
 
@@ -219,7 +246,7 @@ const PreviewPanel = ({ data, config, sectionOrder, activeTemplate }) => {
                         <div className="space-y-8">
                             {mainSections.map(section => (
                                 <div key={section.id}>
-                                    <SectionHeader title={section.label} icon={section.icon} config={config} theme={currentTheme} />
+                                    <SectionHeader title={section.label} icon={sectionIcons[section.id]} config={config} theme={currentTheme} />
                                     {renderSectionContent(section.id)}
                                 </div>
                             ))}
@@ -232,12 +259,10 @@ const PreviewPanel = ({ data, config, sectionOrder, activeTemplate }) => {
                 <div className={`${pageClass} p-10 md:p-14`}>
                      <div className={`${headerClass} ${config.themeColor === 'noir' ? 'border-b-4 border-black pb-6' : ''}`}>
                         <div className="flex items-center gap-6 w-full">
-                            {config.showPhoto && data.personal.photoUrl && (
-                                <img 
-                                    src={data.personal.photoUrl} 
-                                    alt="Profile" 
-                                    className={`w-28 h-28 object-cover border-2 border-gray-100 shadow-sm ${config.photoShape}`} 
-                                />
+                            {config.showPhoto && (
+                                <div className={`w-28 h-28 flex-shrink-0 overflow-hidden border-2 border-gray-100 shadow-sm ${config.photoShape}`}>
+                                    {renderPhoto()}
+                                </div>
                             )}
                             <div className="flex-grow">
                                 <h1 className={`${config.nameSize} ${config.nameWeight} ${currentTheme.text} mb-1`}>
@@ -269,7 +294,7 @@ const PreviewPanel = ({ data, config, sectionOrder, activeTemplate }) => {
                                 <div className="col-span-8 space-y-6">
                                     {sections.filter(s => ['experience', 'education'].includes(s.id) && s.visible).map(section => (
                                         <div key={section.id}>
-                                            <SectionHeader title={section.label} icon={section.icon} config={config} theme={currentTheme} />
+                                            <SectionHeader title={section.label} icon={sectionIcons[section.id]} config={config} theme={currentTheme} />
                                             {renderSectionContent(section.id)}
                                         </div>
                                     ))}
@@ -277,7 +302,7 @@ const PreviewPanel = ({ data, config, sectionOrder, activeTemplate }) => {
                                 <div className="col-span-4 space-y-6 border-l pl-6 border-gray-100">
                                      {sections.filter(s => ['skills', 'achievements', 'community'].includes(s.id) && s.visible).map(section => (
                                         <div key={section.id}>
-                                            <SectionHeader title={section.label} icon={section.icon} config={config} theme={currentTheme} />
+                                            <SectionHeader title={section.label} icon={sectionIcons[section.id]} config={config} theme={currentTheme} />
                                             {renderSectionContent(section.id)}
                                         </div>
                                     ))}
@@ -286,7 +311,7 @@ const PreviewPanel = ({ data, config, sectionOrder, activeTemplate }) => {
                          ) : (
                              allSections.filter(s => s.id !== 'summary').map(section => (
                                 <div key={section.id} className={['skills', 'achievements'].includes(section.id) ? 'mb-4' : 'mb-8'}>
-                                    <SectionHeader title={section.label} icon={section.icon} config={config} theme={currentTheme} />
+                                    <SectionHeader title={section.label} icon={sectionIcons[section.id]} config={config} theme={currentTheme} />
                                     {renderSectionContent(section.id)}
                                 </div>
                              ))
