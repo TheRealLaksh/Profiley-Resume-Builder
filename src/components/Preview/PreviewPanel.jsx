@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import {
-  Mail, Phone, MapPin, Linkedin, Globe,
-  Briefcase, User, GraduationCap, Code, Award, Heart, FileText
+    Mail, Phone, MapPin, Linkedin, Globe,
+    Briefcase, User, GraduationCap, Code, Award, Heart, FileText
 } from 'lucide-react';
 
 import html2pdf from 'html2pdf.js';
@@ -221,7 +221,13 @@ const PreviewPanel = ({ data, config, sectionOrder, activeTemplate }) => {
                         <div className="space-y-4">
                             {mainSections.map(section => (
                                 <div key={section.id}>
-                                    <SectionHeader title={section.label} icon={sectionIcons[section.id]} config={config} theme={currentTheme} />
+                                    <SectionHeader
+                                        title={data.custom?.[section.id]?.title ?? section.label}
+                                        icon={sectionIcons[section.id] ?? FileText}
+                                        config={config}
+                                        theme={currentTheme}
+                                    />
+
                                     {renderSectionContent(section.id)}
                                 </div>
                             ))}
@@ -269,7 +275,13 @@ const PreviewPanel = ({ data, config, sectionOrder, activeTemplate }) => {
                                 <div className="col-span-8 space-y-3">
                                     {sections.filter(s => ['experience', 'education'].includes(s.id) && s.visible).map(section => (
                                         <div key={section.id}>
-                                            <SectionHeader title={section.label} icon={sectionIcons[section.id]} config={config} theme={currentTheme} />
+                                            <SectionHeader
+                                                title={data.custom?.[section.id]?.title ?? section.label}
+                                                icon={sectionIcons[section.id] ?? FileText}
+                                                config={config}
+                                                theme={currentTheme}
+                                            />
+
                                             {renderSectionContent(section.id)}
                                         </div>
                                     ))}
@@ -277,7 +289,13 @@ const PreviewPanel = ({ data, config, sectionOrder, activeTemplate }) => {
                                 <div className="col-span-4 space-y-3 border-l pl-4 border-gray-100">
                                     {sections.filter(s => ['skills', 'achievements', 'community'].includes(s.id) && s.visible).map(section => (
                                         <div key={section.id}>
-                                            <SectionHeader title={section.label} icon={sectionIcons[section.id]} config={config} theme={currentTheme} />
+                                            <SectionHeader
+                                                title={data.custom?.[section.id]?.title ?? section.label}
+                                                icon={sectionIcons[section.id] ?? FileText}
+                                                config={config}
+                                                theme={currentTheme}
+                                            />
+
                                             {renderSectionContent(section.id)}
                                         </div>
                                     ))}
@@ -286,7 +304,13 @@ const PreviewPanel = ({ data, config, sectionOrder, activeTemplate }) => {
                         ) : (
                             allSections.map(section => (
                                 <div key={section.id} className={['skills', 'achievements'].includes(section.id) ? 'mb-2' : 'mb-4'}>
-                                    <SectionHeader title={section.label} icon={sectionIcons[section.id]} config={config} theme={currentTheme} />
+                                    <SectionHeader
+                                        title={data.custom?.[section.id]?.title ?? section.label}
+                                        icon={sectionIcons[section.id] ?? FileText}
+                                        config={config}
+                                        theme={currentTheme}
+                                    />
+
                                     {renderSectionContent(section.id)}
                                 </div>
                             ))
