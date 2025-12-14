@@ -238,7 +238,7 @@ const PreviewPanel = ({ data, config, sectionOrder, activeTemplate }) => {
                             </div>
                         </div>
 
-                        <div className={`flex flex-wrap gap-3 mt-2 text-xs text-gray-500 ${config.headerAlign === 'text-center' ? 'justify-center' : ''}`}>
+                        <div className={`flex gap-3 mt-2 text-xs text-gray-500 overflow-hidden ${config.headerAlign === 'text-center' ? 'justify-center' : ''}`}>
                             <ContactItem icon={Mail} text={data.personal.email} config={config} />
                             <ContactItem icon={Phone} text={data.personal.phone} config={config} />
                             <ContactItem icon={MapPin} text={data.personal.location} config={config} />
