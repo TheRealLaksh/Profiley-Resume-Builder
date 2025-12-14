@@ -34,7 +34,7 @@ const App = () => {
   const [config, setConfig] = useState(initialConfig);
   const [sectionOrder, setSectionOrder] = useState(initialSections);
   const [activeTab, setActiveTab] = useState('sections');
-  const [activeTemplate, setActiveTemplate] = useState('modern'); // Track active template
+  const [activeTemplate, setActiveTemplate] = useState('modern'); 
   const [draggedItemIndex, setDraggedItemIndex] = useState(null);
 
   const [darkMode, setDarkMode] = useState(true);
@@ -146,7 +146,12 @@ const App = () => {
     setActiveTemplate(templateKey);
     const template = templates[templateKey];
     if (template) {
-      setConfig(prev => ({ ...prev, ...template.config }));
+        // Deep merge config to ensure we don't lose necessary keys, 
+        // but overwrite with template specifics
+        setConfig(prev => ({
+            ...prev,
+            ...template.config
+        }));
     }
   };
 

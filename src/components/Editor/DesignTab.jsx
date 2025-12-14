@@ -10,9 +10,15 @@ const DesignTab = ({
     applyTemplate, 
     darkMode 
 }) => {
+    // Styling helpers
     const cardClass = darkMode ? 'bg-neutral-800 border-neutral-700' : 'bg-white border-gray-200';
     const textClass = darkMode ? 'text-neutral-200' : 'text-gray-800';
     const subTextClass = darkMode ? 'text-neutral-400' : 'text-gray-500';
+
+    // Helper to safely update config
+    const updateConfig = (key, value) => {
+        setConfig(prev => ({ ...prev, [key]: value }));
+    };
 
     const renderTemplateVisual = (key) => {
         switch(key) {
@@ -43,6 +49,7 @@ const DesignTab = ({
 
     return (
         <div className={`p-5 rounded-xl shadow-sm border space-y-8 ${cardClass}`}>
+            {/* Templates */}
             <div>
                 <h3 className={`text-sm font-bold mb-3 flex items-center uppercase tracking-wider ${textClass}`}>
                     <Layout size={16} className="mr-2 opacity-50"/> Templates
@@ -59,24 +66,40 @@ const DesignTab = ({
                 </div>
             </div>
 
+            {/* Theme Colors */}
             <div>
                 <h3 className={`text-sm font-bold mb-3 flex items-center uppercase tracking-wider ${textClass}`}>
                     <Palette size={16} className="mr-2 opacity-50"/> Color Palette
                 </h3>
                 <div className="flex gap-3 flex-wrap">
                     {Object.entries(colorThemes).map(([key, theme]) => (
-                        <ColorButton key={key} colorKey={key} theme={theme} selected={config.themeColor === key} onClick={() => setConfig({...config, themeColor: key})} />
+                        <ColorButton 
+                            key={key} 
+                            colorKey={key} 
+                            theme={theme} 
+                            selected={config.themeColor === key} 
+                            onClick={() => updateConfig('themeColor', key)} 
+                        />
                     ))}
                 </div>
             </div>
 
+            {/* Layout Options */}
             <div>
                 <h3 className={`text-sm font-bold mb-3 flex items-center uppercase tracking-wider ${textClass}`}>
                     <Columns size={16} className="mr-2 opacity-50"/> Layout & Structure
                 </h3>
                 <div className="space-y-1">
-                    <Toggle label="Reverse Layout" value={config.layoutReverse} onChange={(v) => setConfig({...config, layoutReverse: v})} darkMode={darkMode} />
-                    <Select label="Font Family" value={config.fontFamily} onChange={(v) => setConfig({...config, fontFamily: v})} 
+                    <Toggle 
+                        label="Reverse Layout" 
+                        value={config.layoutReverse} 
+                        onChange={(v) => updateConfig('layoutReverse', v)} 
+                        darkMode={darkMode} 
+                    />
+                    <Select 
+                        label="Font Family" 
+                        value={config.fontFamily} 
+                        onChange={(v) => updateConfig('fontFamily', v)} 
                         options={[
                             {value: 'font-inter', label: 'Inter (Clean)'},
                             {value: 'font-merriweather', label: 'Merriweather (Serif)'},
@@ -85,25 +108,76 @@ const DesignTab = ({
                             {value: 'font-raleway', label: 'Raleway (Modern)'},
                             {value: 'font-oswald', label: 'Oswald (Bold)'},
                             {value: 'font-mono', label: 'Space Mono (Tech)'}
-                        ]} darkMode={darkMode} />
-                    <Select label="Page Spacing" value={config.spacingScale} onChange={(v) => setConfig({...config, spacingScale: v})} 
-                        options={[{value: 'compact', label: 'Compact'}, {value: 'normal', label: 'Normal'}, {value: 'spacious', label: 'Spacious'}]} darkMode={darkMode} />
-                    <Select label="Sidebar Background" value={config.sidebarBg} onChange={(v) => setConfig({...config, sidebarBg: v})}
-                        options={[{value: 'none', label: 'Transparent'}, {value: 'gray', label: 'Light Gray'}, {value: 'theme', label: 'Theme Tint'}]} darkMode={darkMode} />
-                    <Toggle label="Show Profile Photo" value={config.showPhoto} onChange={(v) => setConfig({...config, showPhoto: v})} darkMode={darkMode} />
+                        ]} 
+                        darkMode={darkMode} 
+                    />
+                    <Select 
+                        label="Page Spacing" 
+                        value={config.spacingScale} 
+                        onChange={(v) => updateConfig('spacingScale', v)} 
+                        options={[
+                            {value: 'compact', label: 'Compact'}, 
+                            {value: 'normal', label: 'Normal'}, 
+                            {value: 'spacious', label: 'Spacious'}
+                        ]} 
+                        darkMode={darkMode} 
+                    />
+                    <Select 
+                        label="Sidebar Background" 
+                        value={config.sidebarBg} 
+                        onChange={(v) => updateConfig('sidebarBg', v)}
+                        options={[
+                            {value: 'none', label: 'Transparent'}, 
+                            {value: 'gray', label: 'Light Gray'}, 
+                            {value: 'theme', label: 'Theme Tint'}
+                        ]} 
+                        darkMode={darkMode} 
+                    />
+                    <Toggle 
+                        label="Show Profile Photo" 
+                        value={config.showPhoto} 
+                        onChange={(v) => updateConfig('showPhoto', v)} 
+                        darkMode={darkMode} 
+                    />
                 </div>
             </div>
 
+            {/* Typography */}
             <div>
                 <h3 className={`text-sm font-bold mb-3 flex items-center uppercase tracking-wider ${textClass}`}>
                     <Type size={16} className="mr-2 opacity-50"/> Typography
                 </h3>
                 <div className="space-y-1">
-                    <Select label="Font Scale" value={config.fontScale} onChange={(v) => setConfig({...config, fontScale: v})}
-                        options={[{value: 'text-xs', label: 'Extra Small'}, {value: 'text-sm', label: 'Small'}, {value: 'text-base', label: 'Normal'}, {value: 'text-lg', label: 'Large'}, {value: 'text-xl', label: 'Extra Large'}]} darkMode={darkMode} />
-                    <Select label="Header Alignment" value={config.headerAlign} onChange={(v) => setConfig({...config, headerAlign: v})}
-                        options={[{value: 'text-left', label: 'Left'}, {value: 'text-center', label: 'Center'}, {value: 'text-right', label: 'Right'}]} darkMode={darkMode} />
-                    <Toggle label="Uppercase Headers" value={config.uppercaseHeaders} onChange={(v) => setConfig({...config, uppercaseHeaders: v})} darkMode={darkMode} />
+                    <Select 
+                        label="Font Scale" 
+                        value={config.fontScale} 
+                        onChange={(v) => updateConfig('fontScale', v)}
+                        options={[
+                            {value: 'text-xs', label: 'Extra Small'}, 
+                            {value: 'text-sm', label: 'Small'}, 
+                            {value: 'text-base', label: 'Normal'}, 
+                            {value: 'text-lg', label: 'Large'}, 
+                            {value: 'text-xl', label: 'Extra Large'}
+                        ]} 
+                        darkMode={darkMode} 
+                    />
+                    <Select 
+                        label="Header Alignment" 
+                        value={config.headerAlign} 
+                        onChange={(v) => updateConfig('headerAlign', v)}
+                        options={[
+                            {value: 'text-left', label: 'Left'}, 
+                            {value: 'text-center', label: 'Center'}, 
+                            {value: 'text-right', label: 'Right'}
+                        ]} 
+                        darkMode={darkMode} 
+                    />
+                    <Toggle 
+                        label="Uppercase Headers" 
+                        value={config.uppercaseHeaders} 
+                        onChange={(v) => updateConfig('uppercaseHeaders', v)} 
+                        darkMode={darkMode} 
+                    />
                 </div>
             </div>
         </div>
