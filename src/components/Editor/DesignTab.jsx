@@ -10,7 +10,6 @@ const DesignTab = ({
     applyTemplate, 
     darkMode 
 }) => {
-    // Styling helpers
     const cardClass = darkMode ? 'bg-neutral-800 border-neutral-700' : 'bg-white border-gray-200';
     const textClass = darkMode ? 'text-neutral-200' : 'text-gray-800';
     const subTextClass = darkMode ? 'text-neutral-400' : 'text-gray-500';
@@ -31,12 +30,12 @@ const DesignTab = ({
                 return <div className="w-full h-full bg-amber-50 border-4 border-double border-amber-200 flex flex-col items-center justify-center gap-1"><div className="h-0.5 w-1/2 bg-amber-800"></div></div>;
             case 'tech': 
                 return <div className="w-full h-full bg-slate-900 flex"><div className="w-1/4 h-full border-r border-slate-700"></div><div className="w-3/4 h-full"></div></div>;
-            case 'bold': 
-                return <div className="w-full h-full bg-white border-4 border-black flex flex-col"><div className="h-4 w-full bg-black"></div></div>;
-            case 'academic': 
-                return <div className="w-full h-full bg-white flex flex-col p-1"><div className="h-full w-full border border-gray-300"></div></div>;
-            case 'compact': 
-                return <div className="w-full h-full bg-white flex text-[4px] leading-none overflow-hidden text-gray-300 p-0.5">|||||||||||||||||||||||</div>;
+            case 'glitch':
+                return <div className="w-full h-full bg-black flex flex-col items-start p-1"><div className="w-1/2 h-1 bg-green-500 mb-1"></div><div className="w-full h-4 border border-green-500/50"></div></div>;
+            case 'classic':
+                return <div className="w-full h-full bg-[#fdfbf7] flex flex-col items-center p-1"><div className="w-2/3 h-px bg-slate-900 mb-1"></div><div className="w-1/2 h-px bg-slate-900"></div></div>;
+            case 'leafy':
+                return <div className="w-full h-full bg-white flex"><div className="w-1/3 bg-emerald-50 h-full rounded-r-lg"></div></div>;
             default: 
                 return <div className="w-full h-full bg-gray-100"></div>;
         }
@@ -44,7 +43,6 @@ const DesignTab = ({
 
     return (
         <div className={`p-5 rounded-xl shadow-sm border space-y-8 ${cardClass}`}>
-            {/* Templates */}
             <div>
                 <h3 className={`text-sm font-bold mb-3 flex items-center uppercase tracking-wider ${textClass}`}>
                     <Layout size={16} className="mr-2 opacity-50"/> Templates
@@ -61,7 +59,6 @@ const DesignTab = ({
                 </div>
             </div>
 
-            {/* Theme Colors */}
             <div>
                 <h3 className={`text-sm font-bold mb-3 flex items-center uppercase tracking-wider ${textClass}`}>
                     <Palette size={16} className="mr-2 opacity-50"/> Color Palette
@@ -73,7 +70,6 @@ const DesignTab = ({
                 </div>
             </div>
 
-            {/* Layout Options */}
             <div>
                 <h3 className={`text-sm font-bold mb-3 flex items-center uppercase tracking-wider ${textClass}`}>
                     <Columns size={16} className="mr-2 opacity-50"/> Layout & Structure
@@ -88,9 +84,7 @@ const DesignTab = ({
                             {value: 'font-lora', label: 'Lora (Readable)'},
                             {value: 'font-raleway', label: 'Raleway (Modern)'},
                             {value: 'font-oswald', label: 'Oswald (Bold)'},
-                            {value: 'font-sans', label: 'System Sans'},
-                            {value: 'font-serif', label: 'System Serif'},
-                            {value: 'font-mono', label: 'Monospace'}
+                            {value: 'font-mono', label: 'Space Mono (Tech)'}
                         ]} darkMode={darkMode} />
                     <Select label="Page Spacing" value={config.spacingScale} onChange={(v) => setConfig({...config, spacingScale: v})} 
                         options={[{value: 'compact', label: 'Compact'}, {value: 'normal', label: 'Normal'}, {value: 'spacious', label: 'Spacious'}]} darkMode={darkMode} />
@@ -100,7 +94,6 @@ const DesignTab = ({
                 </div>
             </div>
 
-            {/* Typography */}
             <div>
                 <h3 className={`text-sm font-bold mb-3 flex items-center uppercase tracking-wider ${textClass}`}>
                     <Type size={16} className="mr-2 opacity-50"/> Typography

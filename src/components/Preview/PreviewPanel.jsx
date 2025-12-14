@@ -41,7 +41,6 @@ const SectionHeader = ({ title, icon, config, theme }) => {
             {config.showSectionIcons && icon && <IconRenderer icon={icon} size={18} />}
             <h3 className={`${textSize} font-bold whitespace-nowrap`}>{title}</h3>
             
-            {/* Decorative Elements */}
             {style === 'underline' && <div className={`h-0.5 flex-grow opacity-30 ${theme.bg.replace('bg-', 'bg-current ')}`}></div>}
             {style === 'left-bar' && <div className="hidden"></div>} 
             {style === 'box' && <div className="hidden"></div>}
@@ -81,18 +80,10 @@ const SkillTag = ({ skill, config, theme }) => {
 
 // --- Main Component ---
 
-const PreviewPanel = ({ data, config, sectionOrder }) => {
+const PreviewPanel = ({ data, config, sectionOrder, activeTemplate }) => {
     const resumeRef = useRef();
-
-    // 1. Safe access to sections (Fixes "filter of undefined" crash)
     const sections = sectionOrder || [];
-
-    // 2. Safe theme fallback
     const currentTheme = colorThemes[config.themeColor] || colorThemes.midnight;
-
-    // 3. Determine Layout Mode (Sidebar vs Single Column)
-    // If layoutType is explicitly set, use it. Otherwise, guess based on sidebarBg.
-    // Sidebar layouts usually have a background color (gray/theme) or are explicitly 'sidebar'.
     const isSidebarLayout = config.layoutType === 'sidebar' || (config.layoutType !== 'single' && config.sidebarBg !== 'none');
 
     const handleDownload = () => {
@@ -162,20 +153,18 @@ const PreviewPanel = ({ data, config, sectionOrder }) => {
                         ))}
                     </ul>
                 );
-            case 'custom':
-                 // Handle dynamic custom sections
-                 const customSec = data.custom?.[sectionId];
-                 return customSec ? (
-                    <div className="text-sm text-gray-700 whitespace-pre-line">{customSec.content}</div>
-                 ) : null;
             default:
-                return null;
+                const customSec = data.custom?.[sectionId];
+                return customSec ? (
+                   <div className="text-sm text-gray-700 whitespace-pre-line">{customSec.content}</div>
+                ) : null;
         }
     };
 
     const renderLayout = () => {
-        const sidebarSectionIds = ['skills', 'achievements', 'community']; 
-        const mainSectionIds = ['summary', 'experience', 'education'];
+        // --- UPDATED GROUPING HERE ---
+        const sidebarSectionIds = ['education', 'skills', 'community']; // Education moved here
+        const mainSectionIds = ['summary', 'experience', 'achievements']; 
 
         const mainSections = sections.filter(s => s.visible && mainSectionIds.includes(s.id));
         const sidebarSections = sections.filter(s => s.visible && sidebarSectionIds.includes(s.id));
@@ -184,7 +173,6 @@ const PreviewPanel = ({ data, config, sectionOrder }) => {
         const pageClass = `w-[210mm] min-h-[297mm] bg-white shadow-2xl mx-auto overflow-hidden relative text-gray-800 ${config.fontFamily}`;
         const headerClass = `flex flex-col gap-4 mb-6 ${config.headerAlign === 'text-center' ? 'items-center text-center' : config.headerAlign === 'text-right' ? 'items-end text-right' : 'items-start text-left'}`;
 
-        // 1. Sidebar Layouts
         if (isSidebarLayout) {
             const reverse = config.layoutReverse;
             const sidebarWidth = 'w-[32%]'; 
@@ -194,7 +182,6 @@ const PreviewPanel = ({ data, config, sectionOrder }) => {
 
             return (
                 <div className={`${pageClass} flex ${reverse ? 'flex-row-reverse' : 'flex-row'}`}>
-                    {/* SIDEBAR */}
                     <div className={`${sidebarWidth} flex-shrink-0 p-8 min-h-full ${sidebarBgClass} ${sidebarTextClass} flex flex-col gap-6`}>
                         {config.showPhoto && data.personal.photoUrl && (
                             <div className={`w-32 h-32 mx-auto mb-4 overflow-hidden border-4 ${currentTheme.border} ${config.photoShape}`}>
@@ -221,7 +208,6 @@ const PreviewPanel = ({ data, config, sectionOrder }) => {
                         ))}
                     </div>
 
-                    {/* MAIN CONTENT */}
                     <div className={`flex-1 p-10 flex flex-col min-w-0`}>
                         <div className={`${headerClass} border-b pb-6 mb-6 ${currentTheme.border}`}>
                             <h1 className={`${config.nameSize} ${config.nameWeight} ${currentTheme.text} leading-tight`}>
@@ -241,10 +227,7 @@ const PreviewPanel = ({ data, config, sectionOrder }) => {
                     </div>
                 </div>
             );
-        }
-
-        // 2. Single Column Layouts
-        else {
+        } else {
             return (
                 <div className={`${pageClass} p-10 md:p-14`}>
                      <div className={`${headerClass} ${config.themeColor === 'noir' ? 'border-b-4 border-black pb-6' : ''}`}>
@@ -280,7 +263,7 @@ const PreviewPanel = ({ data, config, sectionOrder }) => {
                             </div>
                          )}
 
-                         {/* Logic for 2-column grid in Single Layout (Compact/Academic) */}
+                         {/* 2-column grid for Compact/Academic */}
                          {config.layoutType === 'grid' ? (
                             <div className="grid grid-cols-12 gap-8">
                                 <div className="col-span-8 space-y-6">
@@ -318,7 +301,7 @@ const PreviewPanel = ({ data, config, sectionOrder }) => {
         <div className="flex flex-col gap-4 items-center">
             <div className="w-full max-w-[210mm] flex justify-between items-center bg-white p-3 rounded-lg shadow-sm border border-gray-200">
                 <span className="text-sm font-medium text-gray-500 px-2">
-                    A4 Preview
+                    A4 Preview • {activeTemplate ? activeTemplate.charAt(0).toUpperCase() + activeTemplate.slice(1) : 'Modern'}
                 </span>
                 <button 
                     onClick={handleDownload}

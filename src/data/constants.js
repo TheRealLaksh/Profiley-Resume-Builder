@@ -10,65 +10,53 @@ export const initialData = {
     linkedin: "https://www.linkedin.com/in/laksh-pradhwani/",
     portfolio: "https://www.lakshp.live/",
     photoUrl: "", 
-    summary: "Disciplined Grade XII student with a focused ambition in Artificial Intelligence and Machine Learning. Proactive problem-solver with hands-on experience in full-stack web development (Django, Python) and algorithmic problem-solving. National-level shooter and active badminton player with strong leadership skills honed as House Captain."
+    summary: "Disciplined Grade XII student with a focused ambition in Artificial Intelligence and Machine Learning. Proactive problem-solver with hands-on experience in full-stack web development and algorithmic problem-solving."
   },
   education: [
     {
       id: 1,
       institution: "Sunbeam School Lahartara",
       degree: "Grade XII - PCM with CS",
-      year: "April 2024 - Present",
+      year: "2024 - Present",
       details: "Pursuing rigorous coursework in Physics, Chemistry, Math, and CS."
     },
     {
       id: 2,
-      institution: "Chinmaya International Residential School",
+      institution: "Chinmaya Int. Res. School",
       degree: "Class X",
-      year: "Completed 2024",
-      details: "Secured 87.8% overall. Achieved 94% in Mathematics. Served as House Captain."
+      year: "2024",
+      details: "Secured 87.8% overall. Achieved 94% in Mathematics. House Captain."
     }
   ],
   experience: [
     {
       id: 1,
       role: "AI Intern",
-      company: "IIT Madras (Online)",
-      year: "8 Weeks",
-      details: "Completed intensive program focused on Data Science, Data Engineering, and supervised/unsupervised learning models (KNN, K-Means)."
+      company: "IIT Madras",
+      year: "2023",
+      details: "Completed intensive program focused on Data Science, Data Engineering, and supervised learning models."
     },
     {
       id: 2,
-      role: "Full Stack Developer Intern",
+      role: "Full Stack Developer",
       company: "Unified Mentor",
-      year: "Remote",
-      details: "Developed user-centric applications including Helios (music player), Calibridge (calendar exporter), and CogniSync."
-    },
-    {
-      id: 3,
-      role: "Web Developer Intern",
-      company: "MoreYeahs",
-      year: "Remote",
-      details: "Built a full-stack gig platform using Django and Python. Developed REST APIs and auth systems."
+      year: "2024",
+      details: "Developed user-centric applications including Helios (music player) and Calibridge (calendar exporter)."
     }
   ],
   skills: [
-    { name: "Artificial Intelligence & ML", level: 90 },
-    { name: "Data Science", level: 85 },
     { name: "Python & Django", level: 95 },
-    { name: "REST APIs", level: 80 },
-    { name: "Algorithmic Problem Solving", level: 85 },
-    { name: "Leadership & Teamwork", level: 90 }
+    { name: "Machine Learning", level: 85 },
+    { name: "React.js", level: 90 },
+    { name: "Leadership", level: 90 }
   ],
   achievements: [
     "Regional Winner, VVM National Science Competition (2023)",
-    "National-level Shooter: 34th Rank in All-India U-17 Competition",
-    "2nd Position: Website Development, AFS Tech Ramble",
-    "2nd Position: Robowars – Impetus ’25"
+    "National-level Shooter: 34th Rank All-India U-17"
   ],
   community: [
-    "Volunteered at local orphanage and home for specially-abled children.",
-    "Organized independent crowdfunding campaign for underprivileged children (2022).",
-    "Member of Round Square Organizing Committee."
+    "Volunteered at local orphanage.",
+    "Organized crowdfunding campaign."
   ],
   custom: {}
 };
@@ -83,16 +71,16 @@ export const initialSections = [
 ];
 
 export const colorThemes = {
-  blue: { name: 'Classic Blue', text: 'text-blue-700', border: 'border-blue-700', bg: 'bg-blue-50', icon: 'text-blue-600', hex: 'bg-blue-600', fill: 'bg-blue-700' },
+  midnight: { name: 'Midnight', text: 'text-slate-900', border: 'border-slate-800', bg: 'bg-slate-100', icon: 'text-slate-700', hex: 'bg-slate-800', fill: 'bg-slate-900' },
+  blue: { name: 'Blue', text: 'text-blue-700', border: 'border-blue-700', bg: 'bg-blue-50', icon: 'text-blue-600', hex: 'bg-blue-600', fill: 'bg-blue-700' },
   emerald: { name: 'Emerald', text: 'text-emerald-700', border: 'border-emerald-700', bg: 'bg-emerald-50', icon: 'text-emerald-600', hex: 'bg-emerald-600', fill: 'bg-emerald-700' },
-  noir: { name: 'Noir (Minimal)', text: 'text-gray-900', border: 'border-gray-900', bg: 'bg-gray-100', icon: 'text-gray-800', hex: 'bg-gray-900', fill: 'bg-gray-900' },
-  midnight: { name: 'Midnight Navy', text: 'text-slate-900', border: 'border-slate-800', bg: 'bg-slate-100', icon: 'text-slate-700', hex: 'bg-slate-800', fill: 'bg-slate-900' },
-  coral: { name: 'Soft Coral', text: 'text-rose-600', border: 'border-rose-600', bg: 'bg-rose-50', icon: 'text-rose-500', hex: 'bg-rose-500', fill: 'bg-rose-600' },
-  ocean: { name: 'Deep Ocean', text: 'text-cyan-800', border: 'border-cyan-800', bg: 'bg-cyan-50', icon: 'text-cyan-700', hex: 'bg-cyan-700', fill: 'bg-cyan-800' },
-  forest: { name: 'Dark Forest', text: 'text-green-800', border: 'border-green-800', bg: 'bg-green-50', icon: 'text-green-700', hex: 'bg-green-800', fill: 'bg-green-800' },
+  noir: { name: 'Noir', text: 'text-gray-900', border: 'border-gray-900', bg: 'bg-gray-100', icon: 'text-gray-800', hex: 'bg-gray-900', fill: 'bg-gray-900' },
+  coral: { name: 'Coral', text: 'text-rose-600', border: 'border-rose-600', bg: 'bg-rose-50', icon: 'text-rose-500', hex: 'bg-rose-500', fill: 'bg-rose-600' },
+  ocean: { name: 'Ocean', text: 'text-cyan-800', border: 'border-cyan-800', bg: 'bg-cyan-50', icon: 'text-cyan-700', hex: 'bg-cyan-700', fill: 'bg-cyan-800' },
+  forest: { name: 'Forest', text: 'text-green-800', border: 'border-green-800', bg: 'bg-green-50', icon: 'text-green-700', hex: 'bg-green-800', fill: 'bg-green-800' },
   berry: { name: 'Berry', text: 'text-fuchsia-800', border: 'border-fuchsia-800', bg: 'bg-fuchsia-50', icon: 'text-fuchsia-700', hex: 'bg-fuchsia-800', fill: 'bg-fuchsia-800' },
-  royal: { name: 'Royal Purple', text: 'text-indigo-800', border: 'border-indigo-800', bg: 'bg-indigo-50', icon: 'text-indigo-700', hex: 'bg-indigo-700', fill: 'bg-indigo-800' },
-  gold: { name: 'Luxury Gold', text: 'text-yellow-700', border: 'border-yellow-700', bg: 'bg-yellow-50', icon: 'text-yellow-600', hex: 'bg-yellow-600', fill: 'bg-yellow-700' }
+  royal: { name: 'Royal', text: 'text-indigo-800', border: 'border-indigo-800', bg: 'bg-indigo-50', icon: 'text-indigo-700', hex: 'bg-indigo-700', fill: 'bg-indigo-800' },
+  gold: { name: 'Gold', text: 'text-amber-700', border: 'border-amber-700', bg: 'bg-amber-50', icon: 'text-amber-600', hex: 'bg-amber-600', fill: 'bg-amber-700' }
 };
 
 export const templates = {
@@ -159,10 +147,10 @@ export const templates = {
       showIcons: false,
       showSectionIcons: false,
       borderStyle: 'none',
-      themeColor: 'noir'
+      themeColor: 'noir',
+      layoutMode: 'single-column'
     }
   },
-  // --- NEW TEMPLATES ---
   executive: {
     name: 'Executive',
     config: {
@@ -213,58 +201,55 @@ export const templates = {
       themeColor: 'emerald'
     }
   },
-  bold: {
-    name: 'Bold',
+  glitch: {
+    name: 'Glitch',
     config: {
       layoutType: 'single',
       layoutReverse: false,
       sidebarBg: 'none',
       headerAlign: 'text-left',
       photoShape: 'rounded-none',
-      fontFamily: 'font-oswald',
-      sectionHeaderStyle: 'box',
+      fontFamily: 'font-mono',
+      sectionHeaderStyle: 'left-bar',
       skillStyle: 'tags',
       showPhoto: true,
+      showIcons: true,
+      borderStyle: 'none',
+      themeColor: 'noir',
       uppercaseHeaders: true,
-      nameWeight: 'font-black',
-      nameSize: 'text-5xl',
-      borderStyle: 'thick',
-      themeColor: 'midnight'
+      nameWeight: 'font-black'
     }
   },
-  academic: {
-    name: 'Academic',
+  classic: {
+    name: 'Classic',
     config: {
-      layoutType: 'grid', // Uses the new 2-column grid in main area
+      layoutType: 'single',
       layoutReverse: false,
       sidebarBg: 'none',
       headerAlign: 'text-center',
-      photoShape: 'rounded-sm',
-      fontFamily: 'font-lora',
+      photoShape: 'rounded-full',
+      fontFamily: 'font-merriweather',
       sectionHeaderStyle: 'underline',
       skillStyle: 'list',
       showPhoto: false,
       dividerStyle: 'thick',
       borderStyle: 'double',
-      themeColor: 'royal',
-      spacingScale: 'compact'
+      themeColor: 'midnight'
     }
   },
-  compact: {
-    name: 'Compact',
+  leafy: {
+    name: 'Leafy',
     config: {
       layoutType: 'sidebar',
-      layoutReverse: true,
-      sidebarBg: 'gray',
+      layoutReverse: false,
+      sidebarBg: 'theme',
       headerAlign: 'text-left',
-      photoShape: 'rounded-full',
-      fontFamily: 'font-inter',
-      sectionHeaderStyle: 'left-bar',
+      photoShape: 'rounded-xl',
+      fontFamily: 'font-raleway',
+      sectionHeaderStyle: 'box',
       skillStyle: 'tags',
       showPhoto: true,
-      spacingScale: 'compact',
-      fontScale: 'text-sm',
-      borderStyle: 'none',
+      borderStyle: 'rounded',
       themeColor: 'forest'
     }
   }
@@ -274,7 +259,7 @@ export const initialConfig = {
   themeColor: 'midnight',
   fontFamily: 'font-inter',
   paperTint: 'bg-white',
-  layoutType: 'sidebar', // Default layout
+  layoutType: 'sidebar',
   layoutReverse: false,
   headerAlign: 'text-left',
   sidebarBg: 'none', 
