@@ -1,325 +1,373 @@
 // src/components/Preview/PreviewPanel.jsx
-import React from 'react';
+import React, { useRef } from 'react';
 import { 
-  User, Briefcase, GraduationCap, Award, Code, Heart, FileText,
-  Mail, Phone, Linkedin, Globe, CheckCircle
+    Mail, Phone, MapPin, Linkedin, Globe, ExternalLink, 
+    Github, Award, Calendar, BookOpen, Briefcase, User 
 } from 'lucide-react';
-import { colorThemes } from '../../data/constants';
+import html2pdf from 'html2pdf.js';
+import { colorThemes, templates } from '../../data/constants';
 
-const PreviewPanel = ({ data, config, sectionOrder }) => {
-  const theme = colorThemes[config.themeColor];
-  
-  const paddingClass = config.spacingScale === 'compact' 
-    ? 'p-6 md:p-8 gap-6'
-    : config.spacingScale === 'spacious' 
-      ? 'p-10 md:p-14 gap-10'
-      : 'p-8 md:p-12 gap-8';
+const PreviewPanel = ({ data, config, sections, activeTemplate }) => {
+    const resumeRef = useRef();
 
-  const sidebarClass = config.sidebarBg === 'none' ? '' :
-                       config.sidebarBg === 'gray' ? 'bg-gray-50' : 
-                       theme.bg;
-
-  const headerClasses = () => `flex items-center gap-2 ${config.sectionTitleSize} font-bold uppercase tracking-wider mb-4 pb-1 break-inside-avoid-page ${
-    config.sectionHeaderStyle === 'underline' ? `border-b-2 ${theme.border} text-gray-800` : 
-    config.sectionHeaderStyle === 'box' ? `${theme.bg} p-2 rounded text-gray-900` :
-    config.sectionHeaderStyle === 'left-bar' ? `border-l-4 ${theme.border} pl-3 text-gray-800` :
-    config.sectionHeaderStyle === 'centered' ? `justify-center border-b-2 ${theme.border} pb-2 text-gray-800` : ''
-  } ${config.uppercaseHeaders ? 'uppercase' : 'capitalize'}`;
-
-  const Bullet = () => {
-    if (config.bulletStyle === 'none') return null;
-    if (config.bulletStyle === 'square') return <span className={`mr-2 text-[0.6em] relative -top-[1px] ${theme.text}`}>■</span>;
-    if (config.bulletStyle === 'check') return <CheckCircle size={14} className={`mr-2 inline ${theme.text}`} />;
-    return <span className={`mr-2 text-xl leading-none relative top-[2px] ${theme.text}`}>•</span>;
-  };
-
-  const Divider = () => {
-    if (config.dividerStyle === 'none') return null;
-    if (config.dividerStyle === 'gradient') return <div className={`my-6 h-0.5 w-full bg-gradient-to-r from-transparent via-${config.themeColor === 'noir' ? 'gray-400' : theme.hex.replace('bg-', '')} to-transparent opacity-50`}></div>;
-    if (config.dividerStyle === 'diamond') return (
-      <div className="flex items-center my-6 opacity-60">
-        <div className="flex-grow h-px bg-gray-300"></div>
-        <div className={`mx-2 text-[10px] transform rotate-45 w-2 h-2 ${theme.fill}`}></div>
-        <div className="flex-grow h-px bg-gray-300"></div>
-      </div>
+    // --- Helper: Icon Renderer ---
+    const IconRenderer = ({ icon: Icon, size = 16, className = "" }) => (
+        <Icon size={size} className={className} />
     );
-    if (config.dividerStyle === 'thick') return <hr className={`my-6 border-t-4 ${theme.border} opacity-20`} />;
-    
-    const borderStyle = config.dividerStyle === 'dotted' ? 'border-dotted' : config.dividerStyle === 'dashed' ? 'border-dashed' : 'border-solid';
-    return <hr className={`my-6 border-t ${borderStyle} border-gray-200`} />;
-  };
 
-  const SocialIconWrapper = ({ children }) => {
-    if (config.socialStyle === 'filled') return <div className={`p-1.5 rounded-full ${theme.fill} text-white`}>{children}</div>;
-    if (config.socialStyle === 'circle') return <div className={`p-1.5 rounded-full border ${theme.border} ${theme.text}`}>{children}</div>;
-    return <span className={theme.icon}>{children}</span>;
-  }
+    // --- Helper: Get Current Theme & Config ---
+    const currentTheme = colorThemes[config.themeColor] || colorThemes.midnight;
+    const tplConfig = templates[activeTemplate]?.config || templates.modern.config;
 
-  const EntryWrapper = ({ children }) => {
-    if (config.entryBox === 'boxed') return <div className="p-4 border rounded-lg bg-gray-50/50 mb-4 break-inside-avoid">{children}</div>;
-    if (config.entryBox === 'line-left') return <div className={`border-l-4 ${theme.border} pl-4 mb-4 break-inside-avoid`}>{children}</div>;
-    return <div className="mb-4 break-inside-avoid">{children}</div>;
-  }
+    // Merge global config with template defaults if specific overrides exist
+    const finalConfig = { ...tplConfig, ...config };
 
-  // --- RENDER SECTIONS ---
-  const renderSection = (sec) => {
-    if (sec.id === 'summary' && data.personal.summary) {
-      return (
-         <section key={sec.id}>
-           <h2 className={headerClasses()}>
-               {config.showSectionIcons && <User size={20} className={`${theme.icon} mr-1`} />} {sec.label}
-           </h2>
-           <p className={`text-gray-700 leading-relaxed text-justify`}>
-             {data.personal.summary}
-           </p>
-           <Divider />
-         </section>
-      );
-    }
-    
-    if (sec.id === 'experience') {
-      return (
-         <section key={sec.id} className="relative">
-           <h2 className={headerClasses()}>
-               {config.showSectionIcons && <Briefcase size={20} className={`${theme.icon} mr-1`} />} {sec.label}
-           </h2>
-           {config.timeline && <div className={`absolute left-[7px] top-10 bottom-2 w-0.5 bg-gray-200`}></div>}
-           <div className={`flex flex-col gap-${config.spacingScale === 'compact' ? '4' : '6'}`}>
-             {data.experience.map((exp) => (
-               <EntryWrapper key={exp.id}>
-                 <div className={`relative ${config.timeline ? 'pl-6' : ''}`}>
-                   {config.timeline && <div className={`absolute left-[-5px] top-1.5 w-3 h-3 rounded-full border-2 border-white ${theme.fill}`}></div>}
-                   <div className={`flex justify-between items-baseline mb-1 ${config.dateAlign === 'below' ? 'flex-col' : ''}`}>
-                     <h3 className="font-bold text-gray-900 text-lg">{exp.role}</h3>
-                     {config.dateAlign === 'inline' ? null : (
-                       <span className={`text-xs font-bold ${theme.text} ${theme.bg} px-2 py-1 rounded whitespace-nowrap ${config.dateAlign === 'below' ? 'mt-1 w-fit' : ''}`}>{exp.year}</span>
-                     )}
-                   </div>
-                   <div className="flex items-center gap-2 mb-2">
-                     <div className={`text-sm ${config.companyStyle} ${theme.text}`}>{exp.company}</div>
-                     {config.dateAlign === 'inline' && <span className="text-xs text-gray-500">| {exp.year}</span>}
-                   </div>
-                   <p className={`text-gray-600 leading-relaxed text-justify text-sm`}>{exp.details}</p>
-                 </div>
-               </EntryWrapper>
-             ))}
-           </div>
-           <Divider />
-         </section>
-      );
-    }
+    // --- Helper: Date Formatter ---
+    const formatDate = (dateString) => {
+        if (!dateString) return '';
+        // Add logic here if you want to format "2024-04" to "Apr 2024"
+        return dateString;
+    };
 
-    if (sec.id === 'achievements') {
-      return (
-        <section key={sec.id}>
-          <h2 className={headerClasses()}>
-              {config.showSectionIcons && <Award size={20} className={`${theme.icon} mr-1`} />} {sec.label}
-          </h2>
-          <ul className="space-y-2">
-            {data.achievements.map((ach, idx) => (
-              <li key={idx} className="flex items-start text-gray-700 break-inside-avoid">
-                <div className="flex-shrink-0 mt-1"><Bullet /></div>
-                <span>{ach}</span>
-              </li>
-            ))}
-          </ul>
-          <Divider />
-        </section>
-      );
-    }
+    // --- PDF Export Function ---
+    const handleDownload = () => {
+        const element = resumeRef.current;
+        const opt = {
+            margin: 0,
+            filename: `${data.personal.name.replace(/\s+/g, '_')}_Resume.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true, logging: false },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        html2pdf().set(opt).from(element).save();
+    };
 
-    if (sec.id === 'education') {
-      return (
-        <section key={sec.id} className="relative">
-          <h2 className={headerClasses()}>
-              {config.showSectionIcons && <GraduationCap size={20} className={`${theme.icon} mr-1`} />} {sec.label}
-          </h2>
-          {config.timeline && <div className={`absolute left-[7px] top-10 bottom-2 w-0.5 bg-gray-200`}></div>}
-          <div className={`flex flex-col gap-${config.spacingScale === 'compact' ? '4' : '6'}`}>
-            {data.education.map((edu) => (
-              <div key={edu.id} className={`break-inside-avoid relative ${config.timeline ? 'pl-6' : ''}`}>
-                {config.timeline && <div className={`absolute left-[-5px] top-1.5 w-3 h-3 rounded-full border-2 border-white ${theme.fill}`}></div>}
-                <h3 className={`font-bold text-gray-900 leading-tight ${config.companyStyle}`}>{edu.institution}</h3>
-                <div className={`text-sm ${theme.text} font-semibold mt-1`}>{edu.degree}</div>
-                <div className="text-xs text-gray-500 mt-1 mb-2 font-medium uppercase tracking-wide">{edu.year}</div>
-                <p className="text-xs text-gray-600 leading-relaxed">{edu.details}</p>
-              </div>
-            ))}
-          </div>
-          <Divider />
-        </section>
-      );
-    }
-
-    if (sec.id === 'skills') {
-      return (
-        <section key={sec.id}>
-          <h2 className={headerClasses()}>
-              {config.showSectionIcons && <Code size={20} className={`${theme.icon} mr-1`} />} {sec.label}
-          </h2>
-          {config.skillStyle === 'tags' && (
-            <div className="flex flex-wrap gap-2">
-              {data.skills.map((skill, idx) => (
-                <span key={idx} className={`${theme.bg} ${theme.text} text-xs font-bold px-3 py-1.5 ${config.skillShape} border border-transparent`}>
-                  {skill.name}
-                </span>
-              ))}
+    // --- Sub-Component: Contact Item ---
+    const ContactItem = ({ icon, text, link }) => {
+        if (!text) return null;
+        return (
+            <div className={`flex items-center gap-2 ${finalConfig.fontScale === 'text-xs' ? 'text-[10px]' : 'text-xs'} opacity-90`}>
+                {finalConfig.showIcons && icon && <IconRenderer icon={icon} size={14} />}
+                {link ? (
+                    <a href={link} target="_blank" rel="noreferrer" className="hover:underline truncate max-w-[200px] block">
+                        {text}
+                    </a>
+                ) : (
+                    <span>{text}</span>
+                )}
             </div>
-          )}
-          {config.skillStyle === 'list' && (
-            <ul className="space-y-1">
-              {data.skills.map((skill, idx) => (
-                <li key={idx} className="flex items-start text-gray-700 text-sm">
-                  <span className={`mr-2 ${theme.text}`}>›</span> {skill.name}
-                </li>
-              ))}
-            </ul>
-          )}
-           {config.skillStyle === 'bars' && (
-            <div className="space-y-3">
-              {data.skills.map((skill, idx) => (
-                <div key={idx} className="break-inside-avoid">
-                  <div className="flex justify-between text-xs font-semibold text-gray-700 mb-1"><span>{skill.name}</span></div>
-                  <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
-                     <div className={`h-full ${theme.fill}`} style={{ width: `${skill.level}%` }}></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-          {config.skillStyle === 'comma' && (
-            <div className="text-gray-700 text-sm leading-relaxed">{data.skills.map(s => s.name).join(', ')}.</div>
-          )}
-          <Divider />
-        </section>
-      );
-    }
+        );
+    };
 
-    if (sec.id === 'community') {
-      return (
-        <section key={sec.id}>
-          <h2 className={headerClasses()}>
-              {config.showSectionIcons && <Heart size={20} className={`${theme.icon} mr-1`} />} {sec.label}
-          </h2>
-          <ul className="space-y-3">
-            {data.community.map((item, idx) => (
-              <li key={idx} className={`text-sm text-gray-700 ${theme.border} border-l-2 pl-3 leading-snug break-inside-avoid`}>
-                {item}
-              </li>
-            ))}
-          </ul>
-          <Divider />
-        </section>
-      );
-    }
+    // --- Sub-Component: Section Header ---
+    const SectionHeader = ({ title, icon }) => {
+        const style = finalConfig.sectionHeaderStyle;
+        const alignClass = style === 'centered' ? 'justify-center' : 'justify-start';
+        const textClass = finalConfig.uppercaseHeaders ? 'uppercase tracking-widest' : '';
+        const textSize = finalConfig.sectionTitleSize || 'text-lg';
 
-    if (sec.type === 'custom' && data.custom[sec.id]) {
-      return (
-       <section key={sec.id}>
-          <h2 className={headerClasses()}>
-              {config.showSectionIcons && <FileText size={20} className={`${theme.icon} mr-1`} />} {sec.label}
-          </h2>
-          <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">{data.custom[sec.id].content}</div>
-          <Divider />
-       </section>
-      );
-    }
-    return null;
-  };
-
-  return (
-    <div 
-      id="cv-document"
-      className={`${config.paperTint} ${config.fontScale} ${config.fontFamily} w-full max-w-[21cm] min-h-[29.7cm] shadow-2xl md:p-0 relative overflow-hidden transition-colors duration-300`}
-    >
-      {/* Watermark */}
-      {config.watermark && (
-        <div className="absolute inset-0 flex items-center justify-center opacity-[0.04] pointer-events-none select-none overflow-hidden">
-           <span className="text-9xl font-black -rotate-45 whitespace-nowrap transform scale-150 text-gray-900 uppercase">{config.watermark}</span>
-        </div>
-      )}
-
-      {/* Border Styles */}
-      {config.borderStyle === 'simple' && <div className={`absolute inset-4 sm:inset-5 md:inset-6 border-2 pointer-events-none ${theme.border}`} style={{ zIndex: 5 }}></div>}
-      {config.borderStyle === 'thick' && <div className={`absolute inset-4 sm:inset-5 md:inset-6 border-4 pointer-events-none ${theme.border}`} style={{ zIndex: 5 }}></div>}
-      {config.borderStyle === 'double' && <div className={`absolute inset-4 sm:inset-5 md:inset-6 border-4 double pointer-events-none ${theme.border}`} style={{ zIndex: 5, borderStyle: 'double', borderWidth: '4px' }}></div>}
-      {config.borderStyle === 'offset' && (
-        <>
-          <div className={`absolute inset-4 sm:inset-5 md:inset-6 border pointer-events-none ${theme.border}`} style={{ zIndex: 5 }}></div>
-          <div className={`absolute inset-6 sm:inset-7 md:inset-8 border pointer-events-none opacity-50 ${theme.border}`} style={{ zIndex: 5 }}></div>
-        </>
-      )}
-      {config.borderStyle === 'rounded' && <div className={`absolute inset-5 sm:inset-6 md:inset-8 border-2 rounded-2xl pointer-events-none ${theme.border}`} style={{ zIndex: 5 }}></div>}
-      {config.borderStyle === 'minimal' && (
-        <>
-          <div className={`absolute top-6 left-6 right-6 border-t-2 pointer-events-none ${theme.border}`} style={{ zIndex: 5 }}></div>
-          <div className={`absolute bottom-6 left-6 right-6 border-b-2 pointer-events-none ${theme.border}`} style={{ zIndex: 5 }}></div>
-        </>
-      )}
-      {config.borderStyle === 'corners' && (
-        <>
-          <div className={`absolute top-6 left-6 w-16 h-16 border-t-4 border-l-4 pointer-events-none ${theme.border}`} style={{ zIndex: 5 }}></div>
-          <div className={`absolute top-6 right-6 w-16 h-16 border-t-4 border-r-4 pointer-events-none ${theme.border}`} style={{ zIndex: 5 }}></div>
-          <div className={`absolute bottom-6 left-6 w-16 h-16 border-b-4 border-l-4 pointer-events-none ${theme.border}`} style={{ zIndex: 5 }}></div>
-          <div className={`absolute bottom-6 right-6 w-16 h-16 border-b-4 border-r-4 pointer-events-none ${theme.border}`} style={{ zIndex: 5 }}></div>
-        </>
-      )}
-      
-      {/* Main Content */}
-      <div className={`relative z-10 flex flex-col flex-grow ${paddingClass}`}>
-          {/* Header */}
-          <header className={`border-b-2 ${theme.border} pb-6 ${config.headerAlign}`}>
-            <div className={`flex gap-6 ${config.headerAlign === 'text-center' ? 'flex-col items-center justify-center' : config.headerAlign === 'text-right' ? 'flex-row-reverse items-center text-right' : 'flex-row items-center'}`}>
-              
-              {/* Photo */}
-              {config.showPhoto && data.personal.photoUrl && (
-                <div className={`flex-shrink-0 w-32 h-32 overflow-hidden ${config.photoBorder === 'thick' ? `border-4 ${theme.border}` : config.photoBorder === 'thin' ? `border-2 ${theme.border}` : ''} ${config.photoShape} ${config.headerAlign === 'text-center' ? 'mb-2' : ''}`}>
-                  <img src={data.personal.photoUrl} alt={data.personal.name} className="w-full h-full object-cover" />
-                </div>
-              )}
-
-              <div className="flex-grow">
-                <h1 className={`${config.nameSize} ${config.nameWeight} text-gray-900 uppercase tracking-tight leading-none`}>{data.personal.name}</h1>
-                <p className={`text-xl mt-2 font-medium ${config.jobTitleColor === 'theme' ? theme.text : config.jobTitleColor === 'gray' ? 'text-gray-600' : 'text-black'}`}>{data.personal.title}</p>
+        return (
+            <div className={`flex items-center ${alignClass} gap-3 mb-3 mt-6 ${currentTheme.text} ${textClass}`}>
+                {finalConfig.showSectionIcons && icon && <IconRenderer icon={icon} size={18} />}
+                <h3 className={`${textSize} font-bold whitespace-nowrap`}>{title}</h3>
                 
-                <div className={`flex flex-wrap gap-x-4 gap-y-2 mt-4 text-sm text-gray-600 ${config.contactLayout === 'grid' ? 'grid grid-cols-2' : config.contactLayout === 'stack' ? 'flex-col' : ''} ${config.headerAlign === 'text-center' ? 'justify-center items-center' : config.headerAlign === 'text-right' ? 'justify-end items-end' : ''}`}>
-                  {data.personal.email && <div className="flex items-center gap-1.5"><SocialIconWrapper><Mail size={14} /></SocialIconWrapper> <span>{data.personal.email}</span></div>}
-                  {data.personal.phone && <div className="flex items-center gap-1.5"><SocialIconWrapper><Phone size={14} /></SocialIconWrapper> <span>{data.personal.phone}</span></div>}
-                  {data.personal.linkedin && <div className="flex items-center gap-1.5"><SocialIconWrapper><Linkedin size={14} /></SocialIconWrapper> <a href={data.personal.linkedin} className={`hover:underline ${theme.text}`}>LinkedIn</a></div>}
-                  {data.personal.portfolio && <div className="flex items-center gap-1.5"><SocialIconWrapper><Globe size={14} /></SocialIconWrapper> <a href={data.personal.portfolio} className={`hover:underline ${theme.text}`}>Portfolio</a></div>}
+                {/* Decorative Elements based on Style */}
+                {style === 'underline' && <div className={`h-0.5 flex-grow opacity-30 ${currentTheme.bg.replace('bg-', 'bg-current ')}`}></div>}
+                {style === 'left-bar' && <div className="hidden"></div>} {/* Handled in parent usually, or simple text */}
+                {style === 'box' && <div className="hidden"></div>} {/* Box style is usually wrapper */}
+                {style === 'centered' && <div className="hidden"></div>}
+            </div>
+        );
+    };
+
+    // --- Sub-Component: Skill Tag ---
+    const SkillTag = ({ skill }) => {
+        if (finalConfig.skillStyle === 'tags') {
+            return (
+                <span className={`px-3 py-1 text-xs rounded-md font-medium border ${currentTheme.border} ${currentTheme.bg} ${currentTheme.text}`}>
+                    {skill.name} {skill.level ? `• ${skill.level}%` : ''}
+                </span>
+            );
+        } else if (finalConfig.skillStyle === 'bars') {
+             return (
+                <div className="w-full mb-2">
+                    <div className="flex justify-between text-xs mb-1">
+                        <span className="font-semibold">{skill.name}</span>
+                    </div>
+                    <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                        <div 
+                            className={`h-full ${currentTheme.hex}`} 
+                            style={{ width: `${skill.level}%` }}
+                        ></div>
+                    </div>
                 </div>
-              </div>
-            </div>
-          </header>
+            );
+        } else {
+            // List or comma
+            return (
+                <span className="text-sm font-medium mr-4 mb-1 block">
+                    • {skill.name}
+                </span>
+            );
+        }
+    };
 
-          {/* Layout Grid */}
-          <div className={`grid grid-cols-1 md:grid-cols-12 gap-8 flex-grow ${config.layoutReverse ? 'direction-rtl' : ''}`}>
-            {/* Main Column */}
-            <div className={`md:col-span-8 flex flex-col gap-${config.spacingScale === 'compact' ? '4' : '8'} ${config.layoutReverse ? 'md:order-2' : 'md:order-1'}`}>
-               {sectionOrder
-                 .filter(s => s.visible && (s.id === 'summary' || s.id === 'experience' || s.id === 'achievements' || s.type === 'custom'))
-                 .map(sec => renderSection(sec))
-               }
+    // --- Renderers for Data Sections ---
+    const renderSectionContent = (sectionId) => {
+        switch (sectionId) {
+            case 'summary':
+                return data.personal.summary && (
+                    <p className={`text-sm leading-relaxed text-gray-700 whitespace-pre-line text-justify`}>
+                        {data.personal.summary}
+                    </p>
+                );
+            case 'experience':
+                return data.experience.map((exp, idx) => (
+                    <div key={idx} className={`mb-4 break-inside-avoid ${finalConfig.entryBox === 'boxed' ? 'p-3 border rounded-lg bg-gray-50' : ''}`}>
+                        <div className="flex justify-between items-baseline mb-1">
+                            <h4 className="font-bold text-gray-900">{exp.role}</h4>
+                            <span className="text-xs font-mono text-gray-500 whitespace-nowrap ml-2">{exp.year}</span>
+                        </div>
+                        <div className={`text-xs font-semibold uppercase tracking-wide mb-2 ${currentTheme.text}`}>
+                            {exp.company}
+                        </div>
+                        <p className="text-sm text-gray-600 leading-snug">{exp.details}</p>
+                    </div>
+                ));
+            case 'education':
+                return data.education.map((edu, idx) => (
+                    <div key={idx} className="mb-4 break-inside-avoid">
+                        <div className="flex justify-between items-baseline mb-1">
+                            <h4 className="font-bold text-gray-900">{edu.institution}</h4>
+                            <span className="text-xs font-mono text-gray-500 whitespace-nowrap ml-2">{edu.year}</span>
+                        </div>
+                        <div className={`text-xs font-semibold mb-1 ${currentTheme.text}`}>
+                            {edu.degree}
+                        </div>
+                        <p className="text-sm text-gray-600">{edu.details}</p>
+                    </div>
+                ));
+            case 'skills':
+                return (
+                    <div className={`flex flex-wrap ${finalConfig.skillStyle === 'bars' ? 'flex-col' : 'gap-2'}`}>
+                        {data.skills.map((skill, idx) => (
+                            <SkillTag key={idx} skill={skill} />
+                        ))}
+                    </div>
+                );
+            case 'achievements':
+                return (
+                    <ul className="list-none space-y-2">
+                        {data.achievements.map((item, idx) => (
+                            <li key={idx} className="text-sm text-gray-700 flex items-start gap-2">
+                                <span className={`mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0 ${currentTheme.hex}`} />
+                                <span>{item}</span>
+                            </li>
+                        ))}
+                    </ul>
+                );
+            case 'community':
+                 return (
+                    <ul className="list-none space-y-2">
+                        {data.community.map((item, idx) => (
+                            <li key={idx} className="text-sm text-gray-700 flex items-start gap-2">
+                                <span className={`mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0 ${currentTheme.hex}`} />
+                                <span>{item}</span>
+                            </li>
+                        ))}
+                    </ul>
+                );
+            default:
+                return null;
+        }
+    };
+
+    // --- Main Layout Renderer ---
+    const renderLayout = () => {
+        // Group sections by their intended location (sidebar vs main)
+        // This is a simplified logic; in a complex builder, you might let users drag-drop.
+        // For now, we hardcode sensible defaults based on templates.
+        
+        const isSidebarLayout = ['modern', 'creative', 'tech', 'executive', 'compact'].includes(activeTemplate);
+        
+        // Define Sidebar Sections
+        const sidebarSectionIds = ['skills', 'achievements', 'community']; 
+        const mainSectionIds = ['summary', 'experience', 'education'];
+
+        // Filter visible sections
+        const mainSections = sections.filter(s => s.visible && mainSectionIds.includes(s.id));
+        const sidebarSections = sections.filter(s => s.visible && sidebarSectionIds.includes(s.id));
+        const allSections = sections.filter(s => s.visible);
+
+        // Common classes
+        const pageClass = `w-[210mm] min-h-[297mm] bg-white shadow-2xl mx-auto overflow-hidden relative text-gray-800 ${finalConfig.fontFamily}`;
+        const headerClass = `flex flex-col gap-4 mb-6 ${finalConfig.headerAlign === 'text-center' ? 'items-center text-center' : finalConfig.headerAlign === 'text-right' ? 'items-end text-right' : 'items-start text-left'}`;
+
+        // --- TEMPLATE SPECIFIC LAYOUTS ---
+
+        // 1. Sidebar Layouts (Modern, Creative, Executive, Tech)
+        if (isSidebarLayout) {
+            const reverse = finalConfig.layoutReverse; // Sidebar on Right
+            const sidebarWidth = 'w-[32%]';
+            const mainWidth = 'w-[68%]';
+            
+            // Sidebar Styling
+            const sidebarBgClass = finalConfig.sidebarBg === 'theme' ? currentTheme.bg : finalConfig.sidebarBg === 'gray' ? 'bg-slate-100' : 'bg-transparent border-r border-gray-100';
+            const sidebarTextClass = finalConfig.sidebarBg === 'theme' || finalConfig.sidebarBg === 'gray' ? 'text-gray-800' : 'text-gray-600';
+
+            return (
+                <div className={`${pageClass} flex ${reverse ? 'flex-row-reverse' : 'flex-row'}`}>
+                    {/* SIDEBAR */}
+                    <div className={`${sidebarWidth} flex-shrink-0 p-8 min-h-full ${sidebarBgClass} ${sidebarTextClass} flex flex-col gap-6`}>
+                        {/* Photo in Sidebar for some layouts */}
+                        {finalConfig.showPhoto && data.personal.photoUrl && (
+                            <div className={`w-32 h-32 mx-auto mb-4 overflow-hidden border-4 ${currentTheme.border} ${finalConfig.photoShape}`}>
+                                <img src={data.personal.photoUrl} alt="Profile" className="w-full h-full object-cover" />
+                            </div>
+                        )}
+
+                        {/* Contact Info (if not in header) */}
+                        <div className="space-y-3 mb-6">
+                            <h3 className={`uppercase tracking-widest text-xs font-bold mb-3 opacity-70 border-b pb-1 ${currentTheme.border}`}>Contact</h3>
+                            <ContactItem icon={Mail} text={data.personal.email} />
+                            <ContactItem icon={Phone} text={data.personal.phone} />
+                            <ContactItem icon={MapPin} text={data.personal.location} />
+                            <ContactItem icon={Linkedin} text="LinkedIn" link={data.personal.linkedin} />
+                            <ContactItem icon={Globe} text="Portfolio" link={data.personal.portfolio} />
+                        </div>
+
+                        {/* Sidebar Sections */}
+                        {sidebarSections.map(section => (
+                            <div key={section.id}>
+                                <div className={`uppercase tracking-widest text-xs font-bold mb-3 opacity-70 border-b pb-1 ${currentTheme.border} flex items-center gap-2`}>
+                                    {section.label}
+                                </div>
+                                {renderSectionContent(section.id)}
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* MAIN CONTENT */}
+                    <div className={`${mainWidth} p-10 flex flex-col`}>
+                        {/* Header Area */}
+                        <div className={`${headerClass} border-b pb-6 mb-6 ${currentTheme.border}`}>
+                            <h1 className={`${finalConfig.nameSize} ${finalConfig.nameWeight} ${currentTheme.text} leading-tight`}>
+                                {data.personal.name}
+                            </h1>
+                            <p className="text-xl font-medium text-gray-500 tracking-tight">{data.personal.title}</p>
+                        </div>
+
+                        {/* Main Sections */}
+                        <div className="space-y-8">
+                            {mainSections.map(section => (
+                                <div key={section.id}>
+                                    <SectionHeader title={section.label} icon={section.icon} />
+                                    {renderSectionContent(section.id)}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // 2. Single Column Layouts (Minimal, Elegant, Bold, ATS, Academic)
+        else {
+            return (
+                <div className={`${pageClass} p-10 md:p-14`}>
+                     {/* Header */}
+                     <div className={`${headerClass} ${activeTemplate === 'bold' ? 'border-b-4 border-black pb-6' : ''}`}>
+                        <div className="flex items-center gap-6 w-full">
+                            {finalConfig.showPhoto && data.personal.photoUrl && (
+                                <img 
+                                    src={data.personal.photoUrl} 
+                                    alt="Profile" 
+                                    className={`w-28 h-28 object-cover border-2 border-gray-100 shadow-sm ${finalConfig.photoShape}`} 
+                                />
+                            )}
+                            <div className="flex-grow">
+                                <h1 className={`${finalConfig.nameSize} ${finalConfig.nameWeight} ${currentTheme.text} mb-1`}>
+                                    {data.personal.name}
+                                </h1>
+                                <p className="text-xl text-gray-600 font-medium">{data.personal.title}</p>
+                            </div>
+                        </div>
+                        
+                        {/* Contact Row */}
+                        <div className={`flex flex-wrap gap-4 mt-4 text-sm text-gray-500 ${finalConfig.headerAlign === 'text-center' ? 'justify-center' : ''}`}>
+                             <ContactItem icon={Mail} text={data.personal.email} />
+                             <ContactItem icon={Phone} text={data.personal.phone} />
+                             <ContactItem icon={MapPin} text={data.personal.location} />
+                             <ContactItem icon={Globe} text="Portfolio" link={data.personal.portfolio} />
+                        </div>
+                    </div>
+
+                    {/* Content Grid (2 col for some sections if needed, or straight list) */}
+                    <div className="space-y-6 mt-8">
+                         {/* Force Summary First */}
+                         {sections.find(s => s.id === 'summary' && s.visible) && (
+                            <div>
+                                <SectionHeader title="Profile Summary" icon={User} />
+                                {renderSectionContent('summary')}
+                            </div>
+                         )}
+
+                         {/* Two Column Grid for Skills/Languages if Compact */}
+                         {activeTemplate === 'compact' || activeTemplate === 'academic' ? (
+                            <div className="grid grid-cols-12 gap-8">
+                                <div className="col-span-8 space-y-6">
+                                    {sections.filter(s => ['experience', 'education'].includes(s.id) && s.visible).map(section => (
+                                        <div key={section.id}>
+                                            <SectionHeader title={section.label} icon={section.icon} />
+                                            {renderSectionContent(section.id)}
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="col-span-4 space-y-6 border-l pl-6 border-gray-100">
+                                     {sections.filter(s => ['skills', 'achievements', 'community'].includes(s.id) && s.visible).map(section => (
+                                        <div key={section.id}>
+                                            <SectionHeader title={section.label} icon={section.icon} />
+                                            {renderSectionContent(section.id)}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                         ) : (
+                             // Standard Flow
+                             allSections.filter(s => s.id !== 'summary').map(section => (
+                                <div key={section.id} className={['skills', 'achievements'].includes(section.id) ? 'mb-4' : 'mb-8'}>
+                                    <SectionHeader title={section.label} icon={section.icon} />
+                                    {renderSectionContent(section.id)}
+                                </div>
+                             ))
+                         )}
+                    </div>
+                </div>
+            );
+        }
+    };
+
+    return (
+        <div className="flex flex-col gap-4 items-center">
+            {/* Toolbar */}
+            <div className="w-full max-w-[210mm] flex justify-between items-center bg-white p-3 rounded-lg shadow-sm border border-gray-200">
+                <span className="text-sm font-medium text-gray-500 px-2">A4 Preview • {activeTemplate.charAt(0).toUpperCase() + activeTemplate.slice(1)} Template</span>
+                <button 
+                    onClick={handleDownload}
+                    className="flex items-center gap-2 bg-gray-900 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800 transition-colors shadow-lg shadow-gray-200"
+                >
+                    <Briefcase size={16} /> Download PDF
+                </button>
             </div>
 
-            {/* Sidebar Column */}
-            <div className={`md:col-span-4 flex flex-col gap-${config.spacingScale === 'compact' ? '5' : '8'} ${config.layoutReverse ? 'md:order-1 border-r pr-6' : 'md:order-2 border-l pl-6'} border-gray-200 ${sidebarClass} ${config.sidebarBg !== 'none' ? '-my-8 -mr-8 py-8 pr-8 pl-6' : ''} rounded-r-lg`}>
-               {sectionOrder
-                 .filter(s => s.visible && (s.id === 'education' || s.id === 'skills' || s.id === 'community'))
-                 .map(sec => renderSection(sec))
-               }
+            {/* Resume Page Wrapper */}
+            <div className="overflow-auto max-w-full pb-10">
+                <div ref={resumeRef} className="origin-top scale-[0.6] sm:scale-[0.8] lg:scale-100 transition-transform duration-300">
+                    {renderLayout()}
+                </div>
             </div>
-          </div>
-
-          {/* Custom Footer */}
-          {config.customFooter && (
-            <div className={`mt-auto pt-6 text-center text-xs text-gray-400 border-t ${config.dividerStyle === 'none' ? 'border-transparent' : 'border-gray-200'}`}>
-              {config.customFooter}
-            </div>
-          )}
-      </div>
-    </div>
-  );
+        </div>
+    );
 };
 
 export default PreviewPanel;

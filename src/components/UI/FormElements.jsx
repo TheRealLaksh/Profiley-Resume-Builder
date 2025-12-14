@@ -6,7 +6,7 @@ export const EditorSection = ({ title, icon: Icon, id, activeTab, setActiveTab, 
   <div className="flex items-center gap-2 mb-2">
     <button
       onClick={() => setActiveTab(id)}
-      className={`flex-grow flex items-center p-3 rounded-lgybGb transition-all duration-200 text-left ${
+      className={`flex-grow flex items-center p-3 rounded-lg transition-all duration-200 text-left ${
         activeTab === id 
           ? 'bg-blue-600 text-white shadow-md translate-x-1' 
           : darkMode 
@@ -37,7 +37,7 @@ export const Toggle = ({ label, value, onChange, darkMode }) => (
     <span className={`text-sm font-medium ${darkMode ? 'text-neutral-300' : 'text-gray-700'}`}>{label}</span>
     <button 
       onClick={() => onChange(!value)}
-      className={`w-11 h-6 rounded-full relative transition-colors duration-200ybGb ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${value ? 'bg-blue-600' : darkMode ? 'bg-neutral-600' : 'bg-gray-300'}`}
+      className={`w-11 h-6 rounded-full relative transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${value ? 'bg-blue-600' : darkMode ? 'bg-neutral-600' : 'bg-gray-300'}`}
     >
       <span className={`block w-4 h-4 bg-white rounded-full shadow absolute top-1 transition-transform duration-200 ${value ? 'left-6' : 'left-1'}`} />
     </button>

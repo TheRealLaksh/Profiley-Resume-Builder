@@ -158,6 +158,106 @@ export const templates = {
       themeColor: 'noir',
       layoutMode: 'single-column'
     }
+  },
+  // --- NEW TEMPLATES ---
+  executive: {
+    name: 'Executive',
+    config: {
+      layoutReverse: true,
+      sidebarBg: 'theme',
+      headerAlign: 'text-right',
+      photoShape: 'rounded-md',
+      fontFamily: 'font-merriweather',
+      sectionHeaderStyle: 'box',
+      skillStyle: 'tags',
+      showPhoto: true,
+      borderStyle: 'simple',
+      themeColor: 'blue'
+    }
+  },
+  elegant: {
+    name: 'Elegant',
+    config: {
+      layoutReverse: false,
+      sidebarBg: 'none',
+      headerAlign: 'text-center',
+      photoShape: 'rounded-full',
+      fontFamily: 'font-playfair',
+      sectionHeaderStyle: 'centered',
+      skillStyle: 'list',
+      showPhoto: true,
+      dividerStyle: 'diamond',
+      borderStyle: 'offset',
+      themeColor: 'gold'
+    }
+  },
+  tech: {
+    name: 'Tech',
+    config: {
+      layoutReverse: false,
+      sidebarBg: 'gray',
+      headerAlign: 'text-left',
+      photoShape: 'rounded-none',
+      fontFamily: 'font-mono',
+      sectionHeaderStyle: 'left-bar',
+      skillStyle: 'bars',
+      showPhoto: true,
+      showIcons: true,
+      borderStyle: 'none',
+      themeColor: 'emerald'
+    }
+  },
+  bold: {
+    name: 'Bold',
+    config: {
+      layoutReverse: false,
+      sidebarBg: 'theme',
+      headerAlign: 'text-left',
+      photoShape: 'rounded-none',
+      fontFamily: 'font-oswald',
+      sectionHeaderStyle: 'box',
+      skillStyle: 'tags',
+      showPhoto: true,
+      uppercaseHeaders: true,
+      nameWeight: 'font-black',
+      nameSize: 'text-5xl',
+      borderStyle: 'thick',
+      themeColor: 'midnight'
+    }
+  },
+  academic: {
+    name: 'Academic',
+    config: {
+      layoutReverse: false,
+      sidebarBg: 'none',
+      headerAlign: 'text-center',
+      photoShape: 'rounded-sm',
+      fontFamily: 'font-lora',
+      sectionHeaderStyle: 'underline',
+      skillStyle: 'list',
+      showPhoto: false,
+      dividerStyle: 'thick',
+      borderStyle: 'double',
+      themeColor: 'royal',
+      spacingScale: 'compact'
+    }
+  },
+  compact: {
+    name: 'Compact',
+    config: {
+      layoutReverse: true,
+      sidebarBg: 'gray',
+      headerAlign: 'text-left',
+      photoShape: 'rounded-full',
+      fontFamily: 'font-inter',
+      sectionHeaderStyle: 'left-bar',
+      skillStyle: 'tags',
+      showPhoto: true,
+      spacingScale: 'compact',
+      fontScale: 'text-sm',
+      borderStyle: 'none',
+      themeColor: 'forest'
+    }
   }
 };
 
