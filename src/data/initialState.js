@@ -114,9 +114,9 @@ export const initialConfig = {
   layoutReverse: false,
   headerAlign: "text-left",
   sidebarBg: "none",
-  fontScale: "text-base",
-  spacingScale: "normal",
-  nameSize: "text-4xl",
+  fontScale: "text-xs", // Decreased from text-base
+  spacingScale: "compact", // Changed to compact
+  nameSize: "text-2xl", // Decreased from text-4xl
   nameWeight: "font-extrabold",
   uppercaseHeaders: true,
   jobTitleColor: "theme",
@@ -125,7 +125,7 @@ export const initialConfig = {
   photoBorder: "none",
   contactLayout: "row",
   sectionHeaderStyle: "underline",
-  sectionTitleSize: "text-lg",
+  sectionTitleSize: "text-sm", // Decreased from text-lg
   dividerStyle: "none",
   borderStyle: "none",
   entryBox: "clean",
