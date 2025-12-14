@@ -27,7 +27,7 @@ export const initialData = {
       degree: "Class X",
       year: "Completed 2024",
       details:
-        "Secured 87.8% overall with 94% in Mathematics. Served as House Captain, member of the Round Square Organizing Committee, and active participant in leadership programs, sports, and MUNs."
+        "Secured 87.8% overall with 94% in Mathematics. Served as House Captain, and active participant in leadership programs, sports, and MUNs."
     }
   ],
 

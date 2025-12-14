@@ -294,7 +294,7 @@ const App = () => {
         <PreviewPanel data={data} config={config} sectionOrder={sectionOrder} activeTemplate={activeTemplate} />
         
         <div className={`mt-8 mb-20 text-xs font-medium uppercase tracking-widest ${darkMode ? 'text-neutral-500' : 'text-gray-400'}`}>
-          Profiley • Resume Builder
+          Profiley • Resume Builder • Laksh Pradhwani 
         </div>
       </div>
     </div>
