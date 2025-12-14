@@ -1,35 +1,30 @@
 import React, { useState } from "react";
-
 import LeftPanel from "../components/layout/LeftPanel";
 import RightPanel from "../components/layout/RightPanel";
+import ResumePreview from "../components/preview/ResumePreview";
 
 import { initialData } from "../constants/initialData";
 import { initialSections } from "../constants/initialSections";
 import { initialConfig } from "../constants/initialConfig";
 
 const Profiley = () => {
-  const [data, setData] = useState(initialData);
-  const [config, setConfig] = useState(initialConfig);
+  const [data] = useState(initialData);
   const [sectionOrder, setSectionOrder] = useState(initialSections);
   const [draggedIndex, setDraggedIndex] = useState(null);
 
   const toggleSectionVisibility = (id) => {
     setSectionOrder((prev) =>
-      prev.map((section) =>
-        section.id === id
-          ? { ...section, visible: !section.visible }
-          : section
+      prev.map((s) =>
+        s.id === id ? { ...s, visible: !s.visible } : s
       )
     );
   };
 
-  const handleDragStart = (_, index) => {
-    setDraggedIndex(index);
-  };
+  const handleDragStart = (_, index) => setDraggedIndex(index);
 
   const handleDragOver = (e, index) => {
     e.preventDefault();
-    if (draggedIndex === null || draggedIndex === index) return;
+    if (index === draggedIndex) return;
 
     const updated = [...sectionOrder];
     const [moved] = updated.splice(draggedIndex, 1);
@@ -39,12 +34,10 @@ const Profiley = () => {
     setSectionOrder(updated);
   };
 
-  const handleDragEnd = () => {
-    setDraggedIndex(null);
-  };
+  const handleDragEnd = () => setDraggedIndex(null);
 
   return (
-    <div className="min-h-screen flex bg-gray-100">
+    <div className="min-h-screen flex">
       <LeftPanel
         sectionOrder={sectionOrder}
         toggleSectionVisibility={toggleSectionVisibility}
@@ -54,9 +47,10 @@ const Profiley = () => {
       />
 
       <RightPanel>
-        <div className="flex items-center justify-center h-full text-gray-400">
-          Resume preview (coming next)
-        </div>
+        <ResumePreview
+          data={data}
+          sectionOrder={sectionOrder}
+        />
       </RightPanel>
     </div>
   );
