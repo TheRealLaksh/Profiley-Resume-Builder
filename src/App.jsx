@@ -1,12 +1,12 @@
-// src/App.jsx
 import React, { useState, useEffect } from 'react';
 import { 
-  Moon, Sun, RotateCcw, RotateCw, Share2, Save, Loader2, FilePlus, X, Link as LinkIcon
+  Moon, Sun, RotateCcw, RotateCw, Share2, Save, Loader2, FilePlus, X, Link as LinkIcon,
+  ZoomIn, ZoomOut, Maximize
 } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
 import EditorPanel from './components/Editor/EditorPanel';
 import PreviewPanel from './components/Preview/PreviewPanel';
-import MobileLayout from './components/Mobile/MobileLayout'; // Import new mobile layout
+import MobileLayout from './components/Mobile/MobileLayout';
 import { saveResumeToDB, saveResumeWithSlug, fetchResumeFromDB } from './firebase'; 
 import {
   initialData,
@@ -51,6 +51,9 @@ const App = () => {
   const [customSlug, setCustomSlug] = useState('');
   const [isGeneratingLink, setIsGeneratingLink] = useState(false);
   const [shareError, setShareError] = useState('');
+
+  // Zoom State for Desktop
+  const [zoom, setZoom] = useState(0.8); // Start at 80% to fit most screens nicely
 
   useEffect(() => {
     const init = async () => {
@@ -176,6 +179,11 @@ const App = () => {
     }
   };
 
+  // Zoom Handlers
+  const handleZoomIn = () => setZoom(prev => Math.min(prev + 0.1, 1.5));
+  const handleZoomOut = () => setZoom(prev => Math.max(prev - 0.1, 0.3));
+  const handleResetZoom = () => setZoom(0.8);
+
   // Drag handlers
   const handleDragStart = (e, index) => { setDraggedItemIndex(index); e.dataTransfer.effectAllowed = 'move'; };
   const handleDragOver = (e, index) => {
@@ -272,13 +280,59 @@ const App = () => {
             <EditorPanel {...appProps} />
         )}
 
-        <div className={`${isReadOnly ? 'w-full max-w-5xl h-screen' : 'w-full md:w-2/3 lg:w-3/4 h-screen'} overflow-y-auto p-4 md:p-8 flex flex-col items-center relative transition-colors duration-300 ${darkMode ? 'bg-neutral-800' : 'bg-gray-200'}`}>
+        <div className={`${isReadOnly ? 'w-full max-w-5xl h-screen' : 'w-full md:w-2/3 lg:w-3/4 h-screen'} overflow-hidden relative flex flex-col items-center transition-colors duration-300 ${darkMode ? 'bg-neutral-800' : 'bg-gray-200'}`}>
             
+            {/* Desktop Zoom Toolbar */}
+            <div className="absolute top-4 right-4 z-40 flex flex-col gap-2">
+              <div className={`flex flex-col gap-1 p-1 rounded-lg shadow-lg border backdrop-blur-md ${darkMode ? 'bg-neutral-900/80 border-neutral-700 text-neutral-300' : 'bg-white/80 border-gray-300 text-gray-700'}`}>
+                <button 
+                  onClick={handleZoomIn} 
+                  className={`p-2 rounded-md transition-colors ${darkMode ? 'hover:bg-neutral-700' : 'hover:bg-gray-100'}`}
+                  title="Zoom In"
+                >
+                  <ZoomIn size={18} />
+                </button>
+                <button 
+                  onClick={handleZoomOut} 
+                  className={`p-2 rounded-md transition-colors ${darkMode ? 'hover:bg-neutral-700' : 'hover:bg-gray-100'}`}
+                  title="Zoom Out"
+                >
+                  <ZoomOut size={18} />
+                </button>
+                <button 
+                  onClick={handleResetZoom} 
+                  className={`p-2 rounded-md transition-colors ${darkMode ? 'hover:bg-neutral-700' : 'hover:bg-gray-100'}`}
+                  title="Reset Zoom"
+                >
+                  <Maximize size={18} />
+                </button>
+                <div className="text-[10px] text-center font-mono font-bold py-1 opacity-60">
+                  {Math.round(zoom * 100)}%
+                </div>
+              </div>
+            </div>
+
             {isReadOnly && (
-            <div className="mb-6 px-6 py-3 bg-blue-600 text-white rounded-full shadow-lg font-semibold text-sm flex items-center gap-2">
+            <div className="absolute top-4 left-6 z-50 px-6 py-3 bg-blue-600 text-white rounded-full shadow-lg font-semibold text-sm flex items-center gap-2">
                 <Share2 size={16} /> Viewing Shared Resume
             </div>
             )}
+
+            {/* Scrollable Preview Area */}
+            <div className="w-full h-full overflow-auto custom-scrollbar flex flex-col items-center p-8 md:p-12 relative">
+                
+                {/* Scalable Container */}
+                <div 
+                  className="transition-transform duration-200 ease-out origin-top shadow-2xl"
+                  style={{ transform: `scale(${zoom})`, marginBottom: `${(zoom - 1) * 300}px` }} 
+                >
+                   <PreviewPanel data={data} config={config} sectionOrder={sectionOrder} activeTemplate={activeTemplate} />
+                </div>
+
+                <div className={`mt-16 mb-20 text-xs font-medium uppercase tracking-widest ${darkMode ? 'text-neutral-500' : 'text-gray-400'}`}>
+                   Profiley • Resume Builder • Laksh Pradhwani 
+                </div>
+            </div>
 
             <div className="fixed bottom-8 right-8 z-50 flex flex-col gap-3">
             {!isReadOnly && (
@@ -291,12 +345,6 @@ const App = () => {
                     <FilePlus size={20} className="text-blue-600" /> Create Yours
                 </button>
             )}
-            </div>
-
-            <PreviewPanel data={data} config={config} sectionOrder={sectionOrder} activeTemplate={activeTemplate} />
-            
-            <div className={`mt-8 mb-20 text-xs font-medium uppercase tracking-widest ${darkMode ? 'text-neutral-500' : 'text-gray-400'}`}>
-            Profiley • Resume Builder • Laksh Pradhwani 
             </div>
         </div>
       </div>

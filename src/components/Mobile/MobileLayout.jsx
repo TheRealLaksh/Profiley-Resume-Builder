@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
     Layers, Palette, Share2, Eye, Layout, 
-    ChevronLeft, Sparkles, Box, FileText 
+    ChevronLeft, FileText, ZoomIn, ZoomOut, Maximize 
 } from 'lucide-react';
 import ContentTab from '../Editor/ContentTab';
 import DesignTab from '../Editor/DesignTab';
@@ -11,11 +11,14 @@ import PreviewPanel from '../Preview/PreviewPanel';
 const MobileLayout = (props) => {
     const { 
         activeTab, setActiveTab, 
-        darkMode, data, config 
+        darkMode, data 
     } = props;
 
     // 'editor' or 'preview'
     const [mobileView, setMobileView] = useState('editor');
+    
+    // Zoom state for Mobile Preview
+    const [mobileZoom, setMobileZoom] = useState(0.55); // Default start scale for mobile
     
     // Auto-switch to editor view if user navigates deeper into content
     useEffect(() => {
@@ -23,6 +26,10 @@ const MobileLayout = (props) => {
             setMobileView('editor');
         }
     }, [activeTab]);
+
+    const handleZoomIn = () => setMobileZoom(prev => Math.min(prev + 0.05, 1.2));
+    const handleZoomOut = () => setMobileZoom(prev => Math.max(prev - 0.05, 0.3));
+    const handleResetZoom = () => setMobileZoom(0.55);
 
     // Styling Constants
     const themeClasses = darkMode 
@@ -40,7 +47,6 @@ const MobileLayout = (props) => {
             case 'export':
                 return <ExportTab {...props} />;
             default:
-                // ContentTab handles 'sections' and specific section ids (e.g., 'experience') internally
                 return <ContentTab {...props} />;
         }
     };
@@ -105,17 +111,43 @@ const MobileLayout = (props) => {
                     </div>
                 </div>
 
-                {/* Preview View - Scaled for Mobile */}
-                <div className={`absolute inset-0 bg-neutral-900/5 overflow-hidden flex flex-col items-center justify-start pt-8 transition-opacity duration-300 ${mobileView === 'preview' ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}>
+                {/* Preview View - Improved with Zoom */}
+                <div className={`absolute inset-0 bg-neutral-900/5 overflow-hidden flex flex-col items-center justify-start transition-opacity duration-300 ${mobileView === 'preview' ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}>
                    
-                   <div className="w-full h-full overflow-y-auto overflow-x-hidden custom-scrollbar pb-24 px-4 text-center">
-                        <div className="inline-block origin-top transform scale-[0.45] sm:scale-[0.55] shadow-2xl border border-gray-200/10">
-                            {/* We pass the same props to PreviewPanel */}
-                            <PreviewPanel {...props} />
+                   {/* Scrollable Canvas Area */}
+                   <div className="w-full h-full overflow-auto custom-scrollbar relative p-4 pb-32">
+                        {/* Zoomable Container */}
+                        <div 
+                            className="w-full flex justify-center origin-top-left"
+                            style={{ 
+                                minHeight: '1000px', // Ensure enough scroll space
+                                width: '100%',
+                            }}
+                        >
+                            <div 
+                                className="shadow-2xl border border-gray-200/10 origin-top transform transition-transform duration-150"
+                                style={{ transform: `scale(${mobileZoom})` }}
+                            >
+                                <PreviewPanel {...props} />
+                            </div>
                         </div>
-                        <p className="mt-4 text-[10px] opacity-40 uppercase tracking-widest pb-8">
-                            Pinch to zoom functionality provided by browser
-                        </p>
+                   </div>
+
+                   {/* Mobile Zoom Controls */}
+                   <div className={`absolute bottom-4 right-4 flex items-center gap-2 px-2 py-2 rounded-full shadow-xl border backdrop-blur-xl ${darkMode ? 'bg-neutral-800/90 border-neutral-700' : 'bg-white/90 border-gray-200'}`}>
+                        <button onClick={handleZoomOut} className="p-2 rounded-full hover:bg-black/5 active:scale-95 transition-transform">
+                            <ZoomOut size={16} />
+                        </button>
+                        <span className="text-[10px] font-bold w-8 text-center opacity-70">
+                            {Math.round(mobileZoom * 100)}%
+                        </span>
+                        <button onClick={handleZoomIn} className="p-2 rounded-full hover:bg-black/5 active:scale-95 transition-transform">
+                            <ZoomIn size={16} />
+                        </button>
+                        <div className="w-[1px] h-4 bg-gray-500/20 mx-1"></div>
+                        <button onClick={handleResetZoom} className="p-2 rounded-full hover:bg-black/5 active:scale-95 transition-transform">
+                            <Maximize size={16} />
+                        </button>
                    </div>
                 </div>
 
