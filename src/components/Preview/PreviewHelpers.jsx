@@ -12,7 +12,8 @@ export const IconRenderer = ({ Icon, size = 16, className = "" }) => {
                 minWidth: size, 
                 display: 'flex', 
                 alignItems: 'center', 
-                justifyContent: 'center' 
+                justifyContent: 'center',
+                color: '#000000' // Force icon color to black for PDF
             }} 
             className={className}
         >
@@ -23,7 +24,6 @@ export const IconRenderer = ({ Icon, size = 16, className = "" }) => {
 
 // --- HELPER: Section Headers ---
 export const SectionHeader = ({ title, icon, config, theme }) => {
-    // Handle alignment classes safely for PDF
     const justifyClass = config.headerAlign === 'text-center' ? 'justify-center' : 
                          config.headerAlign === 'text-right' ? 'justify-end' : 'justify-start';
                          
@@ -41,55 +41,81 @@ export const SectionHeader = ({ title, icon, config, theme }) => {
     );
 };
 
-// --- FIX 1: Contact Item (Links) ---
-// Simplified structure to be robust for html2pdf link detection
+// --- FIX: Contact Item (Critical Visibility Fix) ---
 export const ContactItem = ({ icon, text, link }) => {
     if (!text) return null;
 
-    const content = (
-        <div className="flex items-center gap-1.5 min-w-0">
-            {icon && (
-                <div className="flex-shrink-0 text-gray-500">
-                    <IconRenderer Icon={icon} size={12} />
-                </div>
-            )}
-            <span className="text-[10px] text-gray-700 truncate font-medium">
-                {text}
-            </span>
-            {link && <ExternalLink size={8} className="text-gray-400 flex-shrink-0" />}
+    // CRITICAL PDF STYLES:
+    // 1. color: '#000000' -> Ensures maximum contrast, no grey wash-out.
+    // 2. fontFamily: 'Arial...' -> Bypasses variable/web font loading failures.
+    // 3. textDecoration: 'none' -> Prevents browser link underlining.
+    const safeTextStyle = {
+        color: '#000000',
+        fontFamily: 'Arial, Helvetica, sans-serif', 
+        fontSize: '10px',
+        fontWeight: 600, // Semi-bold for readability
+        textDecoration: 'none',
+        lineHeight: '1.2',
+        whiteSpace: 'nowrap' // Keep on one line
+    };
+
+    // Remove 'truncate' to prevent text becoming "..." or disappearing.
+    const contentClasses = "flex items-center gap-1.5 min-w-0";
+    
+    // Icon Wrapper
+    const iconEl = icon && (
+        <div className="flex-shrink-0 flex items-center justify-center">
+            {/* Force icon color explicitly */}
+            <IconRenderer Icon={icon} size={12} className="text-black" />
         </div>
     );
 
-    return (
-        <div className="break-inside-avoid max-w-full">
-            {link ? (
+    // Text Wrapper
+    const textEl = (
+        <span style={safeTextStyle} className="mt-[1px]">
+            {text}
+        </span>
+    );
+
+    const linkIconEl = link && (
+        <ExternalLink size={8} color="#000000" className="flex-shrink-0 opacity-70 ml-0.5" />
+    );
+
+    // Render Logic
+    if (link) {
+        return (
+            <div className="break-inside-avoid max-w-full inline-flex">
                 <a
                     href={link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block text-inherit no-underline hover:text-blue-600 transition-colors"
+                    className={contentClasses}
+                    style={{ textDecoration: 'none' }} // Double enforcement
                 >
-                    {content}
+                    {iconEl}
+                    {textEl}
+                    {linkIconEl}
                 </a>
-            ) : (
-                content
-            )}
+            </div>
+        );
+    }
+
+    return (
+        <div className={`break-inside-avoid max-w-full ${contentClasses}`}>
+            {iconEl}
+            {textEl}
         </div>
     );
 };
 
-// --- FIX 2: Skill Tag (The Glitch Fix) ---
+// --- HELPER: Skill Tag ---
 export const SkillTag = ({ skill, config, theme }) => {
-    // SAFEGUARD: Handle both object (new data) and string (old data) formats
     const skillName = typeof skill === 'object' ? skill.name : skill;
     const skillLevel = typeof skill === 'object' ? skill.level : null;
 
     const baseClasses = "text-[10px] font-medium break-inside-avoid inline-block";
-    
-    // PDF-Safe Spacing
     const marginStyle = { marginRight: '6px', marginBottom: '6px' };
 
-    // STYLE 1: Tags (Pills)
     if (config.skillStyle === 'tags') {
         return (
             <span 
@@ -101,7 +127,6 @@ export const SkillTag = ({ skill, config, theme }) => {
         );
     }
     
-    // STYLE 2: Bars
     if (config.skillStyle === 'bars') {
         return (
             <div className="w-full break-inside-avoid" style={{ marginBottom: '8px' }}>
@@ -119,7 +144,6 @@ export const SkillTag = ({ skill, config, theme }) => {
         );
     }
 
-    // STYLE 3: Default / List
     return (
         <div className="flex items-center break-inside-avoid" style={marginStyle}>
              <span className={`w-1.5 h-1.5 rounded-full mr-2 ${theme.bg}`}></span>
