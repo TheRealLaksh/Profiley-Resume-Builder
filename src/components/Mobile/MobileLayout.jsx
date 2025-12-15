@@ -1,0 +1,164 @@
+import React, { useState, useEffect } from 'react';
+import { 
+    Layers, Palette, Share2, Eye, Layout, 
+    ChevronLeft, Sparkles, Box, FileText 
+} from 'lucide-react';
+import ContentTab from '../Editor/ContentTab';
+import DesignTab from '../Editor/DesignTab';
+import ExportTab from '../Editor/ExportTab';
+import PreviewPanel from '../Preview/PreviewPanel';
+
+const MobileLayout = (props) => {
+    const { 
+        activeTab, setActiveTab, 
+        darkMode, data, config 
+    } = props;
+
+    // 'editor' or 'preview'
+    const [mobileView, setMobileView] = useState('editor');
+    
+    // Auto-switch to editor view if user navigates deeper into content
+    useEffect(() => {
+        if (activeTab !== 'sections' && activeTab !== 'design' && activeTab !== 'export') {
+            setMobileView('editor');
+        }
+    }, [activeTab]);
+
+    // Styling Constants
+    const themeClasses = darkMode 
+        ? 'bg-neutral-900 text-neutral-100' 
+        : 'bg-gray-50 text-gray-900';
+    
+    const navItemBase = "flex flex-col items-center justify-center w-full h-full gap-1 transition-all duration-200 active:scale-95";
+    const navItemActive = darkMode ? "text-blue-400" : "text-blue-600";
+    const navItemInactive = darkMode ? "text-neutral-500 hover:text-neutral-300" : "text-gray-400 hover:text-gray-600";
+
+    const renderActiveComponent = () => {
+        switch (activeTab) {
+            case 'design':
+                return <DesignTab {...props} />;
+            case 'export':
+                return <ExportTab {...props} />;
+            default:
+                // ContentTab handles 'sections' and specific section ids (e.g., 'experience') internally
+                return <ContentTab {...props} />;
+        }
+    };
+
+    const isDrillDown = !['sections', 'design', 'export'].includes(activeTab);
+
+    return (
+        <div className={`flex flex-col h-[100dvh] w-full overflow-hidden ${themeClasses}`}>
+            
+            {/* Top Bar: Dynamic Header */}
+            <div className={`flex-shrink-0 px-4 py-3 flex items-center justify-between border-b backdrop-blur-md z-20 ${darkMode ? 'bg-neutral-900/80 border-neutral-800' : 'bg-white/80 border-gray-200'}`}>
+                <div className="flex items-center gap-3 overflow-hidden">
+                    {/* Back button logic for drill-down states */}
+                    {isDrillDown && mobileView === 'editor' ? (
+                        <button 
+                            onClick={() => setActiveTab('sections')}
+                            className={`p-1.5 rounded-full ${darkMode ? 'bg-neutral-800 text-neutral-300' : 'bg-gray-100 text-gray-600'}`}
+                        >
+                            <ChevronLeft size={18} />
+                        </button>
+                    ) : (
+                         <div className={`p-1.5 rounded-lg ${darkMode ? 'bg-blue-500/10' : 'bg-blue-50'}`}>
+                            <Layout size={18} className="text-blue-500" />
+                         </div>
+                    )}
+                    
+                    <div className="flex flex-col">
+                        <h1 className="text-sm font-bold leading-tight truncate">
+                            {mobileView === 'preview' ? 'Live Preview' : 
+                             isDrillDown ? (props.sectionOrder.find(s=>s.id === activeTab)?.label || 'Editing') : 
+                             activeTab === 'design' ? 'Design Studio' : 
+                             activeTab === 'export' ? 'Export & Share' : 'Profiley Mobile'}
+                        </h1>
+                        <span className="text-[10px] opacity-50 font-medium tracking-wide uppercase">
+                            {mobileView === 'preview' ? data.personal.name || 'Untitled' : 
+                             activeTab === 'sections' ? 'Resume Builder' : 'Configuration'}
+                        </span>
+                    </div>
+                </div>
+
+                {/* Quick Toggle for Preview */}
+                <button
+                    onClick={() => setMobileView(v => v === 'editor' ? 'preview' : 'editor')}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all shadow-sm ${
+                        mobileView === 'preview' 
+                        ? 'bg-blue-600 text-white shadow-blue-500/20' 
+                        : darkMode ? 'bg-neutral-800 text-neutral-300 border border-neutral-700' : 'bg-white text-gray-700 border border-gray-200'
+                    }`}
+                >
+                    {mobileView === 'preview' ? <FileText size={14} /> : <Eye size={14} />}
+                    <span>{mobileView === 'preview' ? 'Edit' : 'View'}</span>
+                </button>
+            </div>
+
+            {/* Main Content Area */}
+            <div className="flex-grow overflow-hidden relative">
+                
+                {/* Editor View */}
+                <div className={`absolute inset-0 overflow-y-auto custom-scrollbar transition-opacity duration-300 ${mobileView === 'editor' ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}>
+                    <div className="p-4 pb-24 space-y-4">
+                        {renderActiveComponent()}
+                    </div>
+                </div>
+
+                {/* Preview View - Scaled for Mobile */}
+                <div className={`absolute inset-0 bg-neutral-900/5 overflow-hidden flex flex-col items-center justify-start pt-8 transition-opacity duration-300 ${mobileView === 'preview' ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}>
+                   
+                   <div className="w-full h-full overflow-y-auto overflow-x-hidden custom-scrollbar pb-24 px-4 text-center">
+                        <div className="inline-block origin-top transform scale-[0.45] sm:scale-[0.55] shadow-2xl border border-gray-200/10">
+                            {/* We pass the same props to PreviewPanel */}
+                            <PreviewPanel {...props} />
+                        </div>
+                        <p className="mt-4 text-[10px] opacity-40 uppercase tracking-widest pb-8">
+                            Pinch to zoom functionality provided by browser
+                        </p>
+                   </div>
+                </div>
+
+            </div>
+
+            {/* Bottom Navigation Bar */}
+            <div className={`flex-shrink-0 h-16 border-t backdrop-blur-xl z-30 grid grid-cols-4 px-2 pb-safe ${darkMode ? 'bg-neutral-900/90 border-neutral-800' : 'bg-white/90 border-gray-200'}`}>
+                
+                <button 
+                    onClick={() => { setActiveTab('sections'); setMobileView('editor'); }}
+                    className={`${navItemBase} ${activeTab === 'sections' || isDrillDown ? navItemActive : navItemInactive}`}
+                >
+                    <Layers size={20} strokeWidth={activeTab === 'sections' || isDrillDown ? 2.5 : 2} />
+                    <span className="text-[10px] font-medium">Content</span>
+                </button>
+
+                <button 
+                    onClick={() => { setActiveTab('design'); setMobileView('editor'); }}
+                    className={`${navItemBase} ${activeTab === 'design' ? navItemActive : navItemInactive}`}
+                >
+                    <Palette size={20} strokeWidth={activeTab === 'design' ? 2.5 : 2} />
+                    <span className="text-[10px] font-medium">Design</span>
+                </button>
+
+                <button 
+                    onClick={() => setMobileView('preview')}
+                    className={`${navItemBase} ${mobileView === 'preview' ? navItemActive : navItemInactive}`}
+                >
+                    <Eye size={20} strokeWidth={mobileView === 'preview' ? 2.5 : 2} />
+                    <span className="text-[10px] font-medium">Preview</span>
+                </button>
+
+                <button 
+                    onClick={() => { setActiveTab('export'); setMobileView('editor'); }}
+                    className={`${navItemBase} ${activeTab === 'export' ? navItemActive : navItemInactive}`}
+                >
+                    <Share2 size={20} strokeWidth={activeTab === 'export' ? 2.5 : 2} />
+                    <span className="text-[10px] font-medium">Export</span>
+                </button>
+
+            </div>
+        </div>
+    );
+};
+
+export default MobileLayout;

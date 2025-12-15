@@ -6,6 +6,7 @@ import {
 import html2pdf from 'html2pdf.js';
 import EditorPanel from './components/Editor/EditorPanel';
 import PreviewPanel from './components/Preview/PreviewPanel';
+import MobileLayout from './components/Mobile/MobileLayout'; // Import new mobile layout
 import { saveResumeToDB, saveResumeWithSlug, fetchResumeFromDB } from './firebase'; 
 import {
   initialData,
@@ -146,8 +147,6 @@ const App = () => {
     setActiveTemplate(templateKey);
     const template = templates[templateKey];
     if (template) {
-        // Deep merge config to ensure we don't lose necessary keys, 
-        // but overwrite with template specifics
         setConfig(prev => ({
             ...prev,
             ...template.config
@@ -199,10 +198,30 @@ const App = () => {
     );
   }
 
+  // Define common props to avoid repetition
+  const appProps = {
+    activeTab, setActiveTab,
+    data, setData,
+    config, setConfig,
+    sectionOrder, setSectionOrder,
+    applyTemplate,
+    draggedItemIndex, handleDragStart, handleDragOver, handleDragEnd,
+    darkMode, toggleDarkMode: () => setDarkMode(!darkMode),
+    undo: handleUndo, redo: handleRedo,
+    canUndo: historyIndex > 0,
+    canRedo: historyIndex < history.length - 1,
+    pdfQuality, setPdfQuality,
+    handleShare: () => setShowShareModal(true),
+    isSharing: false,
+    activeTemplate,
+    isReadOnly
+  };
+
   return (
-    <div className={`min-h-screen flex flex-col ${isReadOnly ? 'items-center justify-center' : 'md:flex-row'} font-sans transition-colors duration-300 ${darkMode ? 'dark bg-neutral-900' : 'bg-gray-100'}`}>
+    <div className={`min-h-screen font-sans transition-colors duration-300 ${darkMode ? 'dark bg-neutral-900' : 'bg-gray-100'}`}>
       <Styles />
 
+      {/* Share Modal (Global) */}
       {showShareModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
           <div className={`w-full max-w-md p-6 rounded-xl shadow-2xl ${darkMode ? 'bg-neutral-800 text-white' : 'bg-white text-gray-900'}`}>
@@ -242,59 +261,43 @@ const App = () => {
         </div>
       )}
 
-      {!isReadOnly && (
-        <EditorPanel
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          data={data}
-          setData={setData}
-          config={config}
-          setConfig={setConfig}
-          sectionOrder={sectionOrder}
-          setSectionOrder={setSectionOrder}
-          applyTemplate={applyTemplate}
-          draggedItemIndex={draggedItemIndex}
-          handleDragStart={handleDragStart}
-          handleDragOver={handleDragOver}
-          handleDragEnd={handleDragEnd}
-          darkMode={darkMode}
-          toggleDarkMode={() => setDarkMode(!darkMode)}
-          undo={handleUndo}
-          redo={handleRedo}
-          canUndo={historyIndex > 0}
-          canRedo={historyIndex < history.length - 1}
-          pdfQuality={pdfQuality}
-          setPdfQuality={setPdfQuality}
-          handleShare={() => setShowShareModal(true)}
-          isSharing={false}
-        />
-      )}
+      {/* --- MOBILE LAYOUT (Visible on < md screens) --- */}
+      <div className="block md:hidden h-full">
+         <MobileLayout {...appProps} />
+      </div>
 
-      <div className={`${isReadOnly ? 'w-full max-w-5xl h-screen' : 'w-full md:w-2/3 lg:w-3/4 h-screen'} overflow-y-auto p-4 md:p-8 flex flex-col items-center relative transition-colors duration-300 ${darkMode ? 'bg-neutral-800' : 'bg-gray-200'}`}>
-        
-        {isReadOnly && (
-          <div className="mb-6 px-6 py-3 bg-blue-600 text-white rounded-full shadow-lg font-semibold text-sm flex items-center gap-2">
-            <Share2 size={16} /> Viewing Shared Resume
-          </div>
+      {/* --- DESKTOP LAYOUT (Visible on >= md screens) --- */}
+      <div className={`hidden md:flex ${isReadOnly ? 'items-center justify-center flex-col' : 'flex-row h-screen'}`}>
+        {!isReadOnly && (
+            <EditorPanel {...appProps} />
         )}
 
-        <div className="fixed bottom-8 right-8 z-50 flex flex-col gap-3">
-           {!isReadOnly && (
-             <div className={`flex items-center gap-2 px-4 py-2 rounded-lg shadow-lg backdrop-blur-sm text-xs font-semibold ${isAutoSaving ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'} transition-all duration-300 ${darkMode ? 'text-green-400 bg-neutral-900/80' : 'text-green-700 bg-white/80'}`}>
-               <Save size={14} /> Auto-saved
-             </div>
-           )}
-          {isReadOnly && (
-             <button onClick={() => window.location.href = window.location.origin} className="flex items-center justify-center gap-2 px-6 py-3 rounded-full shadow-xl transition-all hover:scale-105 font-bold text-gray-900 bg-white hover:bg-gray-50 border border-gray-200">
-                <FilePlus size={20} className="text-blue-600" /> Create Yours
-             </button>
-           )}
-        </div>
+        <div className={`${isReadOnly ? 'w-full max-w-5xl h-screen' : 'w-full md:w-2/3 lg:w-3/4 h-screen'} overflow-y-auto p-4 md:p-8 flex flex-col items-center relative transition-colors duration-300 ${darkMode ? 'bg-neutral-800' : 'bg-gray-200'}`}>
+            
+            {isReadOnly && (
+            <div className="mb-6 px-6 py-3 bg-blue-600 text-white rounded-full shadow-lg font-semibold text-sm flex items-center gap-2">
+                <Share2 size={16} /> Viewing Shared Resume
+            </div>
+            )}
 
-        <PreviewPanel data={data} config={config} sectionOrder={sectionOrder} activeTemplate={activeTemplate} />
-        
-        <div className={`mt-8 mb-20 text-xs font-medium uppercase tracking-widest ${darkMode ? 'text-neutral-500' : 'text-gray-400'}`}>
-          Profiley • Resume Builder • Laksh Pradhwani 
+            <div className="fixed bottom-8 right-8 z-50 flex flex-col gap-3">
+            {!isReadOnly && (
+                <div className={`flex items-center gap-2 px-4 py-2 rounded-lg shadow-lg backdrop-blur-sm text-xs font-semibold ${isAutoSaving ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'} transition-all duration-300 ${darkMode ? 'text-green-400 bg-neutral-900/80' : 'text-green-700 bg-white/80'}`}>
+                <Save size={14} /> Auto-saved
+                </div>
+            )}
+            {isReadOnly && (
+                <button onClick={() => window.location.href = window.location.origin} className="flex items-center justify-center gap-2 px-6 py-3 rounded-full shadow-xl transition-all hover:scale-105 font-bold text-gray-900 bg-white hover:bg-gray-50 border border-gray-200">
+                    <FilePlus size={20} className="text-blue-600" /> Create Yours
+                </button>
+            )}
+            </div>
+
+            <PreviewPanel data={data} config={config} sectionOrder={sectionOrder} activeTemplate={activeTemplate} />
+            
+            <div className={`mt-8 mb-20 text-xs font-medium uppercase tracking-widest ${darkMode ? 'text-neutral-500' : 'text-gray-400'}`}>
+            Profiley • Resume Builder • Laksh Pradhwani 
+            </div>
         </div>
       </div>
     </div>
