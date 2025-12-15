@@ -30,46 +30,58 @@ const PreviewPanel = ({ data, config, sectionOrder, activeTemplate }) => {
         // 1. Clone the element to avoid messing with the displayed preview
         const clone = element.cloneNode(true);
 
-        // 2. Remove the scaling classes from the clone
-        // We strip the Tailwind scale classes so the clone renders at 100% size
+        // 2. Remove scaling classes and enforce print resets
         clone.classList.remove('scale-[0.6]', 'sm:scale-[0.8]', 'lg:scale-100', 'origin-top', 'transition-transform', 'duration-300');
-
-        // 3. Force the clone to be standard A4 width/height to ensure perfect capture
-        clone.style.transform = 'scale(1)';
-        clone.style.width = '280mm';
-        clone.style.minHeight = '350mm';
-        clone.style.margin = '0 auto';
+        
+        // 3. Enforce strict A4 geometry
+        // IMPORTANT: Width must match the design width (210mm) to prevent text reflow
+        clone.style.width = '210mm'; 
+        clone.style.minHeight = '297mm';
+        clone.style.height = 'auto'; // Allow expansion if content overflows (optional, usually fixed for 1 page)
+        clone.style.margin = '0';
+        clone.style.padding = '0';
+        clone.style.transform = 'none';
+        clone.style.boxShadow = 'none';
+        clone.style.backgroundColor = '#ffffff';
 
         // 4. Append clone to a temporary container off-screen
         const container = document.createElement('div');
-        container.style.position = 'absolute';
+        container.style.position = 'fixed'; // Use fixed to ensure it doesn't affect document flow
         container.style.top = '-10000px';
         container.style.left = '-10000px';
+        container.style.zIndex = '-100';
         container.appendChild(clone);
         document.body.appendChild(container);
+
         const opt = {
-            margin: 0,
+            margin: 0, // No margin, we handle it in CSS/Layout
             filename: `${data.personal.name.replace(/\s+/g, '_')}_Resume.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
+            enableLinks: true, // Attempt to render hyperlinks
             html2canvas: {
-                scale: 3, // Higher scale for crisp text
+                scale: 3, // High scale for crisp text (300 DPI equiv)
                 useCORS: true,
                 logging: false,
                 scrollY: 0,
                 letterRendering: true, // Crucial for text kerning/glitches
                 allowTaint: true,
-                backgroundColor: '#ffffff' // Ensure white background
+                backgroundColor: '#ffffff'
             },
-            jsPDF: { unit: 'mm', format: 'a3', orientation: 'portrait' }
+            jsPDF: { 
+                unit: 'mm', 
+                format: 'a4', 
+                orientation: 'portrait',
+                compress: true 
+            }
         };
 
         try {
-            // 5. Generate PDF from the clone
+            // 5. Generate PDF
             await html2pdf().set(opt).from(clone).save();
         } catch (error) {
             console.error("PDF Generation failed", error);
         } finally {
-            // 6. Cleanup the temporary container
+            // 6. Cleanup
             document.body.removeChild(container);
         }
     };
@@ -110,7 +122,6 @@ const PreviewPanel = ({ data, config, sectionOrder, activeTemplate }) => {
                 ));
             case 'skills':
                 return (
-                    // REMOVED 'gap-1.5' because we are handling it in SkillTag now for better PDF support
                     <div className={`flex flex-wrap ${config.skillStyle === 'bars' ? 'flex-col' : ''}`}>
                         {data.skills.map((skill, idx) => (
                             <SkillTag key={idx} skill={skill} config={config} theme={currentTheme} />
@@ -123,7 +134,7 @@ const PreviewPanel = ({ data, config, sectionOrder, activeTemplate }) => {
                 return (
                     <ul className="list-none space-y-1">
                         {items.map((item, idx) => (
-                            <li key={idx} className="text-xs text-gray-700 flex items-start gap-1.5">
+                            <li key={idx} className="text-xs text-gray-700kq flex items-start gap-1.5">
                                 <span className={`mt-1.5 w-1 h-1 rounded-full flex-shrink-0 ${currentTheme.hex}`} />
                                 <span>{item}</span>
                             </li>
@@ -154,6 +165,7 @@ const PreviewPanel = ({ data, config, sectionOrder, activeTemplate }) => {
 
         const allSections = sections.filter(s => s.visible);
 
+        // STYLING: Enforce A4 dimensions explicitly here
         const pageClass = `w-[210mm] min-h-[297mm] bg-white shadow-2xl mx-auto overflow-hidden relative text-gray-800 ${config.fontFamily}`;
         const headerClass = `flex flex-col gap-2 mb-3 ${config.headerAlign === 'text-center' ? 'items-center text-center' : config.headerAlign === 'text-right' ? 'items-end text-right' : 'items-start text-left'}`;
 
@@ -184,7 +196,7 @@ const PreviewPanel = ({ data, config, sectionOrder, activeTemplate }) => {
 
             return (
                 <div className={`${pageClass} flex ${reverse ? 'flex-row-reverse' : 'flex-row'}`}>
-                    <div className={`${sidebarWidth} flex-shrink-0 p-5 min-h-[297mm] ${sidebarBgClass} ${sidebarTextClass} flex flex-col gap-4 min-w-0`}>
+                    <div className={`${sidebarWidth} flex-shrink-0 p-5 min-h-[297mm] ${sidebarBgClass} ${sidebarTextClass}qk flex flex-col gap-4 min-w-0`}>
                         {config.showPhoto && (
                             <div className={`w-24 h-24 mx-auto mb-2 overflow-hidden border-2 ${currentTheme.border} ${config.photoShape}`}>
                                 {renderPhoto()}
@@ -253,7 +265,7 @@ const PreviewPanel = ({ data, config, sectionOrder, activeTemplate }) => {
                             </div>
                         </div>
 
-                        <div className={`flex gap-3 mt-2 text-xs text-gray-500 overflow-hidden min-w-0 ${config.headerAlign === 'text-center' ? 'justify-center' : ''}`}>
+                        <div className={`flex gap-3 mt-2 text-xs text-gray-500 overflow-hidden min-w-0 flex-wrap ${config.headerAlign === 'text-center' ? 'justify-center' : ''}`}>
                             <ContactItem icon={Mail} text={data.personal.email} config={config} />
                             <ContactItem icon={Phone} text={data.personal.phone} config={config} />
                             <ContactItem icon={MapPin} text={data.personal.location} config={config} />
@@ -336,7 +348,7 @@ const PreviewPanel = ({ data, config, sectionOrder, activeTemplate }) => {
             </div>
 
             <div className="overflow-auto max-w-full pb-10">
-                <div ref={resumeRef} className="origin-top scale-[0.6] sm:scale-[0.8] lg:scale-100 transition-transform duration-300">
+                <div ref={resumeRef} className="origin-top scale-[0.6] sm:scale-[0.8] lg:scale-100 transition-transform duration-300 shadow-xl">
                     {renderLayout()}
                 </div>
             </div>

@@ -2,8 +2,39 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Add the custom styles from your code here */
-.direction-rtl { direction: ltr; } 
-.custom-scrollbar::-webkit-scrollbar { width: 6px; }
-.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-.custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 3px; }
+/* Custom Scrollbar for Editor */
+.custom-scrollbar::-webkit-scrollbar { 
+    width: 6px; 
+}
+.custom-scrollbar::-webkit-scrollbar-track { 
+    background: transparent; 
+}
+.custom-scrollbar::-webkit-scrollbar-thumb { 
+    background-color: #cbd5e1; 
+    border-radius: 3px; 
+}
+
+/* RTL Helper */
+.direction-rtl { 
+    direction: ltr; 
+}
+
+/* --- PRINT & PDF RULES --- */
+@page {
+    size: A4 portrait;
+    margin: 0;
+}
+
+@media print {
+    body {
+        margin: 0;
+        padding: 0;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    /* Hide UI elements during standard browser print */
+    .no-print {
+        display: none !important;
+    }
+}

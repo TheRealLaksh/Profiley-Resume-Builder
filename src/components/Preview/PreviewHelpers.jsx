@@ -42,82 +42,32 @@ export const SectionHeader = ({ title, icon, config, theme }) => {
 };
 
 // --- FIX 1: Contact Item (Links) ---
-// Uses inline-flex and explicit decorations to prevent PDF splitting/misalignment
+// Simplified structure to be robust for html2pdf link detection
 export const ContactItem = ({ icon, text, link }) => {
     if (!text) return null;
 
     const content = (
-        <div
-            style={{
-                display: 'flex',
-                alignItems: 'center',
-                maxWidth: '160px',   // HARD WIDTH — REQUIRED
-                overflow: 'hidden',
-                whiteSpace: 'nowrap'
-            }}
-        >
+        <div className="flex items-center gap-1.5 min-w-0">
             {icon && (
-                <span
-                    style={{
-                        display: 'flex',
-                        marginRight: '6px',
-                        flexShrink: 0
-                    }}
-                >
+                <div className="flex-shrink-0 text-gray-500">
                     <IconRenderer Icon={icon} size={12} />
-                </span>
+                </div>
             )}
-
-            <span
-                style={{
-                    fontSize: '10px',
-                    color: '#374151',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                    flex: 1,
-                    minWidth: 0
-                }}
-            >
+            <span className="text-[10px] text-gray-700 truncate font-medium">
                 {text}
             </span>
-
-            {link && (
-                <span
-                    style={{
-                        display: 'flex',
-                        marginLeft: '4px',
-                        flexShrink: 0
-                    }}
-                >
-                    <ExternalLink size={8} />
-                </span>
-            )}
+            {link && <ExternalLink size={8} className="text-gray-400 flex-shrink-0" />}
         </div>
     );
 
     return (
-        <div
-            className="mb-1 break-inside-avoid"
-            style={{
-                maxWidth: '160px',   // SAME WIDTH HERE
-                overflow: 'hidden',
-                whiteSpace: 'nowrap'
-            }}
-        >
+        <div className="break-inside-avoid max-w-full">
             {link ? (
                 <a
                     href={link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    style={{
-                        display: 'block',
-                        maxWidth: '160px',
-                        overflow: 'hidden',
-                        whiteSpace: 'nowrap',
-                        textDecoration: 'none',
-                        color: 'inherit'
-                    }}
+                    className="block text-inherit no-underline hover:text-blue-600 transition-colors"
                 >
                     {content}
                 </a>
@@ -129,9 +79,6 @@ export const ContactItem = ({ icon, text, link }) => {
 };
 
 // --- FIX 2: Skill Tag (The Glitch Fix) ---
-// 1. Handles object vs string skills safely
-// 2. Uses marginRight/Bottom instead of flex-gap to prevent html2canvas overlapping issues
-// 3. Restores support for 'tags' and 'bars' styles used in your templates
 export const SkillTag = ({ skill, config, theme }) => {
     // SAFEGUARD: Handle both object (new data) and string (old data) formats
     const skillName = typeof skill === 'object' ? skill.name : skill;
@@ -139,10 +86,10 @@ export const SkillTag = ({ skill, config, theme }) => {
 
     const baseClasses = "text-[10px] font-medium break-inside-avoid inline-block";
     
-    // PDF-Safe Spacing: We use explicit margins on the item, NOT gap on the container
+    // PDF-Safe Spacing
     const marginStyle = { marginRight: '6px', marginBottom: '6px' };
 
-    // STYLE 1: Tags (Pills) - Used in Leafy, Modern, Glitch
+    // STYLE 1: Tags (Pills)
     if (config.skillStyle === 'tags') {
         return (
             <span 
@@ -154,7 +101,7 @@ export const SkillTag = ({ skill, config, theme }) => {
         );
     }
     
-    // STYLE 2: Bars - Used in Tech, Creative
+    // STYLE 2: Bars
     if (config.skillStyle === 'bars') {
         return (
             <div className="w-full break-inside-avoid" style={{ marginBottom: '8px' }}>
@@ -172,7 +119,7 @@ export const SkillTag = ({ skill, config, theme }) => {
         );
     }
 
-    // STYLE 3: Default / List - Used in Minimal, Elegant
+    // STYLE 3: Default / List
     return (
         <div className="flex items-center break-inside-avoid" style={marginStyle}>
              <span className={`w-1.5 h-1.5 rounded-full mr-2 ${theme.bg}`}></span>
