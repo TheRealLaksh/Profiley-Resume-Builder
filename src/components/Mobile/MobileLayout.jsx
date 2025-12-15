@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
     Layers, Palette, Share2, Eye, Layout, 
-    ChevronLeft, FileText, ZoomIn, ZoomOut, Maximize 
+    ChevronLeft, FileText, ZoomIn, ZoomOut, Maximize, Minimize 
 } from 'lucide-react';
 import ContentTab from '../Editor/ContentTab';
 import DesignTab from '../Editor/DesignTab';
@@ -11,21 +11,63 @@ import PreviewPanel from '../Preview/PreviewPanel';
 const MobileLayout = (props) => {
     const { 
         activeTab, setActiveTab, 
-        darkMode, data 
+        darkMode, data, sectionOrder
     } = props;
 
     // 'editor' or 'preview'
     const [mobileView, setMobileView] = useState('editor');
-    
-    // Zoom state for Mobile Preview
     const [mobileZoom, setMobileZoom] = useState(0.55); // Default start scale for mobile
+    const [isFullScreen, setIsFullScreen] = useState(false);
     
+    const previewRef = useRef(null);
+
     // Auto-switch to editor view if user navigates deeper into content
     useEffect(() => {
         if (activeTab !== 'sections' && activeTab !== 'design' && activeTab !== 'export') {
             setMobileView('editor');
         }
     }, [activeTab]);
+
+    // Handle Ctrl + Scroll Zoom for Mobile Layout (e.g. tablet with mouse)
+    useEffect(() => {
+        const handleWheel = (e) => {
+            if (e.ctrlKey) {
+                e.preventDefault();
+                const delta = e.deltaY * -0.001; 
+                setMobileZoom(prev => Math.min(Math.max(prev + delta, 0.3), 1.5));
+            }
+        };
+
+        const container = previewRef.current;
+        if (container) {
+            container.addEventListener('wheel', handleWheel, { passive: false });
+        }
+
+        return () => {
+            if (container) {
+                container.removeEventListener('wheel', handleWheel);
+            }
+        };
+    }, []);
+
+    // Handle Fullscreen Change
+    useEffect(() => {
+        const onFullScreenChange = () => setIsFullScreen(!!document.fullscreenElement);
+        document.addEventListener('fullscreenchange', onFullScreenChange);
+        return () => document.removeEventListener('fullscreenchange', onFullScreenChange);
+    }, []);
+
+    const toggleFullScreen = () => {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(err => {
+                console.error(`Error attempting to enable fullscreen: ${err.message}`);
+            });
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            }
+        }
+    };
 
     const handleZoomIn = () => setMobileZoom(prev => Math.min(prev + 0.05, 1.2));
     const handleZoomOut = () => setMobileZoom(prev => Math.max(prev - 0.05, 0.3));
@@ -76,7 +118,7 @@ const MobileLayout = (props) => {
                     <div className="flex flex-col">
                         <h1 className="text-sm font-bold leading-tight truncate">
                             {mobileView === 'preview' ? 'Live Preview' : 
-                             isDrillDown ? (props.sectionOrder.find(s=>s.id === activeTab)?.label || 'Editing') : 
+                             isDrillDown ? (sectionOrder.find(s=>s.id === activeTab)?.label || 'Editing') : 
                              activeTab === 'design' ? 'Design Studio' : 
                              activeTab === 'export' ? 'Export & Share' : 'Profiley Mobile'}
                         </h1>
@@ -112,7 +154,10 @@ const MobileLayout = (props) => {
                 </div>
 
                 {/* Preview View - Improved with Zoom */}
-                <div className={`absolute inset-0 bg-neutral-900/5 overflow-hidden flex flex-col items-center justify-start transition-opacity duration-300 ${mobileView === 'preview' ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}>
+                <div 
+                    ref={previewRef}
+                    className={`absolute inset-0 bg-neutral-900/5 overflow-hidden flex flex-col items-center justify-start transition-opacity duration-300 ${mobileView === 'preview' ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}
+                >
                    
                    {/* Scrollable Canvas Area */}
                    <div className="w-full h-full overflow-auto custom-scrollbar relative p-4 pb-32">
@@ -133,20 +178,20 @@ const MobileLayout = (props) => {
                         </div>
                    </div>
 
-                   {/* Mobile Zoom Controls */}
+                   {/* Mobile Zoom & Fullscreen Controls */}
                    <div className={`absolute bottom-4 right-4 flex items-center gap-2 px-2 py-2 rounded-full shadow-xl border backdrop-blur-xl ${darkMode ? 'bg-neutral-800/90 border-neutral-700' : 'bg-white/90 border-gray-200'}`}>
                         <button onClick={handleZoomOut} className="p-2 rounded-full hover:bg-black/5 active:scale-95 transition-transform">
                             <ZoomOut size={16} />
                         </button>
-                        <span className="text-[10px] font-bold w-8 text-center opacity-70">
+                        <button onClick={handleResetZoom} className="text-[10px] font-bold w-8 text-center opacity-70">
                             {Math.round(mobileZoom * 100)}%
-                        </span>
+                        </button>
                         <button onClick={handleZoomIn} className="p-2 rounded-full hover:bg-black/5 active:scale-95 transition-transform">
                             <ZoomIn size={16} />
                         </button>
                         <div className="w-[1px] h-4 bg-gray-500/20 mx-1"></div>
-                        <button onClick={handleResetZoom} className="p-2 rounded-full hover:bg-black/5 active:scale-95 transition-transform">
-                            <Maximize size={16} />
+                        <button onClick={toggleFullScreen} className="p-2 rounded-full hover:bg-black/5 active:scale-95 transition-transform">
+                            {isFullScreen ? <Minimize size={16} /> : <Maximize size={16} />}
                         </button>
                    </div>
                 </div>

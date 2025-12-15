@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Moon, Sun, RotateCcw, RotateCw, Share2, Save, Loader2, FilePlus, X, Link as LinkIcon,
-  ZoomIn, ZoomOut, Maximize
+  ZoomIn, ZoomOut, Maximize, Minimize
 } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
 import EditorPanel from './components/Editor/EditorPanel';
@@ -52,8 +52,10 @@ const App = () => {
   const [isGeneratingLink, setIsGeneratingLink] = useState(false);
   const [shareError, setShareError] = useState('');
 
-  // Zoom State for Desktop
-  const [zoom, setZoom] = useState(0.8); // Start at 80% to fit most screens nicely
+  // Zoom & Fullscreen State
+  const [zoom, setZoom] = useState(0.8);
+  const [isFullScreen, setIsFullScreen] = useState(false);
+  const previewContainerRef = useRef(null);
 
   useEffect(() => {
     const init = async () => {
@@ -126,6 +128,35 @@ const App = () => {
     return () => clearTimeout(timeoutId);
   }, [data, config, sectionOrder, isLoading, isReadOnly]);
 
+  // Handle Ctrl + Scroll Zoom
+  useEffect(() => {
+    const handleWheel = (e) => {
+      if (e.ctrlKey) {
+        e.preventDefault();
+        const delta = e.deltaY * -0.001; 
+        setZoom(prev => Math.min(Math.max(prev + delta, 0.3), 1.5));
+      }
+    };
+
+    const container = previewContainerRef.current;
+    if (container) {
+      container.addEventListener('wheel', handleWheel, { passive: false });
+    }
+
+    return () => {
+      if (container) {
+        container.removeEventListener('wheel', handleWheel);
+      }
+    };
+  }, []);
+
+  // Handle Fullscreen Change Events
+  useEffect(() => {
+    const onFullScreenChange = () => setIsFullScreen(!!document.fullscreenElement);
+    document.addEventListener('fullscreenchange', onFullScreenChange);
+    return () => document.removeEventListener('fullscreenchange', onFullScreenChange);
+  }, []);
+
   const handleUndo = () => {
     if (historyIndex > 0) {
       const prevState = history[historyIndex - 1];
@@ -183,6 +214,18 @@ const App = () => {
   const handleZoomIn = () => setZoom(prev => Math.min(prev + 0.1, 1.5));
   const handleZoomOut = () => setZoom(prev => Math.max(prev - 0.1, 0.3));
   const handleResetZoom = () => setZoom(0.8);
+
+  const toggleFullScreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(err => {
+        console.error(`Error attempting to enable fullscreen: ${err.message}`);
+      });
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+    }
+  };
 
   // Drag handlers
   const handleDragStart = (e, index) => { setDraggedItemIndex(index); e.dataTransfer.effectAllowed = 'move'; };
@@ -300,15 +343,20 @@ const App = () => {
                   <ZoomOut size={18} />
                 </button>
                 <button 
-                  onClick={handleResetZoom} 
+                  onClick={toggleFullScreen} 
                   className={`p-2 rounded-md transition-colors ${darkMode ? 'hover:bg-neutral-700' : 'hover:bg-gray-100'}`}
+                  title={isFullScreen ? "Exit Fullscreen" : "Fullscreen"}
+                >
+                  {isFullScreen ? <Minimize size={18} /> : <Maximize size={18} />}
+                </button>
+                
+                <button 
+                  onClick={handleResetZoom}
+                  className="text-[10px] text-center font-mono font-bold py-1 opacity-60 hover:opacity-100 cursor-pointer"
                   title="Reset Zoom"
                 >
-                  <Maximize size={18} />
-                </button>
-                <div className="text-[10px] text-center font-mono font-bold py-1 opacity-60">
                   {Math.round(zoom * 100)}%
-                </div>
+                </button>
               </div>
             </div>
 
@@ -319,7 +367,10 @@ const App = () => {
             )}
 
             {/* Scrollable Preview Area */}
-            <div className="w-full h-full overflow-auto custom-scrollbar flex flex-col items-center p-8 md:p-12 relative">
+            <div 
+              ref={previewContainerRef}
+              className="w-full h-full overflow-auto custom-scrollbar flex flex-col items-center p-8 md:p-12 relative"
+            >
                 
                 {/* Scalable Container */}
                 <div 
