@@ -56,8 +56,10 @@ const App = () => {
   const [zoom, setZoom] = useState(0.8);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const previewContainerRef = useRef(null);
+  const fullScreenContainerRef = useRef(null); // Ref for the element to go fullscreen
 
   useEffect(() => {
+    
     const init = async () => {
       setIsLoading(true);
       const params = new URLSearchParams(window.location.search);
@@ -217,9 +219,12 @@ const App = () => {
 
   const toggleFullScreen = () => {
     if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch(err => {
-        console.error(`Error attempting to enable fullscreen: ${err.message}`);
-      });
+        // Use the container ref to request fullscreen
+        if (fullScreenContainerRef.current) {
+            fullScreenContainerRef.current.requestFullscreen().catch(err => {
+                console.error(`Error attempting to enable fullscreen: ${err.message}`);
+            });
+        }
     } else {
       if (document.exitFullscreen) {
         document.exitFullscreen();
@@ -323,7 +328,10 @@ const App = () => {
             <EditorPanel {...appProps} />
         )}
 
-        <div className={`${isReadOnly ? 'w-full max-w-5xl h-screen' : 'w-full md:w-2/3 lg:w-3/4 h-screen'} overflow-hidden relative flex flex-col items-center transition-colors duration-300 ${darkMode ? 'bg-neutral-800' : 'bg-gray-200'}`}>
+        <div 
+            ref={fullScreenContainerRef} // Attached to the container that should go fullscreen
+            className={`${isReadOnly ? 'w-full max-w-5xl h-screen' : 'w-full md:w-2/3 lg:w-3/4 h-screen'} overflow-hidden relative flex flex-col items-center transition-colors duration-300 ${darkMode ? 'bg-neutral-800' : 'bg-gray-200'}`}
+        >
             
             {/* Desktop Zoom Toolbar */}
             <div className="absolute top-4 right-4 z-40 flex flex-col gap-2">
@@ -368,7 +376,7 @@ const App = () => {
 
             {/* Scrollable Preview Area */}
             <div 
-              ref={previewContainerRef}
+              ref={previewContainerRef} // Attached to the scrollable div for Zoom events
               className="w-full h-full overflow-auto custom-scrollbar flex flex-col items-center p-8 md:p-12 relative"
             >
                 

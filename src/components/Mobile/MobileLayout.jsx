@@ -20,6 +20,9 @@ const MobileLayout = (props) => {
     const [isFullScreen, setIsFullScreen] = useState(false);
     
     const previewRef = useRef(null);
+    const touchStartDistRef = useRef(0);
+    const startZoomRef = useRef(0.55);
+    const fullScreenContainerRef = useRef(null);
 
     // Auto-switch to editor view if user navigates deeper into content
     useEffect(() => {
@@ -28,27 +31,59 @@ const MobileLayout = (props) => {
         }
     }, [activeTab]);
 
-    // Handle Ctrl + Scroll Zoom for Mobile Layout (e.g. tablet with mouse)
+    // Handle Ctrl + Scroll Zoom & Pinch-to-Zoom
     useEffect(() => {
+        const container = previewRef.current;
+        if (!container) return;
+
+        // Mouse Wheel Zoom (Ctrl + Wheel)
         const handleWheel = (e) => {
             if (e.ctrlKey) {
                 e.preventDefault();
                 const delta = e.deltaY * -0.001; 
-                setMobileZoom(prev => Math.min(Math.max(prev + delta, 0.3), 1.5));
+                setMobileZoom(prev => Math.min(Math.max(prev + delta, 0.3), 2.0));
             }
         };
 
-        const container = previewRef.current;
-        if (container) {
-            container.addEventListener('wheel', handleWheel, { passive: false });
-        }
+        // Touch Start (Pinch)
+        const onTouchStart = (e) => {
+            if (e.touches.length === 2) {
+                // We don't preventDefault here to allow potential scrolling if fingers move together,
+                // but for pinch we mostly care about distance.
+                const dist = Math.hypot(
+                    e.touches[0].pageX - e.touches[1].pageX,
+                    e.touches[0].pageY - e.touches[1].pageY
+                );
+                touchStartDistRef.current = dist;
+                startZoomRef.current = mobileZoom;
+            }
+        };
+
+        // Touch Move (Pinch)
+        const onTouchMove = (e) => {
+            if (e.touches.length === 2) {
+                e.preventDefault(); // Stop browser zoom/scroll
+                const dist = Math.hypot(
+                    e.touches[0].pageX - e.touches[1].pageX,
+                    e.touches[0].pageY - e.touches[1].pageY
+                );
+                if (touchStartDistRef.current > 0) {
+                    const scaleChange = dist / touchStartDistRef.current;
+                    setMobileZoom(Math.min(Math.max(startZoomRef.current * scaleChange, 0.3), 2.0));
+                }
+            }
+        };
+
+        container.addEventListener('wheel', handleWheel, { passive: false });
+        container.addEventListener('touchstart', onTouchStart, { passive: false });
+        container.addEventListener('touchmove', onTouchMove, { passive: false });
 
         return () => {
-            if (container) {
-                container.removeEventListener('wheel', handleWheel);
-            }
+            container.removeEventListener('wheel', handleWheel);
+            container.removeEventListener('touchstart', onTouchStart);
+            container.removeEventListener('touchmove', onTouchMove);
         };
-    }, []);
+    }, [mobileZoom]); // Re-bind if necessary, though refs handle state access
 
     // Handle Fullscreen Change
     useEffect(() => {
@@ -59,9 +94,17 @@ const MobileLayout = (props) => {
 
     const toggleFullScreen = () => {
         if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen().catch(err => {
-                console.error(`Error attempting to enable fullscreen: ${err.message}`);
-            });
+            // Target the mobile layout container or a specific wrapper
+            if (fullScreenContainerRef.current) {
+                fullScreenContainerRef.current.requestFullscreen().catch(err => {
+                    console.error(`Error attempting to enable fullscreen: ${err.message}`);
+                });
+            } else {
+                 // Fallback to document element if ref is missing
+                 document.documentElement.requestFullscreen().catch(err => {
+                    console.error(`Error attempting to enable fullscreen: ${err.message}`);
+                });
+            }
         } else {
             if (document.exitFullscreen) {
                 document.exitFullscreen();
@@ -69,7 +112,7 @@ const MobileLayout = (props) => {
         }
     };
 
-    const handleZoomIn = () => setMobileZoom(prev => Math.min(prev + 0.05, 1.2));
+    const handleZoomIn = () => setMobileZoom(prev => Math.min(prev + 0.05, 1.5));
     const handleZoomOut = () => setMobileZoom(prev => Math.max(prev - 0.05, 0.3));
     const handleResetZoom = () => setMobileZoom(0.55);
 
@@ -96,7 +139,10 @@ const MobileLayout = (props) => {
     const isDrillDown = !['sections', 'design', 'export'].includes(activeTab);
 
     return (
-        <div className={`flex flex-col h-[100dvh] w-full overflow-hidden ${themeClasses}`}>
+        <div 
+            ref={fullScreenContainerRef}
+            className={`flex flex-col h-[100dvh] w-full overflow-hidden ${themeClasses}`}
+        >
             
             {/* Top Bar: Dynamic Header */}
             <div className={`flex-shrink-0 px-4 py-3 flex items-center justify-between border-b backdrop-blur-md z-20 ${darkMode ? 'bg-neutral-900/80 border-neutral-800' : 'bg-white/80 border-gray-200'}`}>
