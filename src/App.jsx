@@ -7,6 +7,7 @@ import html2pdf from 'html2pdf.js';
 import EditorPanel from './components/Editor/EditorPanel';
 import PreviewPanel from './components/Preview/PreviewPanel';
 import MobileLayout from './components/Mobile/MobileLayout';
+import SEOFooter from './components/SEO/SEOFooter'; // Added Import
 import { saveResumeToDB, saveResumeWithSlug, fetchResumeFromDB } from './firebase'; 
 import {
   initialData,
@@ -391,6 +392,14 @@ const App = () => {
                 <div className={`mt-16 mb-20 text-xs font-medium uppercase tracking-widest ${darkMode ? 'text-neutral-500' : 'text-gray-400'}`}>
                    Profiley • Resume Builder • Laksh Pradhwani 
                 </div>
+
+                {/* --- SEO FOOTER INTEGRATION --- */}
+                {/* Only visible when not in FullScreen Mode */}
+                {!isFullScreen && (
+                  <div className="w-full mt-10">
+                    <SEOFooter darkMode={darkMode} />
+                  </div>
+                )}
             </div>
 
             <div className="fixed bottom-8 right-8 z-50 flex flex-col gap-3">
