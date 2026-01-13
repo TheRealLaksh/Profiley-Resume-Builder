@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { Loader2, Save, Share2 } from 'lucide-react';
 
 // Components
@@ -57,9 +57,13 @@ const App = () => {
   const previewContainerRef = useRef(null);
   const fullScreenContainerRef = useRef(null);
 
+  // --- NEW: Accurate Zoom Layout State ---
+  const [contentSize, setContentSize] = useState({ width: 0, height: 0 });
+  const contentRef = useRef(null);
+
   // --- EFFECTS ---
 
-  // 1. Initialization (Load from URL or LocalStorage)
+  // 1. Initialization
   useEffect(() => {
     const init = async () => {
       setIsLoading(true);
@@ -157,6 +161,28 @@ const App = () => {
     return () => document.removeEventListener('fullscreenchange', onFullScreenChange);
   }, []);
 
+  // 5. NEW: Resize Observer to measure content height/width
+  useLayoutEffect(() => {
+    if (!contentRef.current) return;
+    
+    // Create an observer to watch the Resume Content size
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        // We use offsetWidth/Height to get the full border-box size
+        // but entry.contentRect is more performant for changes.
+        // For reliability with transforms, we read the DOM element directly inside the loop.
+        const element = entry.target;
+        setContentSize({
+          width: element.offsetWidth,
+          height: element.offsetHeight
+        });
+      }
+    });
+
+    observer.observe(contentRef.current);
+    return () => observer.disconnect();
+  }, [data, config, sectionOrder, activeTemplate]); // Re-observe if structure changes deeply
+
   // --- HANDLERS ---
 
   const handleUndo = () => {
@@ -215,19 +241,14 @@ const App = () => {
     }
   };
 
+  // Note: We point to 'resume-preview-content' which is now the INNER unscaled div. 
+  // This produces better PDFs.
   const triggerPdfDownload = () => handleDownloadPdf('resume-preview-content', data.personal?.name);
 
-  // Zoom Helpers
   const handleZoomIn = () => setZoom(prev => Math.min(prev + 0.1, 1.5));
   const handleZoomOut = () => setZoom(prev => Math.max(prev - 0.1, 0.3));
   const handleResetZoom = () => setZoom(0.8);
-  
-  // NEW: Fit to Width Handler
-  const handleFitWidth = () => {
-    // 1.0 represents "Actual Size" or fit width depending on your CSS container logic.
-    // Adjust this value (e.g., 1.1 or 1.2) if your specific layout requires more width.
-    setZoom(1.0); 
-  };
+  const handleFitWidth = () => setZoom(1.0);
   
   const toggleFullScreen = () => {
     if (!document.fullscreenElement && fullScreenContainerRef.current) {
@@ -237,7 +258,6 @@ const App = () => {
     }
   };
 
-  // Drag Helpers
   const handleDragStart = (e, index) => { setDraggedItemIndex(index); e.dataTransfer.effectAllowed = 'move'; };
   const handleDragOver = (e, index) => {
     e.preventDefault();
@@ -315,7 +335,7 @@ const App = () => {
 
         <div 
             ref={fullScreenContainerRef}
-            className={`${isReadOnly ? 'w-full max-w-5xl h-screen' : 'w-full md:w-2/3 lg:w-3/4 h-screen'} overflow-hidden relative flex flex-col items-center transition-colors duration-300 ${
+            className={`${isReadOnly ? 'w-full max-w-5xl h-screen' : 'w-full md:w-2/3 lg:w-3/4 h-screen'} overflow-hidden relative flex flex-col transition-colors duration-300 ${
               isReadOnly 
                 ? (darkMode ? 'bg-gradient-to-br from-neutral-900 via-neutral-800 to-neutral-900' : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-blue-50') 
                 : (darkMode ? 'bg-neutral-800' : 'bg-gray-200')
@@ -325,7 +345,7 @@ const App = () => {
               darkMode={darkMode}
               handleZoomIn={handleZoomIn}
               handleZoomOut={handleZoomOut}
-              handleFitWidth={handleFitWidth} // <-- Passed here
+              handleFitWidth={handleFitWidth}
               toggleFullScreen={toggleFullScreen}
               handleResetZoom={handleResetZoom}
               zoom={zoom}
@@ -338,32 +358,66 @@ const App = () => {
               </div>
             )}
 
-            {/* Scrollable Preview Area */}
+            {/* --- IMPROVED PREVIEW AREA --- */}
+            {/* Using "flex flex-col" with "overflow-auto" ensures native scrolling */}
             <div 
               ref={previewContainerRef}
-              className="w-full h-full overflow-auto custom-scrollbar flex flex-col items-center p-8 md:p-12 relative"
+              className="w-full h-full overflow-auto custom-scrollbar flex flex-col p-8 md:p-12 relative"
             >
-                {/* Scalable Container */}
+                {/* 1. Phantom Container: Resizes physically to force scrollbars */}
+                {/* "mx-auto" keeps it perfectly centered when smaller than viewport */}
                 <div 
-                  id="resume-preview-content"
-                  className="transition-transform duration-200 ease-out origin-top shadow-2xl"
-                  style={{ transform: `scale(${zoom})`, marginBottom: `${(zoom - 1) * 300}px` }} 
+                  style={{
+                    width: contentSize.width > 0 ? contentSize.width * zoom : 'auto',
+                    height: contentSize.height > 0 ? contentSize.height * zoom : 'auto',
+                    // Smoothly transition size changes
+                    transition: 'width 0.15s ease-out, height 0.15s ease-out' 
+                  }}
+                  className="relative mx-auto shrink-0 z-10" 
                 >
-                   <PreviewPanel data={data} config={config} sectionOrder={sectionOrder} activeTemplate={activeTemplate} />
+                    {/* 2. Transform Container: Pins the scaled content to the phantom container */}
+                    <div 
+                       style={{
+                          transform: `scale(${zoom})`,
+                          transformOrigin: 'top left', // Important: Scale from top-left of the box
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          width: contentSize.width > 0 ? contentSize.width : 'auto'
+                       }}
+                       className="transition-transform duration-150 ease-out"
+                    >
+                        {/* 3. Actual Content: Measured by ResizeObserver */}
+                        {/* Shadow and visual styles go here on the "Paper" */}
+                        <div 
+                          id="resume-preview-content" 
+                          ref={contentRef} 
+                          className="inline-block shadow-2xl origin-top"
+                        >
+                           <PreviewPanel 
+                              data={data} 
+                              config={config} 
+                              sectionOrder={sectionOrder} 
+                              activeTemplate={activeTemplate} 
+                           />
+                        </div>
+                    </div>
                 </div>
 
-                <div className={`mt-16 mb-20 text-xs font-medium uppercase tracking-widest ${darkMode ? 'text-neutral-500' : 'text-gray-400'}`}>
+                {/* Footer stays below the Phantom Box content naturally */}
+                <div className={`mt-16 mb-20 text-xs font-medium uppercase tracking-widest text-center shrink-0 ${darkMode ? 'text-neutral-500' : 'text-gray-400'}`}>
                    Profiley • Resume Builder • Laksh Pradhwani 
                 </div>
 
                 {!isFullScreen && (
-                  <div className="w-full mt-10">
+                  <div className="w-full mt-2 shrink-0">
                     <SEOFooter darkMode={darkMode} />
                   </div>
                 )}
             </div>
 
-            <div className="fixed bottom-8 right-8 z-50 flex flex-col gap-3">
+            {/* Auto-save Indicator */}
+            <div className="fixed bottom-8 right-8 z-50 flex flex-col gap-3 pointer-events-none">
               {!isReadOnly && (
                   <div className={`flex items-center gap-2 px-4 py-2 rounded-lg shadow-lg backdrop-blur-sm text-xs font-semibold ${isAutoSaving ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'} transition-all duration-300 ${darkMode ? 'text-green-400 bg-neutral-900/80' : 'text-green-700 bg-white/80'}`}>
                   <Save size={14} /> Auto-saved
