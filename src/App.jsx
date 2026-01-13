@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   Moon, Sun, RotateCcw, RotateCw, Share2, Save, Loader2, FilePlus, X, Link as LinkIcon,
-  ZoomIn, ZoomOut, Maximize, Minimize, Mail, Phone, Check
+  ZoomIn, ZoomOut, Maximize, Minimize, Mail, Phone, Check, Download
 } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
 import EditorPanel from './components/Editor/EditorPanel';
@@ -239,6 +239,18 @@ const App = () => {
     }
   };
 
+  const handleDownloadPdf = () => {
+    const element = document.getElementById('resume-preview-content');
+    const opt = {
+      margin: 0,
+      filename: `${data.personal?.name || 'resume'}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+    html2pdf().set(opt).from(element).save();
+  };
+
   // Zoom Handlers
   const handleZoomIn = () => setZoom(prev => Math.min(prev + 0.1, 1.5));
   const handleZoomOut = () => setZoom(prev => Math.max(prev - 0.1, 0.3));
@@ -380,7 +392,11 @@ const App = () => {
 
         <div 
             ref={fullScreenContainerRef} // Attached to the container that should go fullscreen
-            className={`${isReadOnly ? 'w-full max-w-5xl h-screen' : 'w-full md:w-2/3 lg:w-3/4 h-screen'} overflow-hidden relative flex flex-col items-center transition-colors duration-300 ${darkMode ? 'bg-neutral-800' : 'bg-gray-200'}`}
+            className={`${isReadOnly ? 'w-full max-w-5xl h-screen' : 'w-full md:w-2/3 lg:w-3/4 h-screen'} overflow-hidden relative flex flex-col items-center transition-colors duration-300 ${
+              isReadOnly 
+                ? (darkMode ? 'bg-gradient-to-br from-neutral-900 via-neutral-800 to-neutral-900' : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-blue-50') 
+                : (darkMode ? 'bg-neutral-800' : 'bg-gray-200')
+            }`}
         >
             
             {/* Desktop Zoom Toolbar */}
@@ -432,6 +448,7 @@ const App = () => {
                 
                 {/* Scalable Container */}
                 <div 
+                  id="resume-preview-content"
                   className="transition-transform duration-200 ease-out origin-top shadow-2xl"
                   style={{ transform: `scale(${zoom})`, marginBottom: `${(zoom - 1) * 300}px` }} 
                 >
@@ -493,6 +510,15 @@ const App = () => {
           {(data.personal?.email || data.personal?.phone) && (
              <div className={`hidden sm:block h-8 w-px ${darkMode ? 'bg-neutral-700' : 'bg-gray-300'}`}></div>
           )}
+
+          {/* Download Button */}
+          <button 
+            onClick={handleDownloadPdf}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-full font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition-all shadow-lg hover:shadow-indigo-500/25 hover:scale-105 active:scale-95 cursor-pointer"
+          >
+              <Download size={18} />
+              <span className="hidden sm:inline">Download</span>
+          </button>
 
           {/* Fork/Use Template Button */}
           <button 
