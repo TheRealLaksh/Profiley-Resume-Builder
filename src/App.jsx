@@ -7,7 +7,7 @@ import html2pdf from 'html2pdf.js';
 import EditorPanel from './components/Editor/EditorPanel';
 import PreviewPanel from './components/Preview/PreviewPanel';
 import MobileLayout from './components/Mobile/MobileLayout';
-import SEOFooter from './components/SEO/SEOFooter'; // Added Import
+import SEOFooter from './components/SEO/SEOFooter'; 
 import { saveResumeToDB, saveResumeWithSlug, fetchResumeFromDB } from './firebase'; 
 import {
   initialData,
@@ -81,6 +81,12 @@ const App = () => {
             if (fetched.config) setConfig(fetched.config);
             if (fetched.sectionOrder) setSectionOrder(fetched.sectionOrder);
             setIsReadOnly(true); 
+            
+            // Set Dynamic Title for Shared Resumes
+            if (fetched.data?.personal?.name) {
+                document.title = `${fetched.data.personal.name} - Resume`;
+            }
+
             setIsLoading(false);
             return;
           } else {
@@ -246,6 +252,19 @@ const App = () => {
   };
   const handleDragEnd = () => setDraggedItemIndex(null);
 
+  // FIX: Handle "Use This Template" (Forking)
+  const handleForkTemplate = () => {
+    // 1. Save the current Design Config & Section Order
+    localStorage.setItem('profiley_config', JSON.stringify(config));
+    localStorage.setItem('profiley_order', JSON.stringify(sectionOrder));
+    
+    // 2. Clear personal data to ensure privacy/fresh start
+    localStorage.removeItem('profiley_data');
+    
+    // 3. Redirect to Editor (Home)
+    window.location.href = '/'; 
+  };
+
   if (isLoading) {
     return (
       <div className={`min-h-screen flex flex-col items-center justify-center font-sans transition-colors duration-300 ${darkMode ? 'dark bg-neutral-900 text-white' : 'bg-gray-100 text-gray-600'}`}>
@@ -409,8 +428,11 @@ const App = () => {
                 </div>
             )}
             {isReadOnly && (
-                <button onClick={() => window.location.href = window.location.origin} className="flex items-center justify-center gap-2 px-6 py-3 rounded-full shadow-xl transition-all hover:scale-105 font-bold text-gray-900 bg-white hover:bg-gray-50 border border-gray-200">
-                    <FilePlus size={20} className="text-blue-600" /> Create Yours
+                <button 
+                  onClick={handleForkTemplate} 
+                  className="flex items-center justify-center gap-2 px-6 py-3 rounded-full shadow-xl transition-all hover:scale-105 font-bold text-gray-900 bg-white hover:bg-gray-50 border border-gray-200"
+                >
+                    <FilePlus size={20} className="text-blue-600" /> Use This Template
                 </button>
             )}
             </div>
