@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   Moon, Sun, RotateCcw, RotateCw, Share2, Save, Loader2, FilePlus, X, Link as LinkIcon,
-  ZoomIn, ZoomOut, Maximize, Minimize
+  ZoomIn, ZoomOut, Maximize, Minimize, Mail, Phone, Check
 } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
 import EditorPanel from './components/Editor/EditorPanel';
@@ -28,6 +28,15 @@ const Styles = () => (
     .dark ::-webkit-scrollbar-track { background: #171717; }
     .dark ::-webkit-scrollbar-thumb { background: #525252; border-radius: 4px; }
     .dark ::-webkit-scrollbar-thumb:hover { background: #737373; }
+
+    @keyframes slideIn {
+      from { transform: translate(-50%, 100%); opacity: 0; }
+      to { transform: translate(-50%, 0); opacity: 1; }
+    }
+    
+    .toast-enter {
+      animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
   `}</style>
 );
 
@@ -52,6 +61,9 @@ const App = () => {
   const [customSlug, setCustomSlug] = useState('');
   const [isGeneratingLink, setIsGeneratingLink] = useState(false);
   const [shareError, setShareError] = useState('');
+  
+  // Notification State
+  const [showCopyToast, setShowCopyToast] = useState(false);
 
   // Zoom & Fullscreen State
   const [zoom, setZoom] = useState(0.8);
@@ -219,6 +231,14 @@ const App = () => {
     }
   };
 
+  const handleCopyEmail = () => {
+    if (data.personal?.email) {
+      navigator.clipboard.writeText(data.personal.email);
+      setShowCopyToast(true);
+      setTimeout(() => setShowCopyToast(false), 3000);
+    }
+  };
+
   // Zoom Handlers
   const handleZoomIn = () => setZoom(prev => Math.min(prev + 0.1, 1.5));
   const handleZoomOut = () => setZoom(prev => Math.max(prev - 0.1, 0.3));
@@ -337,6 +357,16 @@ const App = () => {
         </div>
       )}
 
+      {/* --- Notification Toast --- */}
+      {showCopyToast && (
+        <div className="fixed top-8 left-1/2 transform -translate-x-1/2 z-[110] flex items-center gap-3 px-6 py-3 rounded-full shadow-2xl backdrop-blur-md toast-enter bg-gray-900 text-white dark:bg-white dark:text-gray-900">
+          <div className="p-1 rounded-full bg-green-500 text-white">
+            <Check size={14} strokeWidth={3} />
+          </div>
+          <span className="font-semibold text-sm">Email copied to clipboard!</span>
+        </div>
+      )}
+
       {/* --- MOBILE LAYOUT (Visible on < md screens) --- */}
       <div className="block md:hidden h-full">
          <MobileLayout {...appProps} />
@@ -427,17 +457,53 @@ const App = () => {
                 <Save size={14} /> Auto-saved
                 </div>
             )}
-            {isReadOnly && (
-                <button 
-                  onClick={handleForkTemplate} 
-                  className="flex items-center justify-center gap-2 px-6 py-3 rounded-full shadow-xl transition-all hover:scale-105 font-bold text-gray-900 bg-white hover:bg-gray-50 border border-gray-200"
-                >
-                    <FilePlus size={20} className="text-blue-600" /> Use This Template
-                </button>
-            )}
             </div>
         </div>
       </div>
+
+      {/* --- Sticky Action Bar (Only for Shared/ReadOnly View) --- */}
+      {isReadOnly && (
+        <div className={`fixed bottom-0 left-0 w-full z-[100] px-6 py-4 flex items-center justify-center gap-4 border-t shadow-[0_-4px_20px_rgba(0,0,0,0.1)] backdrop-blur-md transition-colors duration-300 ${darkMode ? 'bg-neutral-900/90 border-neutral-800' : 'bg-white/90 border-gray-200'}`}>
+          
+          <div className="flex items-center gap-3">
+            {/* Contact Buttons */}
+            {data.personal?.email && (
+              <button 
+                onClick={handleCopyEmail}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-full font-bold text-white bg-blue-600 hover:bg-blue-700 transition-all shadow-lg hover:shadow-blue-500/25 hover:scale-105 active:scale-95 cursor-pointer"
+                title="Copy Email to Clipboard"
+              >
+                <Mail size={18} />
+                <span className="hidden sm:inline">Email</span>
+              </button>
+            )}
+            
+            {data.personal?.phone && (
+              <a 
+                href={`tel:${data.personal.phone}`}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-full font-bold text-white bg-green-600 hover:bg-green-700 transition-all shadow-lg hover:shadow-green-500/25 hover:scale-105 active:scale-95"
+              >
+                <Phone size={18} />
+                <span className="hidden sm:inline">Call</span>
+              </a>
+            )}
+          </div>
+
+          {/* Divider if Contact Info Exists */}
+          {(data.personal?.email || data.personal?.phone) && (
+             <div className={`hidden sm:block h-8 w-px ${darkMode ? 'bg-neutral-700' : 'bg-gray-300'}`}></div>
+          )}
+
+          {/* Fork/Use Template Button */}
+          <button 
+            onClick={handleForkTemplate} 
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-bold transition-all shadow-lg hover:scale-105 active:scale-95 border ${darkMode ? 'bg-neutral-800 text-white border-neutral-700 hover:bg-neutral-700' : 'bg-white text-gray-900 border-gray-200 hover:bg-gray-50'}`}
+          >
+              <FilePlus size={18} className="text-blue-500" />
+              <span>Use Template</span>
+          </button>
+        </div>
+      )}
     </div>
   );
 };
