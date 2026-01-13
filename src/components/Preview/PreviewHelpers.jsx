@@ -41,25 +41,14 @@ export const SectionHeader = ({ title, icon, config, theme }) => {
     );
 };
 
-// --- HELPER: URL Normalizer ---
-const ensureProtocol = (url) => {
-    if (!url) return '';
-    const trimmedUrl = url.trim();
-    
-    // Return as is if it already has a protocol
-    if (trimmedUrl.startsWith('http://') || trimmedUrl.startsWith('https://') || trimmedUrl.startsWith('mailto:')) {
-        return trimmedUrl;
-    }
-    
-    // Otherwise, prepend https://
-    return `https://${trimmedUrl}`;
-};
-
 // --- FIX: Contact Item (Critical Visibility Fix) ---
 export const ContactItem = ({ icon, text, link }) => {
     if (!text) return null;
 
     // CRITICAL PDF STYLES:
+    // 1. color: '#000000' -> Ensures maximum contrast, no grey wash-out.
+    // 2. fontFamily: 'Arial...' -> Bypasses variable/web font loading failures.
+    // 3. textDecoration: 'none' -> Prevents browser link underlining.
     const safeTextStyle = {
         color: '#000000',
         fontFamily: 'Arial, Helvetica, sans-serif', 
@@ -70,6 +59,7 @@ export const ContactItem = ({ icon, text, link }) => {
         whiteSpace: 'nowrap' // Keep on one line
     };
 
+    // Remove 'truncate' to prevent text becoming "..." or disappearing.
     const contentClasses = "flex items-center gap-1.5 min-w-0";
     
     // Icon Wrapper
@@ -93,13 +83,10 @@ export const ContactItem = ({ icon, text, link }) => {
 
     // Render Logic
     if (link) {
-        // Use the helper to sanitize the link
-        const safeLink = ensureProtocol(link);
-
         return (
             <div className="break-inside-avoid max-w-full inline-flex">
                 <a
-                    href={safeLink}
+                    href={link}
                     target="_blank"
                     rel="noopener noreferrer"
                     className={contentClasses}
