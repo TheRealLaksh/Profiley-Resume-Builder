@@ -222,6 +222,13 @@ const App = () => {
   const handleZoomOut = () => setZoom(prev => Math.max(prev - 0.1, 0.3));
   const handleResetZoom = () => setZoom(0.8);
   
+  // NEW: Fit to Width Handler
+  const handleFitWidth = () => {
+    // 1.0 represents "Actual Size" or fit width depending on your CSS container logic.
+    // Adjust this value (e.g., 1.1 or 1.2) if your specific layout requires more width.
+    setZoom(1.0); 
+  };
+  
   const toggleFullScreen = () => {
     if (!document.fullscreenElement && fullScreenContainerRef.current) {
         fullScreenContainerRef.current.requestFullscreen().catch(console.error);
@@ -318,6 +325,7 @@ const App = () => {
               darkMode={darkMode}
               handleZoomIn={handleZoomIn}
               handleZoomOut={handleZoomOut}
+              handleFitWidth={handleFitWidth} // <-- Passed here
               toggleFullScreen={toggleFullScreen}
               handleResetZoom={handleResetZoom}
               zoom={zoom}
