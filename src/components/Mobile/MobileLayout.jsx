@@ -11,7 +11,8 @@ import PreviewPanel from '../Preview/PreviewPanel';
 const MobileLayout = (props) => {
     const { 
         activeTab, setActiveTab, 
-        darkMode, data, sectionOrder
+        darkMode, data, sectionOrder,
+        isReadOnly // Added isReadOnly to props destructuring
     } = props;
 
     // 'editor' or 'preview'
@@ -24,12 +25,19 @@ const MobileLayout = (props) => {
     const startZoomRef = useRef(0.55);
     const fullScreenContainerRef = useRef(null);
 
+    // FIX: Auto-switch to preview if read-only
+    useEffect(() => {
+        if (isReadOnly) {
+            setMobileView('preview');
+        }
+    }, [isReadOnly]);
+
     // Auto-switch to editor view if user navigates deeper into content
     useEffect(() => {
-        if (activeTab !== 'sections' && activeTab !== 'design' && activeTab !== 'export') {
+        if (!isReadOnly && activeTab !== 'sections' && activeTab !== 'design' && activeTab !== 'export') {
             setMobileView('editor');
         }
-    }, [activeTab]);
+    }, [activeTab, isReadOnly]);
 
     // Handle Ctrl + Scroll Zoom & Pinch-to-Zoom
     useEffect(() => {
@@ -148,7 +156,7 @@ const MobileLayout = (props) => {
             <div className={`flex-shrink-0 px-4 py-3 flex items-center justify-between border-b backdrop-blur-md z-20 ${darkMode ? 'bg-neutral-900/80 border-neutral-800' : 'bg-white/80 border-gray-200'}`}>
                 <div className="flex items-center gap-3 overflow-hidden">
                     {/* Back button logic for drill-down states */}
-                    {isDrillDown && mobileView === 'editor' ? (
+                    {!isReadOnly && isDrillDown && mobileView === 'editor' ? (
                         <button 
                             onClick={() => setActiveTab('sections')}
                             className={`p-1.5 rounded-full ${darkMode ? 'bg-neutral-800 text-neutral-300' : 'bg-gray-100 text-gray-600'}`}
@@ -175,24 +183,31 @@ const MobileLayout = (props) => {
                     </div>
                 </div>
 
-                {/* Quick Toggle for Preview */}
-                <button
-                    onClick={() => setMobileView(v => v === 'editor' ? 'preview' : 'editor')}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all shadow-sm ${
-                        mobileView === 'preview' 
-                        ? 'bg-blue-600 text-white shadow-blue-500/20' 
-                        : darkMode ? 'bg-neutral-800 text-neutral-300 border border-neutral-700' : 'bg-white text-gray-700 border border-gray-200'
-                    }`}
-                >
-                    {mobileView === 'preview' ? <FileText size={14} /> : <Eye size={14} />}
-                    <span>{mobileView === 'preview' ? 'Edit' : 'View'}</span>
-                </button>
+                {/* Quick Toggle for Preview (Hidden if ReadOnly) */}
+                {!isReadOnly ? (
+                    <button
+                        onClick={() => setMobileView(v => v === 'editor' ? 'preview' : 'editor')}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all shadow-sm ${
+                            mobileView === 'preview' 
+                            ? 'bg-blue-600 text-white shadow-blue-500/20' 
+                            : darkMode ? 'bg-neutral-800 text-neutral-300 border border-neutral-700' : 'bg-white text-gray-700 border border-gray-200'
+                        }`}
+                    >
+                        {mobileView === 'preview' ? <FileText size={14} /> : <Eye size={14} />}
+                        <span>{mobileView === 'preview' ? 'Edit' : 'View'}</span>
+                    </button>
+                ) : (
+                    // Optional: Read Only Badge
+                    <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold opacity-70 ${darkMode ? 'bg-neutral-800 text-neutral-400' : 'bg-gray-100 text-gray-500'}`}>
+                        <Eye size={14} /> <span>Read Only</span>
+                    </div>
+                )}
             </div>
 
             {/* Main Content Area */}
             <div className="flex-grow overflow-hidden relative">
                 
-                {/* Editor View */}
+                {/* Editor View (Hidden entirely if readOnly via logic, but safe to keep conditioned) */}
                 <div className={`absolute inset-0 overflow-y-auto custom-scrollbar transition-opacity duration-300 ${mobileView === 'editor' ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}>
                     <div className="p-4 pb-24 space-y-4">
                         {renderActiveComponent()}
@@ -244,42 +259,44 @@ const MobileLayout = (props) => {
 
             </div>
 
-            {/* Bottom Navigation Bar */}
-            <div className={`flex-shrink-0 h-16 border-t backdrop-blur-xl z-30 grid grid-cols-4 px-2 pb-safe ${darkMode ? 'bg-neutral-900/90 border-neutral-800' : 'bg-white/90 border-gray-200'}`}>
-                
-                <button 
-                    onClick={() => { setActiveTab('sections'); setMobileView('editor'); }}
-                    className={`${navItemBase} ${activeTab === 'sections' || isDrillDown ? navItemActive : navItemInactive}`}
-                >
-                    <Layers size={20} strokeWidth={activeTab === 'sections' || isDrillDown ? 2.5 : 2} />
-                    <span className="text-[10px] font-medium">Content</span>
-                </button>
+            {/* Bottom Navigation Bar - HIDDEN IF READ ONLY */}
+            {!isReadOnly && (
+                <div className={`flex-shrink-0 h-16 border-t backdrop-blur-xl z-30 grid grid-cols-4 px-2 pb-safe ${darkMode ? 'bg-neutral-900/90 border-neutral-800' : 'bg-white/90 border-gray-200'}`}>
+                    
+                    <button 
+                        onClick={() => { setActiveTab('sections'); setMobileView('editor'); }}
+                        className={`${navItemBase} ${activeTab === 'sections' || isDrillDown ? navItemActive : navItemInactive}`}
+                    >
+                        <Layers size={20} strokeWidth={activeTab === 'sections' || isDrillDown ? 2.5 : 2} />
+                        <span className="text-[10px] font-medium">Content</span>
+                    </button>
 
-                <button 
-                    onClick={() => { setActiveTab('design'); setMobileView('editor'); }}
-                    className={`${navItemBase} ${activeTab === 'design' ? navItemActive : navItemInactive}`}
-                >
-                    <Palette size={20} strokeWidth={activeTab === 'design' ? 2.5 : 2} />
-                    <span className="text-[10px] font-medium">Design</span>
-                </button>
+                    <button 
+                        onClick={() => { setActiveTab('design'); setMobileView('editor'); }}
+                        className={`${navItemBase} ${activeTab === 'design' ? navItemActive : navItemInactive}`}
+                    >
+                        <Palette size={20} strokeWidth={activeTab === 'design' ? 2.5 : 2} />
+                        <span className="text-[10px] font-medium">Design</span>
+                    </button>
 
-                <button 
-                    onClick={() => setMobileView('preview')}
-                    className={`${navItemBase} ${mobileView === 'preview' ? navItemActive : navItemInactive}`}
-                >
-                    <Eye size={20} strokeWidth={mobileView === 'preview' ? 2.5 : 2} />
-                    <span className="text-[10px] font-medium">Preview</span>
-                </button>
+                    <button 
+                        onClick={() => setMobileView('preview')}
+                        className={`${navItemBase} ${mobileView === 'preview' ? navItemActive : navItemInactive}`}
+                    >
+                        <Eye size={20} strokeWidth={mobileView === 'preview' ? 2.5 : 2} />
+                        <span className="text-[10px] font-medium">Preview</span>
+                    </button>
 
-                <button 
-                    onClick={() => { setActiveTab('export'); setMobileView('editor'); }}
-                    className={`${navItemBase} ${activeTab === 'export' ? navItemActive : navItemInactive}`}
-                >
-                    <Share2 size={20} strokeWidth={activeTab === 'export' ? 2.5 : 2} />
-                    <span className="text-[10px] font-medium">Export</span>
-                </button>
+                    <button 
+                        onClick={() => { setActiveTab('export'); setMobileView('editor'); }}
+                        className={`${navItemBase} ${activeTab === 'export' ? navItemActive : navItemInactive}`}
+                    >
+                        <Share2 size={20} strokeWidth={activeTab === 'export' ? 2.5 : 2} />
+                        <span className="text-[10px] font-medium">Export</span>
+                    </button>
 
-            </div>
+                </div>
+            )}
         </div>
     );
 };
