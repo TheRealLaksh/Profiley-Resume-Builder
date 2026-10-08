@@ -65,26 +65,31 @@ const ContentTab = ({
         }));
     };
 
+    // Never mutate the existing item: undo history shares these objects with the current state.
     const handleArrayChange = (section, index, field, value) => {
-        const newSection = [...data[section]];
-        newSection[index][field] = value;
-        setData({ ...data, [section]: newSection });
+        setData(prev => ({
+            ...prev,
+            [section]: prev[section].map((item, i) => (i === index ? { ...item, [field]: value } : item))
+        }));
     };
 
     // Fix for Achievements/Community (Simple Lists)
     const handleSimpleListChange = (section, index, value) => {
-        const newSection = [...data[section]];
-        newSection[index] = value;
-        setData({ ...data, [section]: newSection });
+        setData(prev => ({
+            ...prev,
+            [section]: prev[section].map((item, i) => (i === index ? value : item))
+        }));
     };
 
     const handleSkillChange = (index, field, value) => {
-        const newSkills = [...data.skills];
-        if (typeof newSkills[index] === 'string') {
-            newSkills[index] = { name: newSkills[index], level: 80 };
-        }
-        newSkills[index][field] = value;
-        setData({ ...data, skills: newSkills });
+        setData(prev => ({
+            ...prev,
+            skills: prev.skills.map((skill, i) => {
+                if (i !== index) return skill;
+                const base = typeof skill === 'string' ? { name: skill, level: 80 } : skill;
+                return { ...base, [field]: value };
+            })
+        }));
     };
 
     // Fix for Custom Sections
@@ -284,10 +289,10 @@ const ContentTab = ({
                         {data[activeTab].map((item, index) => (
                             <div key={item.id} className={`p-4 rounded-lg border relative group ${darkMode ? 'bg-neutral-900 border-neutral-700' : 'bg-gray-50 border-gray-200'}`}>
                                 <button onClick={() => removeItem(activeTab, index)} className="absolute top-2 right-2 text-gray-400 hover:text-red-500 transition-colors"><Trash2 size={16}/></button>
-                                <input type="text" value={item.role || item.institution} onChange={(e) => handleArrayChange(activeTab, index, activeTab === 'experience' ? 'role' : 'institution', e.target.value)} placeholder={activeTab === 'experience' ? 'Role' : 'Institution'} className={`w-full mb-2 p-1.5 bg-transparent border-b focus:border-blue-500 outline-none font-medium text-sm ${darkMode ? 'border-neutral-600 text-white' : 'border-gray-300 text-gray-900'}`} />
-                                <input type="text" value={item.company || item.degree} onChange={(e) => handleArrayChange(activeTab, index, activeTab === 'experience' ? 'company' : 'degree', e.target.value)} placeholder={activeTab === 'experience' ? 'Company' : 'Degree'} className={`w-full mb-2 p-1.5 bg-transparent border-b focus:border-blue-500 outline-none text-sm ${darkMode ? 'border-neutral-600 text-gray-300' : 'border-gray-300 text-gray-700'}`} />
-                                <input type="text" value={item.year} onChange={(e) => handleArrayChange(activeTab, index, 'year', e.target.value)} placeholder="Year/Duration" className={`w-full mb-2 p-1.5 bg-transparent border-b focus:border-blue-500 outline-none text-xs ${darkMode ? 'border-neutral-600 text-gray-400' : 'border-gray-300 text-gray-500'}`} />
-                                <textarea value={item.details} onChange={(e) => handleArrayChange(activeTab, index, 'details', e.target.value)} placeholder="Details..." rows={3} className={`w-full p-2 border rounded text-sm focus:ring-1 focus:ring-blue-500 outline-none ${inputClass}`} />
+                                <input type="text" value={(activeTab === 'experience' ? item.role : item.institution) ?? ''} onChange={(e) => handleArrayChange(activeTab, index, activeTab === 'experience' ? 'role' : 'institution', e.target.value)} placeholder={activeTab === 'experience' ? 'Role' : 'Institution'} className={`w-full mb-2 p-1.5 bg-transparent border-b focus:border-blue-500 outline-none font-medium text-sm ${darkMode ? 'border-neutral-600 text-white' : 'border-gray-300 text-gray-900'}`} />
+                                <input type="text" value={(activeTab === 'experience' ? item.company : item.degree) ?? ''} onChange={(e) => handleArrayChange(activeTab, index, activeTab === 'experience' ? 'company' : 'degree', e.target.value)} placeholder={activeTab === 'experience' ? 'Company' : 'Degree'} className={`w-full mb-2 p-1.5 bg-transparent border-b focus:border-blue-500 outline-none text-sm ${darkMode ? 'border-neutral-600 text-gray-300' : 'border-gray-300 text-gray-700'}`} />
+                                <input type="text" value={item.year ?? ''} onChange={(e) => handleArrayChange(activeTab, index, 'year', e.target.value)} placeholder="Year/Duration" className={`w-full mb-2 p-1.5 bg-transparent border-b focus:border-blue-500 outline-none text-xs ${darkMode ? 'border-neutral-600 text-gray-400' : 'border-gray-300 text-gray-500'}`} />
+                                <textarea value={item.details ?? ''} onChange={(e) => handleArrayChange(activeTab, index, 'details', e.target.value)} placeholder="Details..." rows={3} className={`w-full p-2 border rounded text-sm focus:ring-1 focus:ring-blue-500 outline-none ${inputClass}`} />
                             </div>
                         ))}
                     </div>
@@ -303,10 +308,10 @@ const ContentTab = ({
                         {data.skills.map((skill, index) => (
                             <div key={index} className={`flex flex-col gap-2 p-2 border rounded-md mb-2 ${darkMode ? 'bg-neutral-900 border-neutral-700' : 'bg-gray-50 border-gray-200'}`}>
                                 <div className="flex gap-2 items-center">
-                                    <input type="text" value={skill.name} onChange={(e) => handleSkillChange(index, 'name', e.target.value)} placeholder="Skill" className={`flex-grow p-2 border rounded-md outline-none text-sm ${inputClass}`} />
+                                    <input type="text" value={typeof skill === 'string' ? skill : skill.name ?? ''} onChange={(e) => handleSkillChange(index, 'name', e.target.value)} placeholder="Skill" className={`flex-grow p-2 border rounded-md outline-none text-sm ${inputClass}`} />
                                     <button onClick={() => removeItem('skills', index)} className="text-gray-400 hover:text-red-500"><Trash2 size={16}/></button>
                                 </div>
-                                <input type="range" value={skill.level} onChange={(e) => handleSkillChange(index, 'level', parseInt(e.target.value))} className="w-full h-1 bg-gray-300 rounded-lg appearance-none cursor-pointer" />
+                                <input type="range" value={typeof skill === 'string' ? 80 : skill.level ?? 80} onChange={(e) => handleSkillChange(index, 'level', parseInt(e.target.value))} className="w-full h-1 bg-gray-300 rounded-lg appearance-none cursor-pointer" />
                             </div>
                         ))}
                     </div>
