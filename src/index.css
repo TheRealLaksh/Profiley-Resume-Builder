@@ -271,6 +271,24 @@
         margin: 0 !important;
     }
 
+    /* "Fit to one page": the app sets --print-fit (0.9 to 1) when the content only just overflows.
+       zoom re-flows the text like a smaller font; the sheet is widened by the same factor so it still fills A4. */
+    #print-root [data-resume-paper] {
+        zoom: var(--print-fit, 1);
+        width: calc(210mm / var(--print-fit, 1)) !important;
+        min-height: calc(297mm / var(--print-fit, 1)) !important;
+    }
+
+    /* Never cut a heading, entry or line of text in half at a page edge. */
+    #print-root h3,
+    #print-root h4 {
+        break-after: avoid;
+    }
+
+    #print-root [class*="break-inside-avoid"] {
+        break-inside: avoid;
+    }
+
     /* Wide letter-spacing is written into the PDF glyph by glyph, so text extractors read
        "E X P E R I E N C E" and applicant tracking systems miss the section. Measured:
        up to about 0.05em extracts as one word in every font used here, wider does not. */

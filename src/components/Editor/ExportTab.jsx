@@ -1,6 +1,6 @@
 import React from 'react';
 import { Braces, Download, FileText, FileUp, Link2, Loader2, Printer } from 'lucide-react';
-import { PanelHeading, Segmented } from '../UI/FormElements';
+import { PanelHeading, Segmented, Toggle } from '../UI/FormElements';
 
 const SHORTCUTS = [
     ['Undo', ['Ctrl', 'Z']],
@@ -9,7 +9,7 @@ const SHORTCUTS = [
     ['Print or save as PDF', ['Ctrl', 'P']]
 ];
 
-const ExportTab = ({ pdfQuality, setPdfQuality, handleShare, onDownloadPdf, onPrint, isExportingPdf, openImport, onExportJson }) => (
+const ExportTab = ({ pdfQuality, setPdfQuality, fitOnePage, setFitOnePage, handleShare, onDownloadPdf, onPrint, isExportingPdf, openImport, onExportJson }) => (
     <div className="animate-rise">
         <PanelHeading title="Export" subtitle="Take your resume with you." />
 
@@ -19,7 +19,7 @@ const ExportTab = ({ pdfQuality, setPdfQuality, handleShare, onDownloadPdf, onPr
                     <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-accent-soft text-accent-ink"><Download size={17} /></span>
                     <div>
                         <h3 className="text-[13px] font-semibold text-ink">PDF with the exact design</h3>
-                        <p className="mt-0.5 text-xs leading-relaxed text-ink-3">A faithful copy of the preview. The text is part of the image, so it can't be selected.</p>
+                        <p className="mt-0.5 text-xs leading-relaxed text-ink-3">A faithful copy of the preview. The text can be selected, searched and read by applicant tracking systems, and the pages break between lines, never through them.</p>
                     </div>
                 </div>
                 <Segmented
@@ -29,6 +29,9 @@ const ExportTab = ({ pdfQuality, setPdfQuality, handleShare, onDownloadPdf, onPr
                     onChange={setPdfQuality}
                     options={[{ value: 'screen', label: 'Standard (faster)' }, { value: 'print', label: 'High (sharper)' }]}
                 />
+                <div className="mt-3">
+                    <Toggle label="Fit to one page" hint="If it only just overflows, shrink it by up to 10% so it fits." value={fitOnePage} onChange={setFitOnePage} />
+                </div>
                 <button className="btn btn-primary mt-3 h-10 w-full" onClick={onDownloadPdf} disabled={isExportingPdf}>
                     {isExportingPdf ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
                     {isExportingPdf ? 'Exporting...' : 'Download PDF'}
@@ -39,8 +42,8 @@ const ExportTab = ({ pdfQuality, setPdfQuality, handleShare, onDownloadPdf, onPr
                 <div className="flex items-start gap-3">
                     <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-sunken text-ink-2"><FileText size={17} /></span>
                     <div>
-                        <h3 className="text-[13px] font-semibold text-ink">PDF with selectable text</h3>
-                        <p className="mt-0.5 text-xs leading-relaxed text-ink-3">Opens your browser's print dialog. Choose "Save as PDF". Best for applicant tracking systems that read the text.</p>
+                        <h3 className="text-[13px] font-semibold text-ink">Browser print (vector PDF)</h3>
+                        <p className="mt-0.5 text-xs leading-relaxed text-ink-3">Opens your browser's print dialog. Choose "Save as PDF" for a sharper, smaller file made of real text.</p>
                     </div>
                 </div>
                 <button className="btn btn-secondary mt-4 h-10 w-full" onClick={onPrint}>
