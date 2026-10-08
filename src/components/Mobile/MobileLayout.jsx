@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-    Download, Eye, FileText, FilePlus, Link2, Loader2, Mail, Moon, Palette, Phone, Redo2, Sun, Undo2
+    Download, Eye, FileText, FilePlus, Link2, Loader2, Mail, Moon, Palette, Phone, Redo2, ScanSearch, Sun, Undo2
 } from 'lucide-react';
 import { EditorBody } from '../Editor/EditorPanel';
 import ResumeDocument from '../Preview/ResumeDocument';
@@ -11,6 +11,7 @@ import useCanvasZoom from '../../hooks/useCanvasZoom';
 const NAV = [
     { id: 'content', label: 'Content', icon: FileText },
     { id: 'design', label: 'Design', icon: Palette },
+    { id: 'review', label: 'Review', icon: ScanSearch },
     { id: 'preview', label: 'Preview', icon: Eye },
     { id: 'export', label: 'Export', icon: Link2 }
 ];
@@ -27,7 +28,7 @@ const MobileLayout = (props) => {
     } = useCanvasZoom({ gutter: 16, min: 0.25, maxFit: 1 });
 
     const inPreview = isReadOnly || showPreview;
-    const current = inPreview ? 'preview' : (activeTab === 'design' || activeTab === 'export' ? activeTab : 'content');
+    const current = inPreview ? 'preview' : (['design', 'review', 'export'].includes(activeTab) ? activeTab : 'content');
 
     const go = (id) => {
         if (id === 'preview') { setShowPreview(true); return; }
@@ -113,7 +114,7 @@ const MobileLayout = (props) => {
                     <button className="btn btn-primary !h-11 flex-1" onClick={onForkTemplate}><FilePlus size={17} /> Use this template</button>
                 </div>
             ) : (
-                <nav aria-label="Primary" className="grid shrink-0 grid-cols-4 border-t border-line bg-panel px-2 pb-[max(0.25rem,env(safe-area-inset-bottom))] pt-1">
+                <nav aria-label="Primary" className="grid shrink-0 grid-cols-5 border-t border-line bg-panel px-2 pb-[max(0.25rem,env(safe-area-inset-bottom))] pt-1">
                     {NAV.map(({ id, label, icon: Icon }) => {
                         const active = current === id;
                         return (

@@ -83,7 +83,40 @@ The editor itself is a product — featuring a warm light and dark theme that fo
       </p>
     </td>
   </tr>
+  <tr>
+    <td width="50%">
+      <h3 align="center">🎯 Tailor to a Job</h3>
+      <p align="center">
+        Paste a job description and Claude suggests rewrites for your summary, roles and skills, with keyword gaps and a match score.  
+        You accept or dismiss each suggestion; contact details and photo are never sent.
+      </p>
+    </td>
+    <td width="50%">
+      <h3 align="center">🤖 ATS Check</h3>
+      <p align="center">
+        See roughly what an applicant tracking system reads: reading order, columns, headings, dates, bullets and links, scored with fixes.
+      </p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <h3 align="center">✏️ Click to Edit</h3>
+      <p align="center">
+        Click any text on the page to edit it in place (name, summary, roles, bullets, skills, section titles). Everything is undoable.
+      </p>
+    </td>
+    <td width="50%">
+      <h3 align="center">📥 Import &amp; Backup</h3>
+      <p align="center">
+        Import a PDF or pasted text (read by AI, or by a basic on-device reader without a key), a Profiley backup, or JSON Resume. Export both formats back out.
+      </p>
+    </td>
+  </tr>
 </table>
+
+### AI setup (optional)
+
+The AI features need an Anthropic key. Either set `ANTHROPIC_API_KEY` in the Vercel project environment (the app then calls `/api/ai`; optional `ANTHROPIC_MODEL`, and `AI_RATE_LIMIT_PER_HOUR`, default 8 per IP, an in-memory best-effort limit), or let each user paste their own key under Review, which is kept in their browser and sent straight to Anthropic. Without either, Job match still works for free: copy the prompt, run it in your own Claude chat, and paste the reply back. Everything else works without AI.
 
 ---
 

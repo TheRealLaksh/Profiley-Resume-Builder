@@ -1,5 +1,5 @@
 import React from 'react';
-import { Download, FileText, Link2, Loader2, Printer } from 'lucide-react';
+import { Braces, Download, FileText, FileUp, Link2, Loader2, Printer } from 'lucide-react';
 import { PanelHeading, Segmented } from '../UI/FormElements';
 
 const SHORTCUTS = [
@@ -9,7 +9,7 @@ const SHORTCUTS = [
     ['Print or save as PDF', ['Ctrl', 'P']]
 ];
 
-const ExportTab = ({ pdfQuality, setPdfQuality, handleShare, onDownloadPdf, onPrint, isExportingPdf }) => (
+const ExportTab = ({ pdfQuality, setPdfQuality, handleShare, onDownloadPdf, onPrint, isExportingPdf, openImport, onExportJson }) => (
     <div className="animate-rise">
         <PanelHeading title="Export" subtitle="Take your resume with you." />
 
@@ -59,6 +59,21 @@ const ExportTab = ({ pdfQuality, setPdfQuality, handleShare, onDownloadPdf, onPr
                 <button className="btn btn-secondary mt-4 h-10 w-full" onClick={handleShare}>
                     <Link2 size={16} /> Create link
                 </button>
+            </section>
+
+            <section className="card p-4">
+                <div className="flex items-start gap-3">
+                    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-sunken text-ink-2"><Braces size={17} /></span>
+                    <div>
+                        <h3 className="text-[13px] font-semibold text-ink">Backup and import</h3>
+                        <p className="mt-0.5 text-xs leading-relaxed text-ink-3">Keep a copy of your resume as a file, move it between browsers, or start from an existing PDF.</p>
+                    </div>
+                </div>
+                <div className="mt-4 grid grid-cols-2 gap-2">
+                    <button className="btn btn-secondary h-10" onClick={() => onExportJson('profiley')}>Save backup</button>
+                    <button className="btn btn-secondary h-10" onClick={() => onExportJson('jsonresume')} title="The open JSON Resume format, readable by other resume tools">JSON Resume</button>
+                </div>
+                <button className="btn btn-secondary mt-2 h-10 w-full" onClick={openImport}><FileUp size={16} /> Import a resume</button>
             </section>
         </div>
 
