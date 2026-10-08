@@ -208,6 +208,32 @@ export const toMessageParams = (request, model = DEFAULT_MODEL) => ({
 });
 
 /**
+ * Plain-text version of a request, for people who paste it into claude.ai themselves
+ * (no API key, no cost to the site). The schema is spelled out because a chat has no
+ * structured-output mode.
+ */
+export const buildManualPrompt = (request) =>
+  `${request.system}\n\n${request.content}\n\nReply with ONLY one JSON object that matches this JSON Schema. No markdown fences, no commentary before or after.\n\n${JSON.stringify(request.schema)}`;
+
+/** Pulls the JSON object out of a chat reply, tolerating code fences and chatter around it. */
+export const parseManualReply = (text) => {
+  const raw = str(text);
+  const start = raw.indexOf('{');
+  const end = raw.lastIndexOf('}');
+  if (start === -1 || end <= start) throw new AiInputError("That doesn't look like Claude's JSON reply. Paste the whole reply, starting at the first {.");
+  let parsed;
+  try {
+    parsed = JSON.parse(raw.slice(start, end + 1));
+  } catch {
+    throw new AiInputError('The reply is cut off or has stray text inside the JSON. Ask Claude to "send the complete JSON again" and paste that.');
+  }
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed) || !('matchScore' in parsed || 'suggestions' in parsed)) {
+    throw new AiInputError("That JSON isn't a job-match result. Make sure you pasted the prompt from this page.");
+  }
+  return parsed;
+};
+
+/**
  * Reads the model's JSON answer. Structured outputs make this reliable, but a
  * refusal or truncation still has to be reported rather than parsed.
  */

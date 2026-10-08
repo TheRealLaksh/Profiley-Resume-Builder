@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Check, Loader2, Sparkles, X } from 'lucide-react';
+import { Check, ClipboardCheck, Copy, Loader2, Sparkles, X } from 'lucide-react';
 import { AiError, runAiTask } from '../../../ai/client';
-import { LIMITS, cleanTailorResult, resumeForAi } from '../../../ai/tasks';
+import { AiInputError, LIMITS, buildManualPrompt, buildTailorRequest, cleanTailorResult, parseManualReply, resumeForAi } from '../../../ai/tasks';
 import { diffWords } from '../../../utils/diff';
 import { TextAreaField } from '../../UI/FormElements';
 import AiSetup from './AiSetup';
@@ -58,7 +58,12 @@ const TailorPanel = ({ data, setData, notifyUndo, ai }) => {
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);
   const [resolved, setResolved] = useState({}); // suggestion key -> 'accepted' | 'dismissed'
+  const [reply, setReply] = useState('');
+  const [copied, setCopied] = useState(false);
+  const [promptText, setPromptText] = useState('');
   const abortRef = useRef(null);
+  // No built-in assistant and no key: the person runs the prompt in their own Claude chat.
+  const manual = !ai.ready && ai.status !== 'checking';
 
   useEffect(() => {
     if (phase !== 'running') return;
@@ -90,6 +95,39 @@ const TailorPanel = ({ data, setData, notifyUndo, ai }) => {
   };
 
   const cancel = () => abortRef.current?.abort();
+
+  const copyPrompt = async () => {
+    setError(null);
+    try {
+      const text = buildManualPrompt(buildTailorRequest({ jobDescription, resume: resumeForAi(data) }));
+      setPromptText(text);
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    } catch (err) {
+      // Clipboard blocked: the prompt is still shown below to copy by hand.
+      if (err instanceof AiInputError) { setError(new AiError('failed', err.message)); setPhase('error'); }
+    }
+  };
+
+  const readReply = () => {
+    try {
+      const resume = resumeForAi(data);
+      setResult(cleanTailorResult(parseManualReply(reply), resume));
+      setResolved({});
+      setError(null);
+      setPhase('done');
+    } catch (err) {
+      setError(new AiError('failed', err.message));
+      setPhase('error');
+    }
+  };
+
+  const again = () => {
+    if (!manual) return analyze();
+    setReply('');
+    setPhase('idle');
+  };
 
   // ---- applying suggestions ----
   const currentText = (s) =>
@@ -125,7 +163,6 @@ const TailorPanel = ({ data, setData, notifyUndo, ai }) => {
   };
 
   // ---- render ----
-  if (!ai.ready && ai.status !== 'checking') return <AiSetup ai={ai} />;
   if (ai.status === 'checking') return <div className="skeleton h-14 w-full" />;
 
   return (
@@ -143,7 +180,33 @@ const TailorPanel = ({ data, setData, notifyUndo, ai }) => {
             hint={`${jobDescription.length.toLocaleString()} / ${LIMITS.jobDescription.toLocaleString()} characters`}
           />
 
-          {phase === 'running' ? (
+          {manual ? (
+            <div className="card space-y-3 p-3.5">
+              <div>
+                <h3 className="text-[13px] font-semibold text-ink">Free: use your own Claude chat</h3>
+                <p className="mt-0.5 text-xs leading-relaxed text-ink-3">Nothing is sent from this page. Copy the prompt, paste it into claude.ai (or Claude in Chrome), then paste Claude's reply here.</p>
+              </div>
+              <button className="btn btn-primary h-10 w-full" onClick={copyPrompt} disabled={jobDescription.trim().length < 40}>
+                {copied ? <><ClipboardCheck size={16} /> Copied. Now paste it into Claude</> : <><Copy size={16} /> 1. Copy the prompt</>}
+              </button>
+              {promptText && (
+                <details className="text-xs text-ink-3">
+                  <summary className="cursor-pointer">Show the prompt (if copying didn't work)</summary>
+                  <textarea readOnly className="input mt-2 h-28 w-full font-numeric text-[11px]" value={promptText} onFocus={(e) => e.target.select()} />
+                </details>
+              )}
+              <TextAreaField
+                label="2. Claude's reply"
+                rows={5}
+                value={reply}
+                onChange={(e) => setReply(e.target.value)}
+                placeholder="Paste Claude's whole reply here (the JSON)."
+              />
+              <button className="btn btn-secondary h-10 w-full" onClick={readReply} disabled={reply.trim().length < 20}>
+                <Sparkles size={16} /> 3. Show the match
+              </button>
+            </div>
+          ) : phase === 'running' ? (
             <div className="card flex items-center gap-3 p-3.5" role="status">
               <Loader2 size={18} className="animate-spin text-accent" />
               <p className="flex-1 text-[13px] text-ink-2">{STEPS[step]}…</p>
@@ -159,9 +222,9 @@ const TailorPanel = ({ data, setData, notifyUndo, ai }) => {
             <p role="alert" className="rounded-xl border border-danger/30 bg-danger-soft px-3.5 py-2.5 text-xs leading-relaxed text-danger">{error?.message}</p>
           )}
 
-          <p className="hint">
+          {!manual && <p className="hint">
             Your resume's career content and the job post are sent to Anthropic to write the suggestions. Your contact details and photo are not. Nothing is stored. The assistant only rewords what you've already written and will not invent experience.
-          </p>
+          </p>}
         </div>
       )}
 
@@ -241,7 +304,7 @@ const TailorPanel = ({ data, setData, notifyUndo, ai }) => {
           </section>
 
           <div className="flex gap-2">
-            <button className="btn btn-secondary flex-1" onClick={analyze}><Sparkles size={15} /> Run again</button>
+            <button className="btn btn-secondary flex-1" onClick={again}><Sparkles size={15} /> {manual ? "Paste another reply" : "Run again"}</button>
             <button className="btn btn-ghost" onClick={() => { setPhase('idle'); setResult(null); }}>New job</button>
           </div>
         </>

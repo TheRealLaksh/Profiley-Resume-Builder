@@ -28,17 +28,17 @@ React 19, Vite, Tailwind, Firebase, html2canvas + jsPDF/html2pdf, lucide-react.
 - `public/`: favicon, og-image.png, `_redirects`, `robots.txt` (served; moved here by the merged PR #1 `claude/pensive-meitner-opz77b`, which also hardened sharing/saved data, fixed preview/PDF export and dropped unused dependencies)
 
 ## Status
-Branch `claude/pensive-meitner-opz77b` (not yet PR'd; PR #2 redesign is merged and live): added AI "tailor to job", ATS check, click-to-edit and import/export (PDF/text/backup/JSON Resume). Lint, `npm run build`, API handler test (stubbed fetch) and Playwright suites pass. Real Anthropic calls and real Firestore shares are untested (no key / no Firestore in the sandbox). `ANTHROPIC_API_KEY` is not set on Vercel yet, so only the bring-your-own-key path works until it is. Print CSS now caps letter-spacing at 0.05em so the text PDF extracts cleanly. `vercel.json` rewrite excludes `/api/`. Migrating off lakshp.live: default email `contact@lakshp.live` still to swap.
+Branch `claude/pensive-meitner-opz77b` (not yet PR'd; PR #2 redesign is merged and live): added AI "tailor to job", ATS check, click-to-edit and import/export (PDF/text/backup/JSON Resume). Lint, `npm run build`, API handler test (stubbed fetch) and Playwright suites pass. Real Anthropic calls and real Firestore shares are untested (no key / no Firestore in the sandbox). `ANTHROPIC_API_KEY` is deliberately NOT set (Laksh doesn't want to pay): with no server key and no user key, Job match runs in a free copy-paste mode (Copy prompt, run it in claude.ai or Claude in Chrome, paste the JSON reply back; `buildManualPrompt`/`parseManualReply` in `src/ai/tasks.js`, UI in `TailorPanel.jsx`). Import's AI read is still key-only; the basic reader is free. Print CSS now caps letter-spacing at 0.05em so the text PDF extracts cleanly. `vercel.json` rewrite excludes `/api/`. Migrating off lakshp.live: default email `contact@lakshp.live` still to swap.
 
 ## Next steps
-0. Open the PR for this branch when Laksh asks; then set `ANTHROPIC_API_KEY` in Vercel (costs are his; rate limit is best-effort) and try Review > Job match on production.
+0. Open the PR for this branch when Laksh asks; do NOT set `ANTHROPIC_API_KEY` unless Laksh decides to pay; try Review > Job match (copy-paste mode) on production.
 1. Replace `contact@lakshp.live` with `work@lakshpradhwani.com` in `src/data/initialState.js` once forwarding works.
 2. Add `profiley.lakshpradhwani.com` to Firebase authorized domains (Auth settings), otherwise Google sign-in fails on the new domain.
 3. After merging PR #2: create a share link on production and open it in a private window (never tested against real Firestore), and confirm the `/laksh` page still renders with the new `config.activeTemplate` (older shared docs have none and fall back to defaults).
 4. Check the `/laksh` public resume page and the exported PDF carry the new links.
 
 ## Open questions / waiting on
-- Whether to enable the server key (cost) or keep AI bring-your-own-key only. Firestore security rules are not in the repo; check them.
+- Server key stays off (cost); AI is copy-paste or bring-your-own-key only. Firestore security rules are not in the repo; check them.
 - Old domain `profiley.lakshp.live` must be removed by hand in the Vercel dashboard (Domains); no tool available for it.
 - `public/robots.txt` points at `/sitemap.xml`, but there is no `sitemap.xml` in `public/`; that URL returns the SPA index page (200) because of the catch-all rewrite. Decide whether to add a real sitemap.
 - Email forwarding (ImprovMX) for work@ and me@lakshpradhwani.com: Laksh signs up first.
@@ -48,6 +48,7 @@ Branch `claude/pensive-meitner-opz77b` (not yet PR'd; PR #2 redesign is merged a
 - Laksh chose small commits, pushed after each (every push to `main` goes live). Session of 8 Oct 2026.
 
 ## Session log (newest first)
+- 2026-10-08: added the free copy-paste Job match mode (no API key needed); Playwright-verified clipboard prompt, fenced reply parsing, bogus-id suggestions dropped.
 - 2026-10-08: added AI tailor-to-job (`api/ai.js`, `src/ai/`), ATS check (`src/ats/`), click-to-edit (`Editable.jsx`), import/export (`src/import/`), Review tab and mobile 5-item nav; export-clone text-drift fix and ATS-safe print tracking.
 - 2026-10-08: redesigned the editor UI and added six templates (PR #2); merged `main` into the branch (resolved `index.html`: kept the new font list and the lakshpradhwani.com canonical).
 - 2026-10-08: replaced lakshp.live with lakshpradhwani.com in `index.html` (canonical, og, twitter), `public/robots.txt` and the default portfolio link; email default still pending. Rebased onto remote PR #1 (kept its ShareModal and index.html structure).
