@@ -350,3 +350,42 @@
         display: none;
     }
 }
+
+/* Phones: a slider you can actually grab (the default 4px track and 16px thumb are too small for a finger). */
+@media (max-width: 767px) {
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 1.75rem;
+    background: transparent;
+  }
+  input[type="range"]::-webkit-slider-runnable-track {
+    height: 6px;
+    border-radius: 999px;
+    background: rgb(var(--c-line-strong));
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 26px;
+    height: 26px;
+    margin-top: -10px;
+    border-radius: 999px;
+    border: 3px solid rgb(var(--c-surface));
+    background: rgb(var(--c-accent));
+    box-shadow: 0 1px 4px rgb(0 0 0 / 0.35);
+  }
+  input[type="range"]::-moz-range-track {
+    height: 6px;
+    border-radius: 999px;
+    background: rgb(var(--c-line-strong));
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 999px;
+    border: 3px solid rgb(var(--c-surface));
+    background: rgb(var(--c-accent));
+    box-shadow: 0 1px 4px rgb(0 0 0 / 0.35);
+  }
+}
