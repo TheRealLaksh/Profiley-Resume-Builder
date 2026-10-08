@@ -45,7 +45,7 @@ Every keystroke triggers an immediate DOM update in the preview engine. There is
 Complex local state management handles **content**, **visual configuration**, and **history (undo/redo)** simultaneously, ensuring stability even during aggressive iteration.
 
 ### 03 · Cinematic UI
-The editor itself is a product — featuring dark mode, smooth transitions, `lucide-react` iconography, and a glassmorphism-inspired interface that keeps attention on creation.
+The editor itself is a product — featuring a warm light and dark theme that follows your system, a floating zoom control, keyboard shortcuts, and a calm, paper-first interface that keeps attention on your resume.
 
 ---
 
@@ -56,14 +56,14 @@ The editor itself is a product — featuring dark mode, smooth transitions, `luc
     <td width="50%">
       <h3 align="center">🎨 Dynamic Template Engine</h3>
       <p align="center">
-        Instantly switch between <b>10+ architectural layouts</b> (Modern, Minimal, Glitch, ATS, Leafy, and more).  
+        Instantly switch between <b>16 templates</b> (Modern, Nordic, Atlas, Swiss, Poster, Elegant, ATS, and more), each previewed with your own content.  
         The data model is fully decoupled from presentation, allowing content to flow into any layout geometry.
       </p>
     </td>
     <td width="50%">
       <h3 align="center">🧩 Real-Time Customization</h3>
       <p align="center">
-        Control <b>color palettes, font families (Inter, Merriweather, Mono), spacing scales, and visibility</b>.  
+        Control <b>color palettes, font pairings, spacing, section and entry styles, skill displays, page frames, and visibility</b>.  
         Toggle photos, icons, and section headers with a single interaction.
       </p>
     </td>
@@ -78,8 +78,8 @@ The editor itself is a product — featuring dark mode, smooth transitions, `luc
     <td width="50%">
       <h3 align="center">📄 High-Fidelity Export</h3>
       <p align="center">
-        Powered by <code>html2pdf.js</code>, Profiley generates <b>vector-quality PDFs</b>.  
-        Supports both fast screen rendering and high-resolution 300-DPI print output.
+        Download an exact-design PDF (rendered with <code>html2pdf.js</code>), or print to a <b>text PDF with selectable text</b> that applicant tracking systems can read.  
+        Both options use A4 and keep colours and backgrounds.
       </p>
     </td>
   </tr>

@@ -1,220 +1,284 @@
-// src/components/Editor/DesignTab.jsx
-import React from 'react';
-import { Layout, Palette, Columns, Type, Star } from 'lucide-react';
-import { Toggle, Select, ColorButton } from '../UI/FormElements';
-import { colorThemes, templates } from '../../data/constants';
+import React, { useDeferredValue, useMemo, useState } from 'react';
+import { Check, RotateCcw } from 'lucide-react';
+import { colorThemes, initialConfig, templates, templateFilters } from '../../data/constants';
+import { Group, PanelHeading, Segmented, SelectField, Swatch, Toggle } from '../UI/FormElements';
+import TemplateThumb from './TemplateThumb';
 
-const DesignTab = ({ 
-    config, 
-    setConfig, 
-    applyTemplate, 
-    darkMode 
-}) => {
-    // Styling helpers
-    const cardClass = darkMode ? 'bg-neutral-800 border-neutral-700' : 'bg-white border-gray-200';
-    const textClass = darkMode ? 'text-neutral-200' : 'text-gray-800';
-    const subTextClass = darkMode ? 'text-neutral-400' : 'text-gray-500';
+const FONTS = [
+    { value: 'font-inter', label: 'Inter' },
+    { value: 'font-jakarta', label: 'Jakarta' },
+    { value: 'font-grotesk', label: 'Grotesk' },
+    { value: 'font-raleway', label: 'Raleway' },
+    { value: 'font-sans', label: 'Arial' },
+    { value: 'font-oswald', label: 'Oswald' },
+    { value: 'font-merriweather', label: 'Merriweather' },
+    { value: 'font-lora', label: 'Lora' },
+    { value: 'font-playfair', label: 'Playfair' },
+    { value: 'font-mono', label: 'Space Mono' }
+];
 
-    // Helper to safely update config
-    const updateConfig = (key, value) => {
-        setConfig(prev => ({ ...prev, [key]: value }));
-    };
+const HEADING_FONTS = [
+    { value: '', label: 'Same as body' },
+    { value: 'font-grotesk', label: 'Grotesk' },
+    { value: 'font-playfair', label: 'Playfair' },
+    { value: 'font-merriweather', label: 'Merriweather' },
+    { value: 'font-oswald', label: 'Oswald' },
+    { value: 'font-mono', label: 'Space Mono' }
+];
 
-    const renderTemplateVisual = (key) => {
-        switch(key) {
-            case 'modern': 
-                return <div className="w-full h-full bg-white flex"><div className="w-1/3 bg-slate-800 h-full"></div><div className="w-2/3 h-full"></div></div>;
-            case 'minimal': 
-                return <div className="w-full h-full bg-white border-t-4 border-black"></div>;
-            case 'creative': 
-                return <div className="w-full h-full bg-white flex flex-row-reverse"><div className="w-1/3 bg-rose-200 h-full"></div><div className="w-2/3 h-full"></div></div>;
-            case 'ats': 
-                return <div className="w-full h-full bg-white flex flex-col p-1 gap-1"><div className="h-1 w-full bg-gray-300"></div><div className="h-1 w-3/4 bg-gray-200"></div></div>;
-            case 'executive': 
-                return <div className="w-full h-full bg-white flex flex-row-reverse"><div className="w-1/3 bg-blue-800 h-full"></div><div className="w-2/3 h-full flex flex-col justify-center px-1"><div className="h-0.5 w-full bg-gray-300 mb-1"></div></div></div>;
-            case 'elegant': 
-                return <div className="w-full h-full bg-amber-50 border-4 border-double border-amber-200 flex flex-col items-center justify-center gap-1"><div className="h-0.5 w-1/2 bg-amber-800"></div></div>;
-            case 'tech': 
-                return <div className="w-full h-full bg-slate-900 flex"><div className="w-1/4 h-full border-r border-slate-700"></div><div className="w-3/4 h-full"></div></div>;
-            case 'glitch':
-                return <div className="w-full h-full bg-black flex flex-col items-start p-1"><div className="w-1/2 h-1 bg-green-500 mb-1"></div><div className="w-full h-4 border border-green-500/50"></div></div>;
-            case 'classic':
-                return <div className="w-full h-full bg-[#fdfbf7] flex flex-col items-center p-1"><div className="w-2/3 h-px bg-slate-900 mb-1"></div><div className="w-1/2 h-px bg-slate-900"></div></div>;
-            case 'leafy':
-                return <div className="w-full h-full bg-white flex"><div className="w-1/3 bg-emerald-50 h-full rounded-r-lg"></div></div>;
-            default: 
-                return <div className="w-full h-full bg-gray-100"></div>;
-        }
-    };
+const DesignTab = ({ data, config, setConfig, sectionOrder, applyTemplate }) => {
+    const [filter, setFilter] = useState('all');
+    const deferredData = useDeferredValue(data);
+
+    const update = (patch) => setConfig((prev) => ({ ...prev, ...patch }));
+    const isSidebar = config.layoutType === 'sidebar';
+    const hasHeaderChoice = !isSidebar && config.layoutType !== 'gutter';
+
+    const visibleTemplates = useMemo(
+        () => Object.entries(templates).filter(([, t]) => filter === 'all' || t.tags.includes(filter)),
+        [filter]
+    );
 
     return (
-        <div className={`p-5 rounded-xl shadow-sm border space-y-8 ${cardClass}`}>
-            {/* Templates */}
-            <div>
-                <h3 className={`text-sm font-bold mb-3 flex items-center uppercase tracking-wider ${textClass}`}>
-                    <Layout size={16} className="mr-2 opacity-50"/> Templates
-                </h3>
-                <div className="grid grid-cols-2 gap-3">
-                    {Object.entries(templates).map(([key, tpl]) => (
-                        <button key={key} onClick={() => applyTemplate(key)} className={`flex flex-col items-center p-2 border rounded-lg transition-all group ${darkMode ? 'border-neutral-600 hover:border-blue-500 hover:bg-neutral-700' : 'border-gray-200 hover:border-blue-500 hover:bg-blue-50'}`}>
-                            <div className="w-full h-16 bg-gray-100 rounded mb-2 overflow-hidden relative border border-gray-200/50">
-                                {renderTemplateVisual(key)}
-                            </div>
-                            <span className={`text-xs font-semibold ${subTextClass} group-hover:text-blue-600`}>{tpl.name}</span>
+        <div className="animate-rise">
+            <PanelHeading
+                title="Design"
+                subtitle="Start from a template, then fine-tune."
+                action={
+                    <button className="btn btn-ghost btn-sm" onClick={() => applyTemplate(config.activeTemplate)} title="Undo your tweaks and restore this template">
+                        <RotateCcw size={14} /> Reset
+                    </button>
+                }
+            />
+
+            <Group title="Templates" meta={`${Object.keys(templates).length} designs`}>
+                <div className="-mx-1 flex flex-wrap gap-1.5 px-1" role="group" aria-label="Filter templates">
+                    {templateFilters.map((f) => (
+                        <button
+                            key={f.id}
+                            type="button"
+                            aria-pressed={filter === f.id}
+                            onClick={() => setFilter(f.id)}
+                            className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors duration-200 ease-snap ${filter === f.id ? 'border-ink bg-ink text-canvas' : 'border-line text-ink-2 hover:border-line-strong hover:text-ink'}`}
+                        >
+                            {f.label}
                         </button>
                     ))}
                 </div>
-            </div>
 
-            {/* Theme Colors */}
-            <div>
-                <h3 className={`text-sm font-bold mb-3 flex items-center uppercase tracking-wider ${textClass}`}>
-                    <Palette size={16} className="mr-2 opacity-50"/> Color Palette
-                </h3>
-                <div className="flex gap-3 flex-wrap">
+                <div className="grid grid-cols-2 gap-3">
+                    {visibleTemplates.map(([key, tpl]) => {
+                        const selected = config.activeTemplate === key;
+                        const previewConfig = { ...initialConfig, ...tpl.config, activeTemplate: key };
+                        return (
+                            <button
+                                key={key}
+                                type="button"
+                                aria-pressed={selected}
+                                onClick={() => applyTemplate(key)}
+                                className={`group rounded-2xl border p-1.5 text-left transition-[border-color,box-shadow,background-color,transform] duration-200 ease-snap active:scale-[0.985] ${selected ? 'border-accent bg-accent-soft/60 shadow-soft' : 'border-line bg-surface hover:border-line-strong hover:shadow-soft'}`}
+                            >
+                                <div className="overflow-hidden rounded-lg border border-line/80 shadow-[0_1px_3px_rgb(60_45_20/0.1)] transition-transform duration-300 ease-snap group-hover:-translate-y-0.5">
+                                    <TemplateThumb config={previewConfig} data={deferredData} sectionOrder={sectionOrder} />
+                                </div>
+                                <div className="px-1.5 pb-1 pt-2">
+                                    <div className="flex items-center justify-between gap-2">
+                                        <span className="text-[13px] font-semibold text-ink">{tpl.name}</span>
+                                        {selected && <span className="grid h-4 w-4 place-items-center rounded-full bg-accent text-accent-fg"><Check size={10} strokeWidth={3.5} /></span>}
+                                    </div>
+                                    <span className="mt-0.5 block text-xs leading-snug text-ink-3 line-clamp-2">{tpl.description}</span>
+                                </div>
+                            </button>
+                        );
+                    })}
+                </div>
+            </Group>
+
+            <Group title="Colour" meta={colorThemes[config.themeColor]?.name}>
+                <div className="flex flex-wrap gap-2.5" role="group" aria-label="Accent colour">
                     {Object.entries(colorThemes).map(([key, theme]) => (
-                        <ColorButton 
-                            key={key} 
-                            theme={theme} 
-                            selected={config.themeColor === key} 
-                            onClick={() => updateConfig('themeColor', key)} 
-                        />
+                        <Swatch key={key} theme={theme} selected={config.themeColor === key} onClick={() => update({ themeColor: key })} />
                     ))}
                 </div>
-            </div>
+                <Segmented
+                    label="Paper"
+                    value={config.paperTint || 'bg-white'}
+                    onChange={(v) => update({ paperTint: v })}
+                    options={[
+                        { value: 'bg-white', label: 'White' },
+                        { value: 'bg-[#fbf7ee]', label: 'Warm' },
+                        { value: 'bg-[#fdf6f3]', label: 'Blush' },
+                        { value: 'bg-[#f4f7fa]', label: 'Cool' }
+                    ]}
+                />
+            </Group>
 
-            {/* Layout Options */}
-            <div>
-                <h3 className={`text-sm font-bold mb-3 flex items-center uppercase tracking-wider ${textClass}`}>
-                    <Columns size={16} className="mr-2 opacity-50"/> Layout & Structure
-                </h3>
-                <div className="space-y-1">
-                    {/* Layout Style Selector */}
-                    <Select 
-                        label="Layout Style" 
-                        value={config.layoutType} 
-                        onChange={(v) => updateConfig('layoutType', v)} 
+            <Group title="Layout" defaultOpen={false}>
+                <Segmented
+                    label="Structure"
+                    value={config.layoutType}
+                    onChange={(v) => update({ layoutType: v })}
+                    options={[
+                        { value: 'sidebar', label: 'Sidebar' },
+                        { value: 'single', label: 'Single' },
+                        { value: 'grid', label: 'Grid' },
+                        { value: 'gutter', label: 'Gutter' }
+                    ]}
+                />
+                {isSidebar && (
+                    <>
+                        <Segmented
+                            label="Sidebar position"
+                            value={config.layoutReverse ? 'right' : 'left'}
+                            onChange={(v) => update({ layoutReverse: v === 'right' })}
+                            options={[{ value: 'left', label: 'Left' }, { value: 'right', label: 'Right' }]}
+                        />
+                        <Segmented
+                            label="Sidebar fill"
+                            value={config.sidebarBg}
+                            onChange={(v) => update({ sidebarBg: v })}
+                            options={[
+                                { value: 'none', label: 'Plain' },
+                                { value: 'gray', label: 'Grey' },
+                                { value: 'theme', label: 'Tint' },
+                                { value: 'dark', label: 'Dark' }
+                            ]}
+                        />
+                    </>
+                )}
+                {hasHeaderChoice && (
+                    <SelectField
+                        label="Header"
+                        value={config.headerStyle || 'default'}
+                        onChange={(v) => update({ headerStyle: v })}
                         options={[
-                            {value: 'sidebar', label: 'Sidebar (Standard)'},
-                            {value: 'single', label: 'Single Column'},
-                            {value: 'grid', label: 'Grid (Compact)'}
-                        ]} 
-                        darkMode={darkMode} 
+                            { value: 'default', label: 'Classic' },
+                            { value: 'banner', label: 'Colour banner' },
+                            { value: 'centered', label: 'Centred' },
+                            { value: 'split', label: 'Split (name left, contact right)' },
+                            { value: 'poster', label: 'Poster' }
+                        ]}
                     />
+                )}
+                {(isSidebar || (config.headerStyle || 'default') === 'default') && (
+                    <Segmented
+                        label="Header alignment"
+                        value={config.headerAlign}
+                        onChange={(v) => update({ headerAlign: v })}
+                        options={[{ value: 'text-left', label: 'Left' }, { value: 'text-center', label: 'Centre' }, { value: 'text-right', label: 'Right' }]}
+                    />
+                )}
+                <Segmented
+                    label="Spacing"
+                    value={config.spacingScale}
+                    onChange={(v) => update({ spacingScale: v })}
+                    options={[{ value: 'compact', label: 'Compact' }, { value: 'normal', label: 'Normal' }, { value: 'spacious', label: 'Airy' }]}
+                />
+            </Group>
 
-                    <Toggle 
-                        label="Reverse Layout" 
-                        value={config.layoutReverse} 
-                        onChange={(v) => updateConfig('layoutReverse', v)} 
-                        darkMode={darkMode} 
-                    />
-                    
-                    <Select 
-                        label="Sidebar Background" 
-                        value={config.sidebarBg} 
-                        onChange={(v) => updateConfig('sidebarBg', v)}
-                        options={[
-                            {value: 'none', label: 'Transparent'}, 
-                            {value: 'gray', label: 'Light Gray'}, 
-                            {value: 'theme', label: 'Theme Tint'}
-                        ]} 
-                        darkMode={darkMode} 
-                    />
-                    
-                    <Select 
-                        label="Page Spacing" 
-                        value={config.spacingScale} 
-                        onChange={(v) => updateConfig('spacingScale', v)} 
-                        options={[
-                            {value: 'compact', label: 'Compact'}, 
-                            {value: 'normal', label: 'Normal'}, 
-                            {value: 'spacious', label: 'Spacious'}
-                        ]} 
-                        darkMode={darkMode} 
-                    />
+            <Group title="Typography" defaultOpen={false}>
+                <div>
+                    <span className="label">Font</span>
+                    <div className="grid grid-cols-2 gap-2" role="group" aria-label="Body font">
+                        {FONTS.map((font) => (
+                            <button
+                                key={font.value}
+                                type="button"
+                                aria-pressed={config.fontFamily === font.value}
+                                onClick={() => update({ fontFamily: font.value })}
+                                className={`flex items-center gap-3 rounded-xl border px-3 py-2 text-left transition-[border-color,background-color] duration-200 ease-snap ${config.fontFamily === font.value ? 'border-accent bg-accent-soft/60' : 'border-line bg-surface hover:border-line-strong'}`}
+                            >
+                                <span className={`${font.value} text-xl leading-none text-ink`}>Aa</span>
+                                <span className="truncate text-xs font-medium text-ink-2">{font.label}</span>
+                            </button>
+                        ))}
+                    </div>
                 </div>
-            </div>
+                <SelectField label="Heading font" value={config.headingFont || ''} onChange={(v) => update({ headingFont: v })} options={HEADING_FONTS} />
+                <Segmented
+                    label="Text size"
+                    value={config.fontScale}
+                    onChange={(v) => update({ fontScale: v })}
+                    options={[{ value: 'text-[11px]', label: 'Small' }, { value: 'text-xs', label: 'Medium' }, { value: 'text-[13px]', label: 'Large' }]}
+                />
+                <Segmented
+                    label="Name size"
+                    value={config.nameSize}
+                    onChange={(v) => update({ nameSize: v })}
+                    options={[{ value: 'text-2xl', label: 'S' }, { value: 'text-3xl', label: 'M' }, { value: 'text-4xl', label: 'L' }, { value: 'text-5xl', label: 'XL' }]}
+                />
+                <Segmented
+                    label="Name weight"
+                    value={config.nameWeight}
+                    onChange={(v) => update({ nameWeight: v })}
+                    options={[{ value: 'font-bold', label: 'Bold' }, { value: 'font-extrabold', label: 'Heavy' }, { value: 'font-black', label: 'Black' }]}
+                />
+                <Toggle label="Uppercase section titles" value={config.uppercaseHeaders !== false} onChange={(v) => update({ uppercaseHeaders: v })} />
+            </Group>
 
-            {/* Visual Elements */}
-            <div>
-                 <h3 className={`text-sm font-bold mb-3 flex items-center uppercase tracking-wider ${textClass}`}>
-                    <Star size={16} className="mr-2 opacity-50"/> Visual Elements
-                </h3>
-                <div className="space-y-1">
-                    <Toggle 
-                        label="Show Profile Photo" 
-                        value={config.showPhoto} 
-                        onChange={(v) => updateConfig('showPhoto', v)} 
-                        darkMode={darkMode} 
-                    />
-                    <Toggle 
-                        label="Contact Icons" 
-                        value={config.showIcons} 
-                        onChange={(v) => updateConfig('showIcons', v)} 
-                        darkMode={darkMode} 
-                    />
-                    <Toggle 
-                        label="Section Icons" 
-                        value={config.showSectionIcons} 
-                        onChange={(v) => updateConfig('showSectionIcons', v)} 
-                        darkMode={darkMode} 
-                    />
-                </div>
-            </div>
+            <Group title="Sections and entries" defaultOpen={false}>
+                <SelectField
+                    label="Section title style"
+                    value={config.sectionHeaderStyle || 'underline'}
+                    onChange={(v) => update({ sectionHeaderStyle: v })}
+                    options={[
+                        { value: 'underline', label: 'Underline' },
+                        { value: 'left-bar', label: 'Side bar' },
+                        { value: 'box', label: 'Tinted box' },
+                        { value: 'plain', label: 'Plain' },
+                        { value: 'centered', label: 'Centred between rules' },
+                        { value: 'caps-rule', label: 'Title with rule' },
+                        { value: 'prompt', label: 'Terminal prompt' }
+                    ]}
+                />
+                <Segmented
+                    label="Entries"
+                    value={config.entryStyle || 'clean'}
+                    onChange={(v) => update({ entryStyle: v })}
+                    options={[{ value: 'clean', label: 'Clean' }, { value: 'boxed', label: 'Boxed' }, { value: 'timeline', label: 'Timeline' }]}
+                />
+                <Segmented
+                    label="Dates"
+                    value={config.dateAlign || 'right'}
+                    onChange={(v) => update({ dateAlign: v })}
+                    options={[{ value: 'right', label: 'Beside title' }, { value: 'below', label: 'Below title' }]}
+                />
+                <Segmented
+                    label="Skills"
+                    value={config.skillStyle || 'tags'}
+                    onChange={(v) => update({ skillStyle: v })}
+                    options={[
+                        { value: 'tags', label: 'Tags' }, { value: 'bars', label: 'Bars' }, { value: 'dots', label: 'Dots' },
+                        { value: 'list', label: 'List' }, { value: 'comma', label: 'Inline' }
+                    ]}
+                />
+            </Group>
 
-            {/* Typography */}
-            <div>
-                <h3 className={`text-sm font-bold mb-3 flex items-center uppercase tracking-wider ${textClass}`}>
-                    <Type size={16} className="mr-2 opacity-50"/> Typography
-                </h3>
-                <div className="space-y-1">
-                    <Select 
-                        label="Font Family" 
-                        value={config.fontFamily} 
-                        onChange={(v) => updateConfig('fontFamily', v)} 
-                        options={[
-                            {value: 'font-inter', label: 'Inter (Clean)'},
-                            {value: 'font-merriweather', label: 'Merriweather (Serif)'},
-                            {value: 'font-playfair', label: 'Playfair (Elegant)'},
-                            {value: 'font-lora', label: 'Lora (Readable)'},
-                            {value: 'font-raleway', label: 'Raleway (Modern)'},
-                            {value: 'font-oswald', label: 'Oswald (Bold)'},
-                            {value: 'font-mono', label: 'Space Mono (Tech)'}
-                        ]} 
-                        darkMode={darkMode} 
+            <Group title="Details" defaultOpen={false}>
+                <Toggle label="Profile photo" value={config.showPhoto} onChange={(v) => update({ showPhoto: v })} />
+                {config.showPhoto && (
+                    <Segmented
+                        label="Photo shape"
+                        value={config.photoShape}
+                        onChange={(v) => update({ photoShape: v })}
+                        options={[{ value: 'rounded-full', label: 'Circle' }, { value: 'rounded-xl', label: 'Soft' }, { value: 'rounded-none', label: 'Square' }]}
                     />
-                    <Select 
-                        label="Font Scale" 
-                        value={config.fontScale} 
-                        onChange={(v) => updateConfig('fontScale', v)}
-                        options={[
-                            {value: 'text-xs', label: 'Extra Small'}, 
-                            {value: 'text-sm', label: 'Small'}, 
-                            {value: 'text-base', label: 'Normal'}, 
-                            {value: 'text-lg', label: 'Large'}, 
-                            {value: 'text-xl', label: 'Extra Large'}
-                        ]} 
-                        darkMode={darkMode} 
-                    />
-                    <Select 
-                        label="Header Alignment" 
-                        value={config.headerAlign} 
-                        onChange={(v) => updateConfig('headerAlign', v)}
-                        options={[
-                            {value: 'text-left', label: 'Left'}, 
-                            {value: 'text-center', label: 'Center'}, 
-                            {value: 'text-right', label: 'Right'}
-                        ]} 
-                        darkMode={darkMode} 
-                    />
-                    <Toggle 
-                        label="Uppercase Headers" 
-                        value={config.uppercaseHeaders} 
-                        onChange={(v) => updateConfig('uppercaseHeaders', v)} 
-                        darkMode={darkMode} 
-                    />
-                </div>
-            </div>
+                )}
+                <Toggle label="Contact icons" value={config.showIcons !== false} onChange={(v) => update({ showIcons: v })} />
+                <Toggle label="Section icons" value={config.showSectionIcons !== false} onChange={(v) => update({ showSectionIcons: v })} />
+                <Segmented
+                    label="Page frame"
+                    value={config.borderStyle || 'none'}
+                    onChange={(v) => update({ borderStyle: v })}
+                    options={[{ value: 'none', label: 'None' }, { value: 'simple', label: 'Thin' }, { value: 'double', label: 'Double' }]}
+                />
+                <Segmented
+                    label="Divider under name"
+                    value={config.dividerStyle || 'none'}
+                    onChange={(v) => update({ dividerStyle: v })}
+                    options={[{ value: 'none', label: 'Hairline' }, { value: 'thick', label: 'Thick' }, { value: 'diamond', label: 'Diamond' }]}
+                />
+            </Group>
         </div>
     );
 };

@@ -1,7 +1,8 @@
 import React from 'react';
 import { Check, AlertTriangle } from 'lucide-react';
 
-const Toast = ({ show, message, variant = 'success' }) => {
+/** `action` is { label, onClick }, e.g. Undo after deleting something. */
+const Toast = ({ show, message, variant = 'success', action, onAction }) => {
   if (!show) return null;
 
   const isError = variant === 'error';
@@ -9,12 +10,22 @@ const Toast = ({ show, message, variant = 'success' }) => {
   return (
     <div
       role={isError ? 'alert' : 'status'}
-      className="fixed top-8 left-1/2 transform -translate-x-1/2 z-[110] flex items-center gap-3 px-6 py-3 rounded-full shadow-2xl backdrop-blur-md toast-enter bg-gray-900 text-white dark:bg-white dark:text-gray-900 max-w-[90vw]"
+      className="pointer-events-none fixed inset-x-0 bottom-24 z-[110] flex justify-center px-4 md:bottom-8"
     >
-      <div className={`p-1 rounded-full text-white flex-shrink-0 ${isError ? 'bg-red-500' : 'bg-green-500'}`}>
-        {isError ? <AlertTriangle size={14} strokeWidth={3} /> : <Check size={14} strokeWidth={3} />}
+      <div className="pointer-events-auto flex max-w-[34rem] animate-pop items-center gap-3 rounded-2xl bg-ink py-2.5 pl-3.5 pr-2.5 text-canvas shadow-pop">
+        <span className={`grid h-5 w-5 shrink-0 place-items-center rounded-full text-white ${isError ? 'bg-danger' : 'bg-accent'}`}>
+          {isError ? <AlertTriangle size={11} strokeWidth={3} /> : <Check size={11} strokeWidth={3.5} />}
+        </span>
+        <span className="text-[13px] font-medium leading-snug">{message}</span>
+        {action && (
+          <button
+            onClick={onAction}
+            className="ml-1 rounded-lg px-2.5 py-1 text-[13px] font-semibold underline decoration-canvas/40 underline-offset-4 transition-colors hover:bg-canvas/15"
+          >
+            {action.label}
+          </button>
+        )}
       </div>
-      <span className="font-semibold text-sm">{message}</span>
     </div>
   );
 };

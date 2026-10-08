@@ -2,21 +2,223 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom Scrollbar for Editor */
-.custom-scrollbar::-webkit-scrollbar { 
-    width: 6px; 
-}
-.custom-scrollbar::-webkit-scrollbar-track { 
-    background: transparent; 
-}
-.custom-scrollbar::-webkit-scrollbar-thumb { 
-    background-color: #cbd5e1; 
-    border-radius: 3px; 
+/* ------------------------------------------------------------------
+   Design tokens (space-separated RGB so Tailwind can apply opacity).
+   Warm neutrals + one deep-spruce accent. Dark mode is class-based.
+------------------------------------------------------------------- */
+:root {
+  --c-canvas: 243 240 234;
+  --c-panel: 251 250 247;
+  --c-surface: 255 255 255;
+  --c-sunken: 238 234 226;
+  --c-line: 227 222 212;
+  --c-line-strong: 202 195 181;
+  --c-ink: 28 27 25;
+  --c-ink-2: 78 74 67;
+  --c-ink-3: 114 109 100;
+  --c-accent: 47 93 80;
+  --c-accent-hover: 36 74 64;
+  --c-accent-soft: 227 238 233;
+  --c-accent-fg: 255 255 255;
+  --c-accent-ink: 31 77 64;
+  --c-danger: 178 52 43;
+  --c-danger-soft: 249 231 228;
+
+  /* Tinted, low-opacity shadows: they pick up the warm background instead of going grey. */
+  --shadow-soft: 0 1px 2px rgb(70 55 30 / 0.06), 0 8px 24px -10px rgb(70 55 30 / 0.14);
+  --shadow-pop: 0 2px 4px rgb(70 55 30 / 0.06), 0 18px 48px -12px rgb(70 55 30 / 0.28);
+  --shadow-paper: 0 1px 1px rgb(60 45 20 / 0.05), 0 2px 6px rgb(60 45 20 / 0.06), 0 24px 60px -18px rgb(60 45 20 / 0.32);
+
+  color-scheme: light;
 }
 
-/* RTL Helper */
-.direction-rtl { 
-    direction: ltr; 
+.dark {
+  --c-canvas: 19 18 17;
+  --c-panel: 27 26 24;
+  --c-surface: 36 34 32;
+  --c-sunken: 21 20 18;
+  --c-line: 49 46 42;
+  --c-line-strong: 72 68 62;
+  --c-ink: 238 235 229;
+  --c-ink-2: 193 188 179;
+  --c-ink-3: 146 141 131;
+  --c-accent: 108 176 152;
+  --c-accent-hover: 128 192 170;
+  --c-accent-soft: 30 50 44;
+  --c-accent-fg: 12 24 19;
+  --c-accent-ink: 150 205 186;
+  --c-danger: 236 120 108;
+  --c-danger-soft: 62 31 28;
+
+  --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.4), 0 8px 24px -10px rgb(0 0 0 / 0.5);
+  --shadow-pop: 0 2px 4px rgb(0 0 0 / 0.4), 0 18px 48px -12px rgb(0 0 0 / 0.7);
+  --shadow-paper: 0 1px 1px rgb(0 0 0 / 0.3), 0 2px 6px rgb(0 0 0 / 0.3), 0 28px 70px -18px rgb(0 0 0 / 0.75);
+
+  color-scheme: dark;
+}
+
+@layer base {
+  html {
+    @apply bg-canvas font-ui text-ink antialiased;
+    text-rendering: optimizeLegibility;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply m-0 min-h-[100dvh];
+  }
+
+  ::selection {
+    background: rgb(var(--c-accent) / 0.25);
+  }
+
+  :focus-visible {
+    outline: 2px solid rgb(var(--c-accent));
+    outline-offset: 2px;
+  }
+
+  button,
+  [role="button"],
+  summary {
+    cursor: pointer;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+  }
+
+  /* Keep numbers from jittering as they change (zoom %, counters). */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  h1, h2, h3 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+}
+
+@layer components {
+  /* ---- Buttons ---- */
+  .btn {
+    @apply inline-flex h-9 select-none items-center justify-center gap-2 whitespace-nowrap rounded-xl px-3.5 text-[13px] font-medium;
+    @apply transition-[background-color,border-color,color,transform,box-shadow] duration-200 ease-snap;
+    @apply active:scale-[0.98] disabled:pointer-events-none disabled:opacity-45;
+  }
+  .btn-primary {
+    @apply bg-accent text-accent-fg hover:bg-accent-hover;
+  }
+  .btn-secondary {
+    @apply border border-line bg-surface text-ink hover:border-line-strong hover:bg-sunken/60;
+  }
+  .btn-ghost {
+    @apply text-ink-2 hover:bg-sunken hover:text-ink;
+  }
+  .btn-danger {
+    @apply text-danger hover:bg-danger-soft;
+  }
+  .btn-icon {
+    @apply h-9 w-9 shrink-0 px-0;
+  }
+  .btn-sm {
+    @apply h-8 rounded-lg px-2.5 text-xs;
+  }
+
+  /* ---- Fields ---- */
+  .input {
+    @apply h-10 w-full rounded-xl border border-line bg-surface px-3 text-sm text-ink placeholder:text-ink-3;
+    @apply transition-[border-color,box-shadow] duration-200 ease-snap;
+    @apply hover:border-line-strong focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent/15;
+  }
+  textarea.input {
+    @apply h-auto min-h-[5.5rem] resize-y py-2.5 leading-relaxed;
+  }
+  .label {
+    @apply mb-1.5 block text-xs font-medium text-ink-2;
+  }
+  .hint {
+    @apply mt-1.5 text-xs text-ink-3;
+  }
+
+  /* ---- Surfaces & text ---- */
+  .card {
+    @apply rounded-2xl border border-line bg-surface;
+  }
+  .eyebrow {
+    @apply font-numeric text-[11px] font-medium uppercase tracking-[0.08em] text-ink-3;
+  }
+  .kbd {
+    @apply inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded border border-line bg-sunken px-1 font-numeric text-[10px] text-ink-2;
+  }
+
+  /* ---- Segmented control ---- */
+  .seg {
+    @apply flex gap-0.5 rounded-xl bg-sunken p-1;
+  }
+  .seg-item {
+    @apply flex min-h-8 flex-1 items-center justify-center gap-1.5 rounded-lg px-2.5 text-xs font-medium text-ink-3;
+    @apply transition-[background-color,color,box-shadow] duration-200 ease-snap hover:text-ink;
+  }
+  .seg-item[aria-pressed="true"],
+  .seg-item[aria-selected="true"] {
+    @apply bg-surface text-ink shadow-[0_1px_2px_rgb(60_45_20/0.12)];
+  }
+}
+
+/* Panel scrollbars: thin and quiet */
+.scroll-quiet {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(var(--c-line-strong)) transparent;
+}
+.scroll-quiet::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.scroll-quiet::-webkit-scrollbar-thumb {
+  background: rgb(var(--c-line-strong));
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+.scroll-quiet::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Workspace backdrop: a faint dot grid so the page reads as lying on a desk. */
+.canvas-dots {
+  background-image: radial-gradient(rgb(var(--c-line-strong) / 0.55) 1px, transparent 1px);
+  background-size: 22px 22px;
+  background-position: -11px -11px;
+}
+
+/* Loading skeleton */
+.skeleton {
+  @apply relative overflow-hidden rounded-lg bg-sunken;
+}
+.skeleton::after {
+  content: "";
+  @apply absolute inset-0 -translate-x-full animate-shimmer;
+  background: linear-gradient(90deg, transparent, rgb(var(--c-line) / 0.7), transparent);
+}
+
+/* Staggered entrance for list rows: set style="--i: n" */
+.stagger > * {
+  animation: rise 420ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  animation-delay: calc(var(--i, 0) * 40ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* --- PRINT & PDF RULES --- */
@@ -26,6 +228,11 @@
 }
 
 @media print {
+    html,
+    body {
+        background: #fff !important;
+    }
+
     body {
         margin: 0;
         padding: 0;
@@ -33,7 +240,7 @@
         print-color-adjust: exact !important;
     }
 
-    /* FIX: Links in PDF should look like text, not blue/underlined web links */
+    /* Links in the PDF should look like text, not blue/underlined web links */
     a {
         text-decoration: none !important;
         color: inherit !important;
