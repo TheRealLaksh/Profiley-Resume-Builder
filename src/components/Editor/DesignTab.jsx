@@ -52,14 +52,14 @@ const DesignTab = ({ data, config, setConfig, sectionOrder, applyTemplate }) => 
             />
 
             <Group title="Templates" meta={`${Object.keys(templates).length} designs`}>
-                <div className="-mx-1 flex flex-wrap gap-1.5 px-1" role="group" aria-label="Filter templates">
+                <div className="-mx-1 flex flex-wrap gap-1.5 px-1 max-md:-mx-4 max-md:flex-nowrap max-md:snap-x max-md:overflow-x-auto max-md:px-4 max-md:pb-1 max-md:[scrollbar-width:none] max-md:[&::-webkit-scrollbar]:hidden" role="group" aria-label="Filter templates">
                     {templateFilters.map((f) => (
                         <button
                             key={f.id}
                             type="button"
                             aria-pressed={filter === f.id}
                             onClick={() => setFilter(f.id)}
-                            className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors duration-200 ease-snap ${filter === f.id ? 'border-ink bg-ink text-canvas' : 'border-line text-ink-2 hover:border-line-strong hover:text-ink'}`}
+                            className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors duration-200 ease-snap max-md:min-h-10 max-md:shrink-0 max-md:snap-start max-md:px-4 max-md:text-[13px] ${filter === f.id ? 'border-ink bg-ink text-canvas' : 'border-line text-ink-2 hover:border-line-strong hover:text-ink'}`}
                         >
                             {f.label}
                         </button>
