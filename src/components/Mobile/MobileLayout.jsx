@@ -66,7 +66,7 @@ const MobileLayout = (props) => {
 
     return (
         <div className="flex h-[100dvh] flex-col bg-canvas text-ink">
-            <header className="flex h-[calc(3.5rem+env(safe-area-inset-top))] shrink-0 items-center gap-1 border-b border-line bg-panel pl-[max(0.75rem,env(safe-area-inset-left))] pr-[max(0.75rem,env(safe-area-inset-right))] pt-[env(safe-area-inset-top)]">
+            <header className="flex h-[calc(3.5rem+env(safe-area-inset-top))] land:h-[calc(2.75rem+env(safe-area-inset-top))] shrink-0 items-center gap-1 border-b border-line bg-panel pl-[max(0.75rem,env(safe-area-inset-left))] pr-[max(0.75rem,env(safe-area-inset-right))] pt-[env(safe-area-inset-top)]">
                 {isReadOnly ? (
                     <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-semibold">{data.personal.name || 'Resume'}</p>
@@ -96,7 +96,9 @@ const MobileLayout = (props) => {
             <main id="main" className="relative min-h-0 flex-1">
                 {!inPreview && (
                     <div key={activeTab} className="scroll-quiet absolute inset-0 overflow-y-auto overscroll-contain bg-panel pb-8 pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] pt-4">
-                        <EditorBody {...props} openPreview={() => go('preview')} />
+                        <div className="mx-auto w-full max-w-xl">
+                            <EditorBody {...props} openPreview={() => go('preview')} />
+                        </div>
                     </div>
                 )}
 
@@ -159,9 +161,9 @@ const MobileLayout = (props) => {
                                     key={id}
                                     onClick={() => go(id)}
                                     aria-current={active ? 'page' : undefined}
-                                    className={`group flex min-h-[3.5rem] flex-col items-center justify-center gap-0.5 rounded-xl text-[11px] font-medium transition-colors duration-200 ease-snap active:scale-[0.96] ${active ? 'text-accent-ink' : 'text-ink-3'}`}
+                                    className={`group flex min-h-[3.5rem] land:min-h-11 flex-col land:flex-row items-center justify-center gap-0.5 land:gap-1.5 rounded-xl text-[11px] font-medium transition-colors duration-200 ease-snap active:scale-[0.96] ${active ? 'text-accent-ink' : 'text-ink-3'}`}
                                 >
-                                    <span className={`grid h-8 w-14 place-items-center rounded-full transition-colors duration-300 ease-snap ${active ? 'bg-accent-soft' : 'group-active:bg-sunken'}`}>
+                                    <span className={`grid h-8 w-14 land:h-7 land:w-9 place-items-center rounded-full transition-colors duration-300 ease-snap ${active ? 'bg-accent-soft' : 'group-active:bg-sunken'}`}>
                                         <Icon size={21} strokeWidth={active ? 2.1 : 1.65} />
                                     </span>
                                     <span className={active ? 'font-semibold' : ''}>{label}</span>
