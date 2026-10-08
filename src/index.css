@@ -64,8 +64,27 @@
     -webkit-tap-highlight-color: transparent;
   }
 
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
   body {
     @apply m-0 min-h-[100dvh];
+  }
+
+  /* No 300 ms tap delay or accidental double-tap zoom on controls. */
+  button,
+  a,
+  [role="button"],
+  [role="tab"],
+  [role="switch"],
+  summary,
+  label,
+  select,
+  input,
+  textarea {
+    touch-action: manipulation;
   }
 
   ::selection {
