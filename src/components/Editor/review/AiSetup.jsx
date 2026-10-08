@@ -63,7 +63,7 @@ const AiSetup = ({ ai, compact = false }) => {
       {!ai.serverAvailable && key && (
         <div className="mt-3.5 flex items-center gap-2">
           <label htmlFor="ai-model" className="sr-only">Model</label>
-          <select id="ai-model" className="input !h-9 text-[13px]" value={model} onChange={(e) => changeModel(e.target.value)}>
+          <select id="ai-model" className="input !h-9 text-[13px] phone:!h-11 phone:text-base" value={model} onChange={(e) => changeModel(e.target.value)}>
             {MODEL_CHOICES.map((m) => <option key={m.id} value={m.id}>{m.label}</option>)}
           </select>
           <button type="button" className="btn btn-ghost btn-danger btn-sm shrink-0" onClick={remove}><Trash2 size={14} /> Remove key</button>
