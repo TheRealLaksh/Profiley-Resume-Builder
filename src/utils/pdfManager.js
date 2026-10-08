@@ -242,8 +242,9 @@ const planPages = ({ atoms, height }, pageH, marginPx, cleanest) => {
 /**
  * Renders the visible resume to an A4 PDF and downloads it.
  * Resolves with { pages, scale } (scale < 1 when it was shrunk to fit one page). Rejects when export fails.
+ * With deliver: 'blob' nothing is saved; the result also carries { blob, filename }, e.g. for the phone's share sheet.
  */
-export const downloadResumePdf = async ({ name, quality = 'screen', fitOnePage = true, meta = {} } = {}) => {
+export const downloadResumePdf = async ({ name, quality = 'screen', fitOnePage = true, meta = {}, deliver = 'download' } = {}) => {
   const paper = findVisiblePaper();
   if (!paper) throw new Error('The resume preview is not visible.');
 
@@ -350,7 +351,9 @@ export const downloadResumePdf = async ({ name, quality = 'screen', fitOnePage =
       });
     });
 
-    pdf.save(buildFileName(name));
+    const filename = buildFileName(name);
+    if (deliver === 'blob') return { pages: pages.length, scale: fit, blob: pdf.output('blob'), filename };
+    pdf.save(filename);
     return { pages: pages.length, scale: fit };
   } finally {
     stage.destroy();
