@@ -283,8 +283,12 @@ const DesignTab = ({ data, config, setConfig, sectionOrder, applyTemplate, openP
 
             {openPreview && (
                 <div className="pointer-events-none sticky bottom-3 z-10 mt-4 flex justify-center">
-                    <button type="button" onClick={openPreview} className="btn btn-primary pointer-events-auto gap-2 rounded-full px-5 shadow-pop">
-                        <Eye size={17} /> See it on your resume
+                    <button type="button" onClick={openPreview} className="btn btn-primary pointer-events-auto h-14 gap-3 rounded-full pl-2.5 pr-5 shadow-pop">
+                        {/* A live thumbnail: it updates as you change colours and fonts, so you can see the effect without leaving. */}
+                        <span className="block w-8 shrink-0 overflow-hidden rounded-[4px] ring-1 ring-white/40">
+                            <TemplateThumb config={config} data={deferredData} sectionOrder={sectionOrder} />
+                        </span>
+                        <span className="flex items-center gap-1.5"><Eye size={17} /> See it on your resume</span>
                     </button>
                 </div>
             )}
