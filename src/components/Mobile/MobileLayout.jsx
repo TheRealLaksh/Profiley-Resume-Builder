@@ -95,7 +95,7 @@ const MobileLayout = (props) => {
 
             <main id="main" className="relative min-h-0 flex-1">
                 {!inPreview && (
-                    <div key={activeTab} className="scroll-quiet absolute inset-0 overflow-y-auto bg-panel px-4 pb-8 pt-4">
+                    <div key={activeTab} className="scroll-quiet absolute inset-0 overflow-y-auto overscroll-contain bg-panel px-4 pb-8 pt-4">
                         <EditorBody {...props} openPreview={() => go('preview')} />
                     </div>
                 )}
