@@ -59,20 +59,21 @@ const ShareModal = ({
             <label htmlFor="share-url" className="label">Your link {linkCopied && <span className="font-normal text-accent-ink">· copied</span>}</label>
             <div className="flex gap-2">
               <input id="share-url" readOnly value={shareUrl} onFocus={(e) => e.target.select()} className="input font-numeric text-[13px]" />
-              <button onClick={handleCopyShareUrl} className="btn btn-primary btn-icon !h-10 !w-10" aria-label="Copy link">
+              <button onClick={handleCopyShareUrl} className="btn btn-primary btn-icon !h-10 !w-10 max-sm:!h-[2.875rem] max-sm:!w-[2.875rem]" aria-label="Copy link">
                 {linkCopied ? <Check size={17} /> : <Copy size={17} />}
               </button>
             </div>
-            <button onClick={onClose} className="btn btn-secondary mt-4 h-10 w-full">Done</button>
+            <button onClick={onClose} className="btn btn-secondary mt-4 h-10 w-full max-sm:h-12">Done</button>
           </>
         ) : (
           <form onSubmit={(e) => { e.preventDefault(); handleGenerateLink(); }}>
             <label htmlFor="share-slug" className="label">Custom address <span className="font-normal text-ink-3">(optional)</span></label>
-            <div className="flex items-stretch">
-              <span className="flex items-center rounded-l-xl border border-r-0 border-line bg-sunken px-3 font-numeric text-[13px] text-ink-3">{window.location.host}/</span>
+            <div className="flex items-stretch max-sm:flex-col max-sm:gap-1.5">
+              <span className="flex items-center truncate rounded-l-xl border border-r-0 border-line bg-sunken px-3 font-numeric text-[13px] text-ink-3 max-sm:rounded-xl max-sm:border max-sm:py-2">{window.location.host}/</span>
               <input
                 id="share-slug"
-                autoFocus
+                autoFocus={!window.matchMedia('(pointer: coarse)').matches}
+                enterKeyHint="go"
                 value={customSlug}
                 onChange={(e) => setCustomSlug(e.target.value)}
                 placeholder="priya-raman"
@@ -81,11 +82,11 @@ const ShareModal = ({
                 spellCheck={false}
                 aria-describedby={shareError ? 'share-error' : undefined}
                 aria-invalid={shareError ? true : undefined}
-                className="input min-w-0 !rounded-l-none"
+                className="input min-w-0 !rounded-l-none max-sm:!rounded-xl"
               />
             </div>
             {shareError && <p id="share-error" role="alert" className="mt-2 text-xs font-medium text-danger">{shareError}</p>}
-            <button type="submit" disabled={isGeneratingLink} className="btn btn-primary mt-5 h-10 w-full">
+            <button type="submit" disabled={isGeneratingLink} className="btn btn-primary mt-5 h-10 w-full max-sm:h-12">
               {isGeneratingLink && <Loader2 size={16} className="animate-spin" />}
               {isGeneratingLink ? 'Creating...' : 'Create link'}
             </button>
