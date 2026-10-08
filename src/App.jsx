@@ -219,6 +219,8 @@ const App = () => {
   // 5. Theme: class on <html> drives every colour token, and the choice is remembered.
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');
+    // Colour the phone's status bar and browser chrome to match the app, even when the choice differs from the system's.
+    document.querySelectorAll('meta[name="theme-color"]').forEach((meta) => meta.setAttribute('content', theme === 'dark' ? '#131211' : '#f3f0ea'));
     try {
       localStorage.setItem(THEME_KEY, theme);
     } catch {
