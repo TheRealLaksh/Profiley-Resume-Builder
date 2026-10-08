@@ -38,7 +38,7 @@ const MobileLayout = (props) => {
 
     return (
         <div className="flex h-[100dvh] flex-col bg-canvas text-ink">
-            <header className="flex h-14 shrink-0 items-center gap-2 border-b border-line bg-panel px-3">
+            <header className="flex h-[calc(3.5rem+env(safe-area-inset-top))] shrink-0 items-center gap-1 border-b border-line bg-panel px-3 pt-[env(safe-area-inset-top)]">
                 {isReadOnly ? (
                     <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-semibold">{data.personal.name || 'Resume'}</p>
