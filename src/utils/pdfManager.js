@@ -20,6 +20,9 @@ export const downloadResumePdf = async ({ name, quality = 'screen' } = {}) => {
   if (!paper) throw new Error('The resume preview is not visible.');
 
   const clone = paper.cloneNode(true);
+  clone.querySelectorAll('[data-editor-only]').forEach((el) => el.remove());
+  // A contact line whose only text was an editor placeholder would leave a bare icon behind.
+  clone.querySelectorAll('[data-contact]').forEach((el) => { if (!el.textContent.trim()) el.remove(); });
   Object.assign(clone.style, {
     width: '210mm',
     minHeight: '297mm',
@@ -34,6 +37,19 @@ export const downloadResumePdf = async ({ name, quality = 'screen' } = {}) => {
   Object.assign(container.style, { position: 'fixed', top: '-10000px', left: '-10000px', zIndex: '-100' });
   container.appendChild(clone);
   document.body.appendChild(container);
+
+  // html2canvas draws text a few pixels lower than the browser lays it out (about 0.3 to 0.4em for the
+  // fonts used here), which pushes labels out of chips and off their icons. Nudge every element
+  // that directly holds text back up. This only touches the throwaway clone (and must run once it is attached, so computed styles exist).
+  const walker = document.createTreeWalker(clone, NodeFilter.SHOW_TEXT);
+  const holders = new Set();
+  for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+    if (node.nodeValue.trim() && node.parentElement) holders.add(node.parentElement);
+  }
+  holders.forEach((el) => {
+    if (getComputedStyle(el).position === 'static') el.style.position = 'relative';
+    el.style.top = '-0.36em';
+  });
 
   try {
     // Capturing before web fonts finish loading would bake in the fallback font.

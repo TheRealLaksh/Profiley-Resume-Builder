@@ -4,9 +4,11 @@ import { createPortal } from 'react-dom';
 // Components
 import EditorPanel from './components/Editor/EditorPanel';
 import ResumeDocument from './components/Preview/ResumeDocument';
+import { EditContext } from './components/Preview/editContext';
 import MobileLayout from './components/Mobile/MobileLayout';
 import Toast from './components/UI/Toast';
 import ShareModal from './components/Modals/ShareModal';
+import ImportModal from './components/Modals/ImportModal';
 import TopBar from './components/Layout/TopBar';
 import ZoomDock from './components/Layout/ZoomDock';
 import AppSkeleton from './components/Layout/AppSkeleton';
@@ -15,10 +17,15 @@ import Footer from './components/Layout/Footer';
 // Hooks
 import useCanvasZoom from './hooks/useCanvasZoom';
 import useMediaQuery from './hooks/useMediaQuery';
+import useAiStatus from './ai/useAiStatus';
+import { toJsonResume, toProfileyBackup } from './import/formats';
 
 // Utilities & Data
 import { downloadResumePdf, printResume } from './utils/pdfManager';
 import {
+  normalizeData,
+  normalizeConfig,
+  normalizeSectionOrder,
   normalizeResume,
   loadLocalResume,
   saveLocalResume,
@@ -78,6 +85,8 @@ const App = () => {
 
   // Sharing State
   const [showShareModal, setShowShareModal] = useState(false);
+  const [showImport, setShowImport] = useState(false);
+  const ai = useAiStatus();
   const [customSlug, setCustomSlug] = useState('');
   const [isGeneratingLink, setIsGeneratingLink] = useState(false);
   const [shareError, setShareError] = useState('');
@@ -354,6 +363,91 @@ const App = () => {
     window.location.href = '/'; 
   };
 
+  // Edits made by clicking text on the page. Paths look like "personal:name",
+  // "experience:<id>:role", "skill:<index>:name", "section:<id>", "achievements:<index>".
+  const handleInlineEdit = (path, value) => {
+    const [kind, a, b] = path.split(':');
+
+    if (kind === 'section') {
+      const label = value.trim();
+      if (!label) return;
+      setSectionOrder((prev) => prev.map((s) => (s.id === a ? { ...s, label } : s)));
+      if (a.startsWith('custom-')) {
+        setData((prev) => (prev.custom[a] ? { ...prev, custom: { ...prev.custom, [a]: { ...prev.custom[a], title: label } } } : prev));
+      }
+      return;
+    }
+
+    setData((prev) => {
+      switch (kind) {
+        case 'personal':
+          return { ...prev, personal: { ...prev.personal, [a]: value } };
+        case 'experience':
+        case 'education':
+          return { ...prev, [kind]: prev[kind].map((item) => (String(item.id) === a ? { ...item, [b]: value } : item)) };
+        case 'skill': {
+          const index = Number(a);
+          if (!value.trim()) return { ...prev, skills: prev.skills.filter((_, i) => i !== index) };
+          return {
+            ...prev,
+            skills: prev.skills.map((skill, i) => {
+              if (i !== index) return skill;
+              return typeof skill === 'string' ? value : { ...skill, name: value };
+            })
+          };
+        }
+        case 'achievements':
+        case 'community': {
+          const index = Number(a);
+          if (!value.trim()) return { ...prev, [kind]: prev[kind].filter((_, i) => i !== index) };
+          return { ...prev, [kind]: prev[kind].map((item, i) => (i === index ? value : item)) };
+        }
+        case 'custom':
+          return prev.custom[a] ? { ...prev, custom: { ...prev.custom, [a]: { ...prev.custom[a], [b]: value } } } : prev;
+        default:
+          return prev;
+      }
+    });
+  };
+
+  // Replaces the resume's content with something imported. Design is only touched when the
+  // import carries one (a Profiley backup). Everything goes through normalizeData first.
+  const handleApplyImport = ({ data: incoming, customSections = [], config: incomingConfig, sectionOrder: incomingOrder }) => {
+    const imported = normalizeData(incoming);
+    const photoUrl = imported.personal.photoUrl || data.personal.photoUrl;
+
+    setData({ ...imported, personal: { ...imported.personal, photoUrl } });
+    if (incomingConfig) setConfig(normalizeConfig(incomingConfig));
+    if (incomingOrder) {
+      setSectionOrder(normalizeSectionOrder(incomingOrder));
+    } else {
+      setSectionOrder((prev) => [
+        ...prev.filter((s) => s.type !== 'custom' && !String(s.id).startsWith('custom-')),
+        ...customSections.filter((s) => imported.custom[s.id])
+      ]);
+    }
+    setActiveTab('sections');
+    notifyUndo('Resume imported');
+  };
+
+  const downloadJson = (filename, payload) => {
+    const url = URL.createObjectURL(new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
+
+  const handleExportJson = (kind) => {
+    const base = (data.personal.name || 'resume').trim().replace(/[^\w.-]+/g, '_') || 'resume';
+    if (kind === 'jsonresume') downloadJson(`${base}.jsonresume.json`, toJsonResume(data));
+    else downloadJson(`${base}.profiley.json`, toProfileyBackup({ data, config, sectionOrder }));
+    notify('Saved to your downloads');
+  };
+
   const handleSaveNow = () => {
     const saved = saveLocalResume({ data, config, sectionOrder });
     setSaveState(saved ? 'saved' : 'error');
@@ -382,6 +476,9 @@ const App = () => {
     onDownloadPdf: handleDownloadPdf,
     onPrint: printResume,
     isExportingPdf,
+    openImport: () => setShowImport(true),
+    onExportJson: handleExportJson,
+    notify,
     notifyUndo
   };
 
@@ -434,7 +531,9 @@ const App = () => {
                   style={{ width: canvas.contentSize.width || undefined, transform: `scale(${canvas.zoom})` }}
                 >
                   <div ref={canvas.setContent} className="inline-block">
-                    <ResumeDocument data={data} config={config} sectionOrder={sectionOrder} />
+                    <EditContext.Provider value={isReadOnly ? null : { commit: handleInlineEdit }}>
+                      <ResumeDocument data={data} config={config} sectionOrder={sectionOrder} />
+                    </EditContext.Provider>
                   </div>
                 </div>
               </div>
@@ -444,7 +543,7 @@ const App = () => {
           </div>
 
           <p className="pointer-events-none absolute left-4 top-3 font-numeric text-[11px] text-ink-3">
-            A4{templateName ? ` · ${templateName}` : ''}
+            A4{templateName ? ` · ${templateName}` : ''}{!isReadOnly && ' · click any text to edit'}
           </p>
 
           <ZoomDock
@@ -479,6 +578,9 @@ const App = () => {
         linkCopied={linkCopied}
         handleCopyShareUrl={handleCopyShareUrl}
       />
+
+      {/* Mounted only while open so every visit starts from a clean slate. */}
+      {showImport && <ImportModal isOpen onClose={() => setShowImport(false)} onApply={handleApplyImport} ai={ai} />}
 
       <Toast
         show={toast.show}

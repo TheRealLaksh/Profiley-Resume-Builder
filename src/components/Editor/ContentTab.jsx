@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
     Briefcase, GraduationCap, Code, Award, Heart, User, FileText, FilePlus,
-    GripVertical, Eye, EyeOff, Pencil, Check, X, ChevronRight, ChevronLeft, Trash2, Plus
+    GripVertical, Eye, EyeOff, Pencil, Check, X, ChevronRight, ChevronLeft, Trash2, Plus, FileUp
 } from 'lucide-react';
 import { PanelHeading, Toggle } from '../UI/FormElements';
 import PersonalEditor from './editors/PersonalEditor';
@@ -34,7 +34,7 @@ const describe = (section, data) => {
 
 const ContentTab = ({
     activeTab, setActiveTab, data, setData, sectionOrder, setSectionOrder,
-    draggedItemIndex, handleDragStart, handleDragOver, handleDragEnd, notifyUndo
+    draggedItemIndex, handleDragStart, handleDragOver, handleDragEnd, notifyUndo, openImport
 }) => {
     const [editingId, setEditingId] = useState(null);
     const [draftLabel, setDraftLabel] = useState('');
@@ -97,7 +97,11 @@ const ContentTab = ({
 
         return (
             <div className="animate-rise">
-                <PanelHeading title="Your resume" subtitle="Pick a section to edit. Drag to reorder, or use the arrow keys on the handle." />
+                <PanelHeading
+                    title="Your resume"
+                    subtitle="Pick a section to edit. Drag to reorder, or use the arrow keys on the handle."
+                    action={openImport && <button className="btn btn-secondary btn-sm shrink-0" onClick={openImport}><FileUp size={14} /> Import</button>}
+                />
 
                 <button
                     type="button"

@@ -270,6 +270,13 @@
         box-shadow: none !important;
         margin: 0 !important;
     }
+
+    /* Wide letter-spacing is written into the PDF glyph by glyph, so text extractors read
+       "E X P E R I E N C E" and applicant tracking systems miss the section. Measured:
+       up to about 0.05em extracts as one word in every font used here, wider does not. */
+    #print-root [data-resume-paper] :is([class*="tracking-["], [class*="tracking-wide"]) {
+        letter-spacing: 0.05em !important;
+    }
 }
 
 /* The print copy never shows on screen. */

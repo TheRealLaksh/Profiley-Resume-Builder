@@ -1,16 +1,18 @@
 import React from 'react';
-import { Download, FileText, Palette } from 'lucide-react';
+import { Download, FileText, Palette, ScanSearch } from 'lucide-react';
 import ContentTab from './ContentTab';
 import DesignTab from './DesignTab';
 import ExportTab from './ExportTab';
+import ReviewTab from './ReviewTab';
 
 const TABS = [
     { id: 'content', label: 'Content', icon: FileText },
     { id: 'design', label: 'Design', icon: Palette },
+    { id: 'review', label: 'Review', icon: ScanSearch },
     { id: 'export', label: 'Export', icon: Download }
 ];
 
-const currentTabOf = (activeTab) => (activeTab === 'design' || activeTab === 'export' ? activeTab : 'content');
+const currentTabOf = (activeTab) => (['design', 'review', 'export'].includes(activeTab) ? activeTab : 'content');
 
 /** The tabbed editing surface. Used as the desktop sidebar and inside the mobile layout. */
 export const EditorTabs = ({ activeTab, setActiveTab }) => {
@@ -38,6 +40,7 @@ export const EditorTabs = ({ activeTab, setActiveTab }) => {
 export const EditorBody = (props) => {
     const current = currentTabOf(props.activeTab);
     return current === 'design' ? <DesignTab {...props} />
+        : current === 'review' ? <ReviewTab {...props} />
         : current === 'export' ? <ExportTab {...props} />
         : <ContentTab {...props} />;
 };
