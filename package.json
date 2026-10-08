@@ -10,9 +10,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.132.1",
     "firebase": "^12.6.0",
     "html2pdf.js": "^0.12.1",
     "lucide-react": "^0.561.0",
+    "pdfjs-dist": "^4.10.38",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },
