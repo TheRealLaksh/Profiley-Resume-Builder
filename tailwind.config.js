@@ -84,5 +84,12 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    // Keep these in step with src/utils/layout.js.
+    ({ addVariant }) => {
+      addVariant('phone', '@media (max-width: 767px), (pointer: coarse) and (max-height: 500px)');
+      addVariant('desk', ['@media (min-width: 768px) and (min-height: 501px)', '@media (min-width: 768px) and (pointer: fine)']);
+      addVariant('land', '@media (pointer: coarse) and (max-height: 500px)');
+    },
+  ],
 }
