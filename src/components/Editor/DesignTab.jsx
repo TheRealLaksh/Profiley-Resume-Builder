@@ -3,6 +3,7 @@ import { Check, RotateCcw } from 'lucide-react';
 import { colorThemes, initialConfig, templates, templateFilters } from '../../data/constants';
 import { Group, PanelHeading, Segmented, SelectField, Swatch, Toggle } from '../UI/FormElements';
 import TemplateThumb from './TemplateThumb';
+import { tap } from '../../utils/haptics';
 
 const FONTS = [
     { value: 'font-inter', label: 'Inter' },
@@ -75,7 +76,7 @@ const DesignTab = ({ data, config, setConfig, sectionOrder, applyTemplate }) => 
                                 key={key}
                                 type="button"
                                 aria-pressed={selected}
-                                onClick={() => applyTemplate(key)}
+                                onClick={() => { tap(); applyTemplate(key); }}
                                 className={`group rounded-2xl border p-1.5 text-left transition-[border-color,box-shadow,background-color,transform] duration-200 ease-snap active:scale-[0.985] ${selected ? 'border-accent bg-accent-soft/60 shadow-soft' : 'border-line bg-surface hover:border-line-strong hover:shadow-soft'}`}
                             >
                                 <div className="overflow-hidden rounded-lg border border-line/80 shadow-[0_1px_3px_rgb(60_45_20/0.1)] transition-transform duration-300 ease-snap group-hover:-translate-y-0.5">
@@ -83,10 +84,10 @@ const DesignTab = ({ data, config, setConfig, sectionOrder, applyTemplate }) => 
                                 </div>
                                 <div className="px-1.5 pb-1 pt-2">
                                     <div className="flex items-center justify-between gap-2">
-                                        <span className="text-[13px] font-semibold text-ink">{tpl.name}</span>
+                                        <span className="text-[13px] font-semibold text-ink max-md:text-sm">{tpl.name}</span>
                                         {selected && <span className="grid h-4 w-4 place-items-center rounded-full bg-accent text-accent-fg"><Check size={10} strokeWidth={3.5} /></span>}
                                     </div>
-                                    <span className="mt-0.5 block text-xs leading-snug text-ink-3 line-clamp-2">{tpl.description}</span>
+                                    <span className="mt-0.5 block text-xs leading-snug text-ink-3 line-clamp-2 max-md:text-[13px]">{tpl.description}</span>
                                 </div>
                             </button>
                         );
