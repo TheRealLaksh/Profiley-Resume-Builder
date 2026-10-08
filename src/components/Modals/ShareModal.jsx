@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { X, Link as LinkIcon, Loader2, Copy, Check } from 'lucide-react';
+import { X, Link as LinkIcon, Loader2, Copy, Check, Share2 } from 'lucide-react';
 
 const ShareModal = ({
   isOpen, onClose, customSlug, setCustomSlug, shareError,
@@ -63,7 +63,16 @@ const ShareModal = ({
                 {linkCopied ? <Check size={17} /> : <Copy size={17} />}
               </button>
             </div>
-            <button onClick={onClose} className="btn btn-secondary mt-4 h-10 w-full max-sm:h-12">Done</button>
+            {typeof navigator !== 'undefined' && navigator.share && (
+              <button
+                type="button"
+                onClick={() => navigator.share({ title: 'My resume', url: shareUrl }).catch(() => {})}
+                className="btn btn-primary mt-3 h-12 w-full sm:hidden"
+              >
+                <Share2 size={17} /> Send with…
+              </button>
+            )}
+            <button onClick={onClose} className="btn btn-secondary mt-3 h-10 w-full max-sm:h-12">Done</button>
           </>
         ) : (
           <form onSubmit={(e) => { e.preventDefault(); handleGenerateLink(); }}>
