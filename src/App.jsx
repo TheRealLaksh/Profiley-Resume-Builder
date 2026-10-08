@@ -342,6 +342,32 @@ const App = () => {
     }
   };
 
+  // Phones: hand the PDF to the system share sheet (Messages, WhatsApp, Drive, Mail...) instead of a download.
+  const handleSharePdf = async () => {
+    if (isExportingPdf) return;
+    setIsExportingPdf(true);
+    try {
+      const skills = (data.skills || []).map((skill) => (typeof skill === 'string' ? skill : skill?.name)).filter(Boolean);
+      const { blob, filename } = await downloadResumePdf({ name: data.personal?.name, quality: pdfQuality, fitOnePage, meta: { keywords: skills }, deliver: 'blob' });
+      const file = new File([blob], filename, { type: 'application/pdf' });
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file], title: filename.replace(/\.pdf$/, '') });
+      } else {
+        const url = URL.createObjectURL(blob);
+        const link = Object.assign(document.createElement('a'), { href: url, download: filename });
+        link.click();
+        setTimeout(() => URL.revokeObjectURL(url), 10000);
+      }
+    } catch (error) {
+      if (error?.name !== 'AbortError') {
+        console.error('PDF share failed', error);
+        notify('Could not share the PDF. Try Download PDF instead.', 'error');
+      }
+    } finally {
+      setIsExportingPdf(false);
+    }
+  };
+
   const toggleFullScreen = () => {
     if (!document.fullscreenElement && fullScreenContainerRef.current) {
         fullScreenContainerRef.current.requestFullscreen().catch(console.error);
@@ -479,6 +505,7 @@ const App = () => {
     fitOnePage, setFitOnePage,
     handleShare: openShareModal,
     onDownloadPdf: handleDownloadPdf,
+    onSharePdf: handleSharePdf,
     onPrint: () => printResume({ fitOnePage }),
     isExportingPdf,
     openImport: () => setShowImport(true),
