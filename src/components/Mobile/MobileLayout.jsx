@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
-    Download, Eye, FileText, FilePlus, Loader2, Mail, Moon, Palette, Pencil, Phone, Redo2, ScanSearch, Sun, Undo2, ZoomIn
+    Check, Download, Eye, FileText, FilePlus, Loader2, Mail, Moon, Palette, Pencil, Phone, Redo2, ScanSearch, Sun, Undo2, ZoomIn
 } from 'lucide-react';
 import { EditorBody } from '../Editor/EditorPanel';
 import ResumeDocument from '../Preview/ResumeDocument';
@@ -25,7 +25,7 @@ const markHintSeen = () => { try { localStorage.setItem(HINT_KEY, '1'); } catch 
 const MobileLayout = (props) => {
     const {
         activeTab, setActiveTab, darkMode, toggleDarkMode, data, config, sectionOrder, isReadOnly,
-        canUndo, canRedo, undo, redo, onDownloadPdf, isExportingPdf, onCopyEmail, onForkTemplate
+        canUndo, canRedo, undo, redo, onDownloadPdf, isExportingPdf, onCopyEmail, onForkTemplate, saveState
     } = props;
 
     const [showPreview, setShowPreview] = useState(false);
@@ -73,7 +73,14 @@ const MobileLayout = (props) => {
                         <p className="font-numeric text-[10px] uppercase tracking-wider text-ink-3">Shared · read only</p>
                     </div>
                 ) : (
-                    <div className="flex-1"><Logo size="sm" /></div>
+                    <div className="flex min-w-0 flex-1 items-center gap-2.5">
+                        <Logo size="sm" />
+                        {saveState === 'error' ? (
+                            <span className="flex items-center gap-1 font-numeric text-[11px] text-danger" role="status"><span className="h-1.5 w-1.5 rounded-full bg-danger" />Not saved</span>
+                        ) : saveState === 'saved' && (
+                            <span className="flex animate-fade items-center gap-1 font-numeric text-[11px] text-ink-3" role="status"><Check size={12} className="text-accent" />Saved</span>
+                        )}
+                    </div>
                 )}
 
                 {!isReadOnly && !inPreview && (
