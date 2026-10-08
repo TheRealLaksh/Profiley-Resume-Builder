@@ -11,7 +11,7 @@ const round2 = (value) => Math.round(value * 100) / 100;
  * - Until the user zooms by hand the page is "fitted": scaled to the container width,
  *   so it is sensible on a phone, a laptop and an ultrawide alike.
  */
-export default function useCanvasZoom({ min = 0.3, max = 2, maxFit = 1, gutter = 48 } = {}) {
+export default function useCanvasZoom({ min = 0.3, max = 2, maxFit = 1, gutter = 48, doubleTap = false } = {}) {
   const [container, setContainer] = useState(null);
   const [content, setContent] = useState(null);
   const [containerWidth, setContainerWidth] = useState(0);
@@ -43,6 +43,11 @@ export default function useCanvasZoom({ min = 0.3, max = 2, maxFit = 1, gutter =
   useEffect(() => {
     zoomRef.current = zoom;
   }, [zoom]);
+
+  const fitRef = useRef(fitZoom);
+  useEffect(() => {
+    fitRef.current = fitZoom;
+  }, [fitZoom]);
 
   const setZoom = useCallback((value) => setManualZoom(clamp(round2(value), min, max)), [min, max]);
   const zoomIn = useCallback(() => setZoom(zoomRef.current + 0.1), [setZoom]);
@@ -81,7 +86,22 @@ export default function useCanvasZoom({ min = 0.3, max = 2, maxFit = 1, gutter =
         setZoom(startZoom * (distance(e.touches) / startDistance));
       }
     };
-    const onTouchEnd = () => { startDistance = 0; };
+    // Optional double-tap: jump between "fit to width" and a comfortable reading size.
+    let lastTap = { time: 0, x: 0, y: 0 };
+    const onTouchEnd = (e) => {
+      const wasPinching = startDistance > 0;
+      startDistance = 0;
+      if (!doubleTap || wasPinching || e.touches.length > 0 || e.changedTouches.length !== 1) return;
+      const { clientX: x, clientY: y } = e.changedTouches[0];
+      const now = Date.now();
+      if (now - lastTap.time < 320 && Math.hypot(x - lastTap.x, y - lastTap.y) < 28) {
+        const reading = Math.min(max, Math.max(fitRef.current * 2.2, 0.9));
+        setZoom(zoomRef.current > fitRef.current * 1.3 ? fitRef.current : reading);
+        lastTap = { time: 0, x: 0, y: 0 };
+      } else {
+        lastTap = { time: now, x, y };
+      }
+    };
 
     container.addEventListener('touchstart', onTouchStart, { passive: true });
     container.addEventListener('touchmove', onTouchMove, { passive: false });
@@ -91,7 +111,7 @@ export default function useCanvasZoom({ min = 0.3, max = 2, maxFit = 1, gutter =
       container.removeEventListener('touchmove', onTouchMove);
       container.removeEventListener('touchend', onTouchEnd);
     };
-  }, [container, setZoom]);
+  }, [container, setZoom, doubleTap, max]);
 
   return {
     setContainer, setContent,

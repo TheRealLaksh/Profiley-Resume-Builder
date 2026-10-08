@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
-    Download, Eye, FileText, FilePlus, Loader2, Mail, Moon, Palette, Pencil, Phone, Redo2, ScanSearch, Sun, Undo2
+    Download, Eye, FileText, FilePlus, Loader2, Mail, Moon, Palette, Pencil, Phone, Redo2, ScanSearch, Sun, Undo2, ZoomIn
 } from 'lucide-react';
 import { EditorBody } from '../Editor/EditorPanel';
 import ResumeDocument from '../Preview/ResumeDocument';
@@ -33,17 +33,17 @@ const MobileLayout = (props) => {
     const keyboardOpen = useKeyboardOpen();
     const {
         setContainer, setContent, zoom, min, max, isFit, contentSize, zoomIn, zoomOut, fit, actualSize
-    } = useCanvasZoom({ gutter: 16, min: 0.25, maxFit: 1 });
+    } = useCanvasZoom({ gutter: 16, min: 0.25, maxFit: 1, doubleTap: isReadOnly });
 
     const inPreview = isReadOnly || showPreview;
     const current = inPreview ? 'preview' : (['design', 'review', 'export'].includes(activeTab) ? activeTab : 'content');
 
     // The hint explains tap-to-edit once, then gets out of the way.
     useEffect(() => {
-        if (!showHint || !inPreview || isReadOnly) return undefined;
+        if (!showHint || !inPreview) return undefined;
         const timer = setTimeout(() => { setShowHint(false); markHintSeen(); }, 7000);
         return () => clearTimeout(timer);
-    }, [showHint, inPreview, isReadOnly]);
+    }, [showHint, inPreview]);
 
     // Tapping a part of the page opens the editor for it.
     const editFromPreview = (e) => {
@@ -125,10 +125,10 @@ const MobileLayout = (props) => {
                         </div>
                     </div>
 
-                    {inPreview && !isReadOnly && showHint && (
+                    {inPreview && showHint && (
                         <div className="pointer-events-none absolute inset-x-0 top-3 flex justify-center px-4">
                             <p className="pointer-events-auto flex animate-pop items-center gap-2 rounded-full bg-ink px-4 py-2.5 text-[13px] font-medium text-canvas shadow-pop">
-                                <Pencil size={14} /> Tap any part of the page to edit it
+                                {isReadOnly ? <><ZoomIn size={14} /> Double-tap the page to zoom</> : <><Pencil size={14} /> Tap any part of the page to edit it</>}
                             </p>
                         </div>
                     )}
