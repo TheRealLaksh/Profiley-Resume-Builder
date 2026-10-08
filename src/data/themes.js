@@ -8,5 +8,6 @@ export const colorThemes = {
     forest: { name: 'Forest', text: 'text-green-800', border: 'border-green-800', bg: 'bg-green-50', icon: 'text-green-700', hex: 'bg-green-800', fill: 'bg-green-800' },
     berry: { name: 'Berry', text: 'text-fuchsia-800', border: 'border-fuchsia-800', bg: 'bg-fuchsia-50', icon: 'text-fuchsia-700', hex: 'bg-fuchsia-800', fill: 'bg-fuchsia-800' },
     royal: { name: 'Royal', text: 'text-indigo-800', border: 'border-indigo-800', bg: 'bg-indigo-50', icon: 'text-indigo-700', hex: 'bg-indigo-700', fill: 'bg-indigo-800' },
-    gold: { name: 'Gold', text: 'text-amber-700', border: 'border-amber-700', bg: 'bg-amber-50', icon: 'text-amber-600', hex: 'bg-amber-600', fill: 'bg-amber-700' }
+    gold: { name: 'Gold', text: 'text-amber-700', border: 'border-amber-700', bg: 'bg-amber-50', icon: 'text-amber-600', hex: 'bg-amber-600', fill: 'bg-amber-700' },
+    terracotta: { name: 'Terracotta', text: 'text-orange-800', border: 'border-orange-800', bg: 'bg-orange-50', icon: 'text-orange-700', hex: 'bg-orange-700', fill: 'bg-orange-800' }
 };
