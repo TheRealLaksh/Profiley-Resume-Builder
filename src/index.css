@@ -170,6 +170,18 @@
     textarea.input {
       @apply min-h-[6.5rem];
     }
+    .btn {
+      @apply h-11 rounded-[0.875rem] px-4 text-sm;
+    }
+    .btn-icon {
+      @apply w-11 px-0;
+    }
+    .btn-sm {
+      @apply h-10 rounded-xl px-3 text-[13px];
+    }
+    .seg-item {
+      @apply min-h-10 text-[13px];
+    }
   }
 
   /* ---- Surfaces & text ---- */
