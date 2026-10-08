@@ -17,6 +17,7 @@ import Footer from './components/Layout/Footer';
 // Hooks
 import useCanvasZoom from './hooks/useCanvasZoom';
 import useMediaQuery from './hooks/useMediaQuery';
+import { DESKTOP_QUERY } from './utils/layout';
 import useAiStatus from './ai/useAiStatus';
 import { toJsonResume, toProfileyBackup } from './import/formats';
 
@@ -74,7 +75,7 @@ const App = () => {
 
   const [theme, setTheme] = useState(getInitialTheme);
   const darkMode = theme === 'dark';
-  const isDesktop = useMediaQuery('(min-width: 768px)');
+  const isDesktop = useMediaQuery(DESKTOP_QUERY);
   const [pdfQuality, setPdfQuality] = useState('screen');
   const [fitOnePage, setFitOnePage] = useState(true);
   const [history, setHistory] = useState({ stack: [], index: -1 });
