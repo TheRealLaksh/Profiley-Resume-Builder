@@ -23,19 +23,19 @@ const DesignTab = ({
     const renderTemplateVisual = (key) => {
         switch(key) {
             case 'modern': 
-                return <div className="w-full h-full bg-whitePv flex"><div className="w-1/3 bg-slate-800 h-full"></div><div className="w-2/3 h-full"></div></div>;
+                return <div className="w-full h-full bg-white flex"><div className="w-1/3 bg-slate-800 h-full"></div><div className="w-2/3 h-full"></div></div>;
             case 'minimal': 
                 return <div className="w-full h-full bg-white border-t-4 border-black"></div>;
             case 'creative': 
-                return <div className="w-full h-full bg-whitePv flex flex-row-reverse"><div className="w-1/3 bg-rose-200 h-full"></div><div className="w-2/3 h-full"></div></div>;
+                return <div className="w-full h-full bg-white flex flex-row-reverse"><div className="w-1/3 bg-rose-200 h-full"></div><div className="w-2/3 h-full"></div></div>;
             case 'ats': 
-                return <div className="w-full h-full bg-white flex flex-colMQ p-1 gap-1"><div className="h-1 w-full bg-gray-300"></div><div className="h-1 w-3/4 bg-gray-200"></div></div>;
+                return <div className="w-full h-full bg-white flex flex-col p-1 gap-1"><div className="h-1 w-full bg-gray-300"></div><div className="h-1 w-3/4 bg-gray-200"></div></div>;
             case 'executive': 
-                return <div className="w-full h-full bg-whitePv flex flex-row-reverse"><div className="w-1/3 bg-blue-800 h-full"></div><div className="w-2/3 h-full flex flex-col justify-center px-1"><div className="h-0.5 w-full bg-gray-300 mb-1"></div></div></div>;
+                return <div className="w-full h-full bg-white flex flex-row-reverse"><div className="w-1/3 bg-blue-800 h-full"></div><div className="w-2/3 h-full flex flex-col justify-center px-1"><div className="h-0.5 w-full bg-gray-300 mb-1"></div></div></div>;
             case 'elegant': 
                 return <div className="w-full h-full bg-amber-50 border-4 border-double border-amber-200 flex flex-col items-center justify-center gap-1"><div className="h-0.5 w-1/2 bg-amber-800"></div></div>;
             case 'tech': 
-                return <div className="w-full h-full bg-slate-900 flex"><div className="w-1/4 h-fullQX border-rQX border-slate-700"></div><div className="w-3/4 h-full"></div></div>;
+                return <div className="w-full h-full bg-slate-900 flex"><div className="w-1/4 h-full border-r border-slate-700"></div><div className="w-3/4 h-full"></div></div>;
             case 'glitch':
                 return <div className="w-full h-full bg-black flex flex-col items-start p-1"><div className="w-1/2 h-1 bg-green-500 mb-1"></div><div className="w-full h-4 border border-green-500/50"></div></div>;
             case 'classic':
@@ -75,7 +75,6 @@ const DesignTab = ({
                     {Object.entries(colorThemes).map(([key, theme]) => (
                         <ColorButton 
                             key={key} 
-                            colorKey={key} 
                             theme={theme} 
                             selected={config.themeColor === key} 
                             onClick={() => updateConfig('themeColor', key)} 

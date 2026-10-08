@@ -1,5 +1,6 @@
 import React from 'react';
 import { ExternalLink } from 'lucide-react';
+import { sanitizeUrl } from '../../utils/safeUrl';
 
 // --- HELPER: Renders an icon with fixed, PDF-safe sizing ---
 export const IconRenderer = ({ Icon, size = 16, className = "" }) => {
@@ -24,6 +25,7 @@ export const IconRenderer = ({ Icon, size = 16, className = "" }) => {
 
 // --- HELPER: Section Headers ---
 export const SectionHeader = ({ title, icon, config, theme }) => {
+    const uppercase = config.uppercaseHeaders !== false;
     const justifyClass = config.headerAlign === 'text-center' ? 'justify-center' : 
                          config.headerAlign === 'text-right' ? 'justify-end' : 'justify-start';
                          
@@ -34,7 +36,7 @@ export const SectionHeader = ({ title, icon, config, theme }) => {
                     <IconRenderer Icon={icon} size={18} />
                 </div>
             )}
-            <h3 className={`uppercase tracking-widest text-xs font-bold ${theme.text}`}>
+            <h3 className={`${uppercase ? 'uppercase' : ''} tracking-widest text-xs font-bold ${theme.text}`}>
                 {title}
             </h3>
         </div>
@@ -42,8 +44,11 @@ export const SectionHeader = ({ title, icon, config, theme }) => {
 };
 
 // --- FIX: Contact Item (Critical Visibility Fix) ---
-export const ContactItem = ({ icon, text, link }) => {
+export const ContactItem = ({ icon, text, link: rawLink }) => {
     if (!text) return null;
+
+    // Links come from user input (and from other people's shared resumes): only http(s) is allowed.
+    const link = sanitizeUrl(rawLink);
 
     // CRITICAL PDF STYLES:
     // 1. color: '#000000' -> Ensures maximum contrast, no grey wash-out.
@@ -84,7 +89,7 @@ export const ContactItem = ({ icon, text, link }) => {
     // Render Logic
     if (link) {
         return (
-            <div className="break-inside-avoid max-w-full inline-flex">
+            <div className="break-inside-avoid max-w-full flex">
                 <a
                     href={link}
                     target="_blank"

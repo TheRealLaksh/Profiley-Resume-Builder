@@ -1,9 +1,11 @@
-import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
+import React, { useState, useEffect, useRef, useLayoutEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { Loader2, Save, Share2 } from 'lucide-react';
 
 // Components
 import EditorPanel from './components/Editor/EditorPanel';
 import PreviewPanel from './components/Preview/PreviewPanel';
+import ResumeDocument from './components/Preview/ResumeDocument';
 import MobileLayout from './components/Mobile/MobileLayout';
 import SEOFooter from './components/SEO/SEOFooter';
 
@@ -15,14 +17,33 @@ import ZoomToolbar from './components/Layout/ZoomToolbar';
 import ReadOnlyToolbar from './components/Layout/ReadOnlyToolbar';
 
 // Utilities & Data
-import { handleDownloadPdf } from './utils/pdfManager';
-import { saveResumeToDB, saveResumeWithSlug, fetchResumeFromDB } from './firebase'; 
+import { downloadResumePdf, printResume } from './utils/pdfManager';
+import {
+  normalizeResume,
+  loadLocalResume,
+  saveLocalResume,
+  saveLocalDesignOnly
+} from './utils/resumeData';
+import { saveResumeToDB, saveResumeWithSlug, fetchResumeFromDB, makeSlug } from './firebase';
 import {
   initialData,
   initialConfig,
   initialSections,
   templates
 } from './data/constants';
+
+const MAX_HISTORY = 50;
+
+// Appends a snapshot unless it is the current one. State is updated immutably,
+// so comparing references is enough to know nothing changed.
+const pushSnapshot = (history, snapshot) => {
+  const last = history.stack[history.index];
+  if (last && last.data === snapshot.data && last.config === snapshot.config && last.sectionOrder === snapshot.sectionOrder) {
+    return history;
+  }
+  const stack = [...history.stack.slice(0, history.index + 1), snapshot].slice(-MAX_HISTORY);
+  return { stack, index: stack.length - 1 };
+};
 
 const App = () => {
   // --- STATE MANAGEMENT ---
@@ -35,9 +56,9 @@ const App = () => {
 
   const [darkMode, setDarkMode] = useState(true);
   const [pdfQuality, setPdfQuality] = useState('screen'); 
-  const [history, setHistory] = useState([]);
-  const [historyIndex, setHistoryIndex] = useState(-1);
+  const [history, setHistory] = useState({ stack: [], index: -1 });
   const [isAutoSaving, setIsAutoSaving] = useState(false);
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
   
   const [isLoading, setIsLoading] = useState(true);
   const [isReadOnly, setIsReadOnly] = useState(false);
@@ -47,9 +68,13 @@ const App = () => {
   const [customSlug, setCustomSlug] = useState('');
   const [isGeneratingLink, setIsGeneratingLink] = useState(false);
   const [shareError, setShareError] = useState('');
+  const [shareUrl, setShareUrl] = useState('');
+  const [linkCopied, setLinkCopied] = useState(false);
   
   // Notification State
-  const [showCopyToast, setShowCopyToast] = useState(false);
+  const [toast, setToast] = useState({ show: false, message: '', variant: 'success' });
+  const toastTimerRef = useRef(null);
+  const storageWarnedRef = useRef(false);
 
   // Zoom & Fullscreen State
   const [zoom, setZoom] = useState(0.8);
@@ -61,18 +86,37 @@ const App = () => {
   const [contentSize, setContentSize] = useState({ width: 0, height: 0 });
   const contentRef = useRef(null);
 
+  const notify = useCallback((message, variant = 'success') => {
+    clearTimeout(toastTimerRef.current);
+    setToast({ show: true, message, variant });
+    toastTimerRef.current = setTimeout(() => setToast((t) => ({ ...t, show: false })), 3500);
+  }, []);
+
+  useEffect(() => () => clearTimeout(toastTimerRef.current), []);
+
   // --- EFFECTS ---
 
   // 1. Initialization
   useEffect(() => {
+    let cancelled = false;
+
+    const startEditing = (resume) => {
+      setData(resume.data);
+      setConfig(resume.config);
+      setSectionOrder(resume.sectionOrder);
+      // The first snapshot is the loaded state, so even the very first edit can be undone.
+      setHistory({ stack: [resume], index: 0 });
+      setIsLoading(false);
+    };
+
     const init = async () => {
       setIsLoading(true);
       const params = new URLSearchParams(window.location.search);
       let resumeId = params.get('id');
       
       if (!resumeId) {
-        const path = window.location.pathname.substring(1);
-        if (path && path.length > 0 && path !== 'index.html') {
+        const path = window.location.pathname.replace(/^\/+|\/+$/g, '');
+        if (path && path !== 'index.html') {
           resumeId = path;
         }
       }
@@ -80,66 +124,68 @@ const App = () => {
       if (resumeId) {
         try {
           const fetched = await fetchResumeFromDB(resumeId);
+          if (cancelled) return;
           if (fetched) {
-            if (fetched.data) setData(fetched.data);
-            if (fetched.config) setConfig(fetched.config);
-            if (fetched.sectionOrder) setSectionOrder(fetched.sectionOrder);
+            const resume = normalizeResume(fetched);
+            setData(resume.data);
+            setConfig(resume.config);
+            setSectionOrder(resume.sectionOrder);
             setIsReadOnly(true); 
-            if (fetched.data?.personal?.name) {
-                document.title = `${fetched.data.personal.name} - Resume`;
+            if (resume.data.personal.name) {
+              document.title = `${resume.data.personal.name} - Resume`;
             }
             setIsLoading(false);
             return;
-          } else {
-            alert("Resume not found. Loading editor.");
-            window.history.replaceState({}, document.title, "/");
           }
+          notify('Resume not found. Opening the editor.', 'error');
+          window.history.replaceState({}, document.title, "/");
         } catch (error) {
+          if (cancelled) return;
           console.error("Error loading:", error);
+          notify("Couldn't load that resume. Check your connection and refresh to retry.", 'error');
         }
       }
 
-      const savedData = localStorage.getItem('profiley_data');
-      const savedConfig = localStorage.getItem('profiley_config');
-      const savedOrder = localStorage.getItem('profiley_order');
-      
-      if (savedData) setData(JSON.parse(savedData));
-      if (savedConfig) setConfig(JSON.parse(savedConfig));
-      if (savedOrder) setSectionOrder(JSON.parse(savedOrder));
-      
-      setIsLoading(false);
+      if (cancelled) return;
+      startEditing(loadLocalResume() ?? normalizeResume({ data: initialData, config: initialConfig, sectionOrder: initialSections }));
     };
     init();
-  }, []);
+
+    return () => { cancelled = true; };
+  }, [notify]);
 
   // 2. Auto-save & History
   useEffect(() => {
     if (isLoading || isReadOnly) return; 
 
+    let indicatorTimer;
     const timeoutId = setTimeout(() => {
-      localStorage.setItem('profiley_data', JSON.stringify(data));
-      localStorage.setItem('profiley_config', JSON.stringify(config));
-      localStorage.setItem('profiley_order', JSON.stringify(sectionOrder));
-      setIsAutoSaving(true);
-      setTimeout(() => setIsAutoSaving(false), 1000);
-
-      const currentState = { data, config, sectionOrder };
-      const lastState = history[historyIndex];
-      
-      if (!lastState || JSON.stringify(lastState) !== JSON.stringify(currentState)) {
-        const newHistory = history.slice(0, historyIndex + 1);
-        newHistory.push(currentState);
-        if (newHistory.length > 50) newHistory.shift();
-        setHistory(newHistory);
-        setHistoryIndex(newHistory.length - 1);
+      const saved = saveLocalResume({ data, config, sectionOrder });
+      if (saved) {
+        storageWarnedRef.current = false;
+        setIsAutoSaving(true);
+        indicatorTimer = setTimeout(() => setIsAutoSaving(false), 1000);
+      } else if (!storageWarnedRef.current) {
+        storageWarnedRef.current = true;
+        notify("Couldn't save to this browser (storage full or blocked). Try removing the photo.", 'error');
       }
+
+      setHistory((prev) => pushSnapshot(prev, { data, config, sectionOrder }));
     }, 1000); 
 
-    return () => clearTimeout(timeoutId);
-  }, [data, config, sectionOrder, isLoading, isReadOnly]);
+    return () => {
+      clearTimeout(timeoutId);
+      clearTimeout(indicatorTimer);
+    };
+  }, [data, config, sectionOrder, isLoading, isReadOnly, notify]);
 
   // 3. Zoom via Ctrl+Scroll
+  // The preview container only exists once loading has finished, so wait for that.
   useEffect(() => {
+    if (isLoading) return;
+    const container = previewContainerRef.current;
+    if (!container) return;
+
     const handleWheel = (e) => {
       if (e.ctrlKey) {
         e.preventDefault();
@@ -147,12 +193,9 @@ const App = () => {
         setZoom(prev => Math.min(Math.max(prev + delta, 0.3), 1.5));
       }
     };
-    const container = previewContainerRef.current;
-    if (container) container.addEventListener('wheel', handleWheel, { passive: false });
-    return () => {
-      if (container) container.removeEventListener('wheel', handleWheel);
-    };
-  }, []);
+    container.addEventListener('wheel', handleWheel, { passive: false });
+    return () => container.removeEventListener('wheel', handleWheel);
+  }, [isLoading]);
 
   // 4. Fullscreen Listener
   useEffect(() => {
@@ -161,16 +204,13 @@ const App = () => {
     return () => document.removeEventListener('fullscreenchange', onFullScreenChange);
   }, []);
 
-  // 5. NEW: Resize Observer to measure content height/width
+  // 5. Resize Observer to measure content height/width (the element only exists after loading)
   useLayoutEffect(() => {
-    if (!contentRef.current) return;
-    
-    // Create an observer to watch the Resume Content size
+    if (isLoading || !contentRef.current) return;
+
     const observer = new ResizeObserver((entries) => {
       for (const entry of entries) {
-        // We use offsetWidth/Height to get the full border-box size
-        // but entry.contentRect is more performant for changes.
-        // For reliability with transforms, we read the DOM element directly inside the loop.
+        // offsetWidth/Height give the untransformed border-box size, which is what the zoom layout needs.
         const element = entry.target;
         setContentSize({
           width: element.offsetWidth,
@@ -181,28 +221,31 @@ const App = () => {
 
     observer.observe(contentRef.current);
     return () => observer.disconnect();
-  }, [data, config, sectionOrder, activeTemplate]); // Re-observe if structure changes deeply
+  }, [isLoading]);
 
   // --- HANDLERS ---
 
+  const applySnapshot = (snapshot) => {
+    setData(snapshot.data);
+    setConfig(snapshot.config);
+    setSectionOrder(snapshot.sectionOrder);
+  };
+
   const handleUndo = () => {
-    if (historyIndex > 0) {
-      const prevState = history[historyIndex - 1];
-      setData(prevState.data);
-      setConfig(prevState.config);
-      setSectionOrder(prevState.sectionOrder);
-      setHistoryIndex(historyIndex - 1);
-    }
+    // Record any edit still waiting for the autosave timer, so undo steps back from it.
+    const base = pushSnapshot(history, { data, config, sectionOrder });
+    const target = base.index - 1;
+    if (target < 0) return;
+    applySnapshot(base.stack[target]);
+    setHistory({ ...base, index: target });
   };
 
   const handleRedo = () => {
-    if (historyIndex < history.length - 1) {
-      const nextState = history[historyIndex + 1];
-      setData(nextState.data);
-      setConfig(nextState.config);
-      setSectionOrder(nextState.sectionOrder);
-      setHistoryIndex(historyIndex + 1);
-    }
+    const base = pushSnapshot(history, { data, config, sectionOrder });
+    const target = base.index + 1;
+    if (target >= base.stack.length) return;
+    applySnapshot(base.stack[target]);
+    setHistory({ ...base, index: target });
   };
 
   const applyTemplate = (templateKey) => {
@@ -211,39 +254,66 @@ const App = () => {
     if (template) setConfig(prev => ({ ...prev, ...template.config }));
   };
 
+  const openShareModal = () => {
+    setShareError('');
+    setShareUrl('');
+    setLinkCopied(false);
+    setShowShareModal(true);
+  };
+
+  const copyToClipboard = async (text) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
   const handleGenerateLink = async () => {
     setIsGeneratingLink(true);
     setShareError('');
     try {
-      let resumeId;
-      if (customSlug.trim()) {
-        const slug = customSlug.trim().replace(/[^a-zA-Z0-9-_]/g, '-');
-        resumeId = await saveResumeWithSlug(slug, { data, config, sectionOrder });
-      } else {
-        resumeId = await saveResumeToDB({ data, config, sectionOrder });
-      }
-      const shareUrl = `${window.location.origin}/${resumeId}`;
-      await navigator.clipboard.writeText(shareUrl);
-      alert(`Success! Link copied to clipboard:\n${shareUrl}`);
-      setShowShareModal(false);
+      // Normalising drops unsafe links/photos before anything is published.
+      const payload = normalizeResume({ data, config, sectionOrder });
+      const slug = customSlug.trim() ? makeSlug(customSlug) : '';
+      const resumeId = slug
+        ? await saveResumeWithSlug(slug, payload)
+        : await saveResumeToDB(payload);
+
+      const url = `${window.location.origin}/${resumeId}`;
+      setShareUrl(url);
+      // The link already exists at this point, so a blocked clipboard must not read as a failure.
+      setLinkCopied(await copyToClipboard(url));
     } catch (error) {
-        setShareError(error.message || "Failed to generate link.");
+      setShareError(error.message || "Failed to generate link.");
     } finally {
       setIsGeneratingLink(false);
     }
   };
 
-  const handleCopyEmail = () => {
-    if (data.personal?.email) {
-      navigator.clipboard.writeText(data.personal.email);
-      setShowCopyToast(true);
-      setTimeout(() => setShowCopyToast(false), 3000);
+  const handleCopyShareUrl = async () => {
+    setLinkCopied(await copyToClipboard(shareUrl));
+  };
+
+  const handleCopyEmail = async () => {
+    if (data.personal?.email && await copyToClipboard(data.personal.email)) {
+      notify('Email copied to clipboard!');
     }
   };
 
-  // Note: We point to 'resume-preview-content' which is now the INNER unscaled div. 
-  // This produces better PDFs.
-  const triggerPdfDownload = () => handleDownloadPdf('resume-preview-content', data.personal?.name);
+  const handleDownloadPdf = async () => {
+    if (isExportingPdf) return;
+    setIsExportingPdf(true);
+    try {
+      await downloadResumePdf({ name: data.personal?.name, quality: pdfQuality });
+    } catch (error) {
+      console.error('PDF export failed', error);
+      notify('PDF export failed. Try again, or use Print / Save as PDF.', 'error');
+    } finally {
+      setIsExportingPdf(false);
+    }
+  };
 
   const handleZoomIn = () => setZoom(prev => Math.min(prev + 0.1, 1.5));
   const handleZoomOut = () => setZoom(prev => Math.max(prev - 0.1, 0.3));
@@ -271,9 +341,7 @@ const App = () => {
   const handleDragEnd = () => setDraggedItemIndex(null);
 
   const handleForkTemplate = () => {
-    localStorage.setItem('profiley_config', JSON.stringify(config));
-    localStorage.setItem('profiley_order', JSON.stringify(sectionOrder));
-    localStorage.removeItem('profiley_data');
+    saveLocalDesignOnly({ config, sectionOrder });
     window.location.href = '/'; 
   };
 
@@ -297,11 +365,14 @@ const App = () => {
     draggedItemIndex, handleDragStart, handleDragOver, handleDragEnd,
     darkMode, toggleDarkMode: () => setDarkMode(!darkMode),
     undo: handleUndo, redo: handleRedo,
-    canUndo: historyIndex > 0,
-    canRedo: historyIndex < history.length - 1,
+    canUndo: history.index > 0,
+    canRedo: history.index < history.stack.length - 1,
     pdfQuality, setPdfQuality,
-    handleShare: () => setShowShareModal(true),
+    handleShare: openShareModal,
     isSharing: false,
+    onDownloadPdf: handleDownloadPdf,
+    onPrint: printResume,
+    isExportingPdf,
     activeTemplate,
     isReadOnly
   };
@@ -319,9 +390,12 @@ const App = () => {
         shareError={shareError}
         handleGenerateLink={handleGenerateLink}
         isGeneratingLink={isGeneratingLink}
+        shareUrl={shareUrl}
+        linkCopied={linkCopied}
+        handleCopyShareUrl={handleCopyShareUrl}
       />
 
-      <Toast show={showCopyToast} message="Email copied to clipboard!" />
+      <Toast show={toast.show} message={toast.message} variant={toast.variant} />
 
       {/* --- MOBILE LAYOUT --- */}
       <div className="block md:hidden h-full">
@@ -399,6 +473,8 @@ const App = () => {
                               config={config} 
                               sectionOrder={sectionOrder} 
                               activeTemplate={activeTemplate} 
+                              onDownloadPdf={handleDownloadPdf}
+                              isExportingPdf={isExportingPdf}
                            />
                         </div>
                     </div>
@@ -432,9 +508,18 @@ const App = () => {
           data={data}
           darkMode={darkMode}
           handleCopyEmail={handleCopyEmail}
-          handleDownloadPdf={triggerPdfDownload}
+          handleDownloadPdf={handleDownloadPdf}
+          isExportingPdf={isExportingPdf}
           handleForkTemplate={handleForkTemplate}
         />
+      )}
+
+      {/* Print-only copy of the page: Ctrl+P / "Save as PDF" gives a real text PDF. See index.css. */}
+      {createPortal(
+        <div id="print-root">
+          <ResumeDocument data={data} config={config} sectionOrder={sectionOrder} />
+        </div>,
+        document.body
       )}
     </div>
   );

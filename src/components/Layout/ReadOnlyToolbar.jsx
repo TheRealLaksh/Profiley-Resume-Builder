@@ -1,11 +1,12 @@
 import React from 'react';
-import { Mail, Phone, Download, FilePlus } from 'lucide-react';
+import { Mail, Phone, Download, FilePlus, Loader2 } from 'lucide-react';
 
 const ReadOnlyToolbar = ({ 
   data, 
   darkMode, 
   handleCopyEmail, 
   handleDownloadPdf, 
+  isExportingPdf,
   handleForkTemplate 
 }) => {
   return (
@@ -40,9 +41,10 @@ const ReadOnlyToolbar = ({
 
       <button 
         onClick={handleDownloadPdf}
-        className="flex items-center gap-2 px-5 py-2.5 rounded-full font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition-all shadow-lg hover:shadow-indigo-500/25 hover:scale-105 active:scale-95 cursor-pointer"
+        disabled={isExportingPdf}
+        className="flex items-center gap-2 px-5 py-2.5 rounded-full font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition-all shadow-lg hover:shadow-indigo-500/25 hover:scale-105 active:scale-95 cursor-pointer disabled:opacity-60 disabled:cursor-wait"
       >
-          <Download size={18} />
+          {isExportingPdf ? <Loader2 size={18} className="animate-spin" /> : <Download size={18} />}
           <span className="hidden sm:inline">Download</span>
       </button>
 

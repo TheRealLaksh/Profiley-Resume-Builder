@@ -15,8 +15,9 @@ const MobileLayout = (props) => {
         isReadOnly // Added isReadOnly to props destructuring
     } = props;
 
-    // 'editor' or 'preview'
-    const [mobileView, setMobileView] = useState('editor');
+    // 'editor' or 'preview' (read-only visitors only ever see the preview)
+    const [requestedView, setMobileView] = useState('editor');
+    const mobileView = isReadOnly ? 'preview' : requestedView;
     const [mobileZoom, setMobileZoom] = useState(0.55); // Default start scale for mobile
     const [isFullScreen, setIsFullScreen] = useState(false);
     
@@ -25,19 +26,15 @@ const MobileLayout = (props) => {
     const startZoomRef = useRef(0.55);
     const fullScreenContainerRef = useRef(null);
 
-    // FIX: Auto-switch to preview if read-only
-    useEffect(() => {
-        if (isReadOnly) {
-            setMobileView('preview');
-        }
-    }, [isReadOnly]);
-
-    // Auto-switch to editor view if user navigates deeper into content
-    useEffect(() => {
-        if (!isReadOnly && activeTab !== 'sections' && activeTab !== 'design' && activeTab !== 'export') {
+    // Opening a section jumps back to the editor. Adjusting state while rendering (rather than in an
+    // effect) avoids a second render pass with stale UI.
+    const [seenTab, setSeenTab] = useState(activeTab);
+    if (seenTab !== activeTab) {
+        setSeenTab(activeTab);
+        if (!isReadOnly && !['sections', 'design', 'export'].includes(activeTab)) {
             setMobileView('editor');
         }
-    }, [activeTab, isReadOnly]);
+    }
 
     // Handle Ctrl + Scroll Zoom & Pinch-to-Zoom
     useEffect(() => {

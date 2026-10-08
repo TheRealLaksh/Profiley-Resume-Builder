@@ -1,11 +1,14 @@
 import React from 'react';
-import { Settings, Monitor, Printer, Share2, Loader2 } from 'lucide-react';
+import { Settings, Monitor, Printer, Share2, Loader2, Download, FileText } from 'lucide-react';
 
 const ExportTab = ({ 
     pdfQuality, 
     setPdfQuality, 
     handleShare, 
     isSharing, 
+    onDownloadPdf,
+    onPrint,
+    isExportingPdf,
     darkMode 
 }) => {
     // Styling helpers
@@ -41,7 +44,31 @@ const ExportTab = ({
                                 <span className="text-xs font-semibold">Print (HD)</span>
                             </button>
                         </div>
-                        <p className="text-[10px] mt-2 text-gray-400">Print quality renders at 3x resolution (300 DPI equivalent) but takes longer to generate.</p>
+                        <p className="text-[10px] mt-2 text-gray-400">Print quality renders at 3x resolution (instead of 2x) but takes longer to generate.</p>
+                    </div>
+
+                    <div className="space-y-2">
+                        {onDownloadPdf && (
+                            <button
+                                onClick={onDownloadPdf}
+                                disabled={isExportingPdf}
+                                className={`w-full p-3 rounded-lg border flex items-center justify-center gap-2 transition-all font-semibold text-sm ${buttonClass} ${isExportingPdf ? 'opacity-50 cursor-wait' : ''}`}
+                            >
+                                {isExportingPdf ? <Loader2 className="animate-spin" size={16} /> : <Download size={16} />}
+                                {isExportingPdf ? 'Exporting...' : 'Download PDF (image)'}
+                            </button>
+                        )}
+                        {onPrint && (
+                            <>
+                                <button
+                                    onClick={onPrint}
+                                    className={`w-full p-3 rounded-lg border flex items-center justify-center gap-2 transition-all font-semibold text-sm ${buttonClass}`}
+                                >
+                                    <FileText size={16} /> Print / Save as PDF (text)
+                                </button>
+                                <p className="text-[10px] text-gray-400 text-center">Choose "Save as PDF" in the print dialog for selectable text that applicant tracking systems can read.</p>
+                            </>
+                        )}
                     </div>
                     
                     <div className={`h-px w-full ${darkMode ? 'bg-neutral-700' : 'bg-gray-200'}`}></div>
