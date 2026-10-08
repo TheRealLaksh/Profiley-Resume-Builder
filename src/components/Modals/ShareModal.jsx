@@ -58,7 +58,7 @@ const ShareModal = ({
           <>
             <label htmlFor="share-url" className="label">Your link {linkCopied && <span className="font-normal text-accent-ink">· copied</span>}</label>
             <div className="flex gap-2">
-              <input id="share-url" readOnly value={shareUrl} onFocus={(e) => e.target.select()} className="input font-numeric text-[13px]" />
+              <input id="share-url" readOnly value={shareUrl} onFocus={(e) => e.target.select()} className="input font-numeric text-[13px] phone:text-base" />
               <button onClick={handleCopyShareUrl} className="btn btn-primary btn-icon !h-10 !w-10 max-sm:!h-[2.875rem] max-sm:!w-[2.875rem]" aria-label="Copy link">
                 {linkCopied ? <Check size={17} /> : <Copy size={17} />}
               </button>
