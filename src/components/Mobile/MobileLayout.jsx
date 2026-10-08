@@ -66,7 +66,7 @@ const MobileLayout = (props) => {
 
     return (
         <div className="flex h-[100dvh] flex-col bg-canvas text-ink">
-            <header className="flex h-[calc(3.5rem+env(safe-area-inset-top))] shrink-0 items-center gap-1 border-b border-line bg-panel px-3 pt-[env(safe-area-inset-top)]">
+            <header className="flex h-[calc(3.5rem+env(safe-area-inset-top))] shrink-0 items-center gap-1 border-b border-line bg-panel pl-[max(0.75rem,env(safe-area-inset-left))] pr-[max(0.75rem,env(safe-area-inset-right))] pt-[env(safe-area-inset-top)]">
                 {isReadOnly ? (
                     <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-semibold">{data.personal.name || 'Resume'}</p>
@@ -95,7 +95,7 @@ const MobileLayout = (props) => {
 
             <main id="main" className="relative min-h-0 flex-1">
                 {!inPreview && (
-                    <div key={activeTab} className="scroll-quiet absolute inset-0 overflow-y-auto overscroll-contain bg-panel px-4 pb-8 pt-4">
+                    <div key={activeTab} className="scroll-quiet absolute inset-0 overflow-y-auto overscroll-contain bg-panel pb-8 pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] pt-4">
                         <EditorBody {...props} openPreview={() => go('preview')} />
                     </div>
                 )}
@@ -151,7 +151,7 @@ const MobileLayout = (props) => {
                 </div>
             ) : (
                 !keyboardOpen && (
-                    <nav aria-label="Primary" className="grid shrink-0 grid-cols-5 border-t border-line bg-panel/95 px-1.5 pb-[max(0.375rem,env(safe-area-inset-bottom))] pt-1.5 backdrop-blur-md">
+                    <nav aria-label="Primary" className="grid shrink-0 grid-cols-5 border-t border-line bg-panel/95 pb-[max(0.375rem,env(safe-area-inset-bottom))] pl-[max(0.375rem,env(safe-area-inset-left))] pr-[max(0.375rem,env(safe-area-inset-right))] pt-1.5 backdrop-blur-md">
                         {NAV.map(({ id, label, icon: Icon }) => {
                             const active = current === id;
                             return (
