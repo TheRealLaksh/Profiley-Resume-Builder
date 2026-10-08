@@ -37,13 +37,13 @@ const ExportTab = ({ pdfQuality, setPdfQuality, fitOnePage, setFitOnePage, handl
                     {isExportingPdf ? 'Exporting...' : 'Download PDF'}
                 </button>
                 {onSharePdf && typeof navigator !== 'undefined' && navigator.canShare && (
-                    <button className="btn btn-secondary mt-2 h-10 w-full md:hidden" onClick={onSharePdf} disabled={isExportingPdf}>
+                    <button className="btn btn-secondary mt-2 h-10 w-full desk:hidden" onClick={onSharePdf} disabled={isExportingPdf}>
                         <Share2 size={16} /> Send PDF with…
                     </button>
                 )}
             </section>
 
-            <section className="card p-4 max-md:hidden">
+            <section className="card p-4 phone:hidden">
                 <div className="flex items-start gap-3">
                     <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-sunken text-ink-2"><FileText size={17} /></span>
                     <div>
@@ -85,8 +85,8 @@ const ExportTab = ({ pdfQuality, setPdfQuality, fitOnePage, setFitOnePage, handl
             </section>
         </div>
 
-        <h3 className="eyebrow mb-2 mt-7 px-1 max-md:hidden">Shortcuts</h3>
-        <dl className="card divide-y divide-line max-md:hidden">
+        <h3 className="eyebrow mb-2 mt-7 px-1 phone:hidden">Shortcuts</h3>
+        <dl className="card divide-y divide-line phone:hidden">
             {SHORTCUTS.map(([label, keys]) => (
                 <div key={label} className="flex items-center justify-between px-4 py-2.5">
                     <dt className="text-[13px] text-ink-2">{label}</dt>

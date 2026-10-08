@@ -11,7 +11,7 @@ const AppSkeleton = ({ label = 'Loading your resume' }) => (
             <div className="skeleton h-9 w-32" />
         </div>
         <div className="flex min-h-0 flex-1">
-            <div className="hidden w-[400px] space-y-3 border-r border-line bg-panel p-5 md:block">
+            <div className="hidden w-[400px] space-y-3 border-r border-line bg-panel p-5 desk:block">
                 <div className="skeleton h-9 w-full" />
                 <div className="skeleton h-7 w-40" />
                 {[0, 1, 2, 3, 4].map((i) => <div key={i} className="skeleton h-14 w-full" />)}
