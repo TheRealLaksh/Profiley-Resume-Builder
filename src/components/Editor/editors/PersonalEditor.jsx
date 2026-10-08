@@ -67,19 +67,20 @@ const PersonalEditor = ({ data, setData }) => {
       </div>
 
       <div className="space-y-4">
-        <TextField label="Full name" value={personal.name} onChange={setField('name')} autoComplete="name" placeholder="Priya Raman" />
-        <TextField label="Headline" value={personal.title} onChange={setField('title')} placeholder="Product designer | Design systems" />
+        <TextField label="Full name" value={personal.name} onChange={setField('name')} autoComplete="name" autoCapitalize="words" enterKeyHint="next" placeholder="Priya Raman" />
+        <TextField label="Headline" value={personal.title} onChange={setField('title')} autoCapitalize="sentences" enterKeyHint="next" placeholder="Product designer | Design systems" />
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <TextField label="Email" type="email" value={personal.email} onChange={setField('email')} autoComplete="email" placeholder="priya@example.com" />
-          <TextField label="Phone" type="tel" value={personal.phone} onChange={setField('phone')} autoComplete="tel" placeholder="+91 98765 43210" />
+          <TextField label="Email" type="email" inputMode="email" autoCapitalize="none" spellCheck={false} enterKeyHint="next" value={personal.email} onChange={setField('email')} autoComplete="email" placeholder="priya@example.com" />
+          <TextField label="Phone" type="tel" inputMode="tel" enterKeyHint="next" value={personal.phone} onChange={setField('phone')} autoComplete="tel" placeholder="+91 98765 43210" />
         </div>
-        <TextField label="Location" value={personal.location} onChange={setField('location')} autoComplete="address-level2" placeholder="Pune, India" />
+        <TextField label="Location" value={personal.location} onChange={setField('location')} autoComplete="address-level2" autoCapitalize="words" enterKeyHint="next" placeholder="Pune, India" />
         <TextField
           label="LinkedIn"
           value={personal.linkedin}
           onChange={setField('linkedin')}
           inputMode="url"
           autoCapitalize="none"
+          enterKeyHint="next"
           spellCheck={false}
           placeholder="linkedin.com/in/priya-raman"
           error={urlProblem(personal.linkedin)}
@@ -90,6 +91,7 @@ const PersonalEditor = ({ data, setData }) => {
           onChange={setField('portfolio')}
           inputMode="url"
           autoCapitalize="none"
+          enterKeyHint="done"
           spellCheck={false}
           placeholder="priya.design"
           error={urlProblem(personal.portfolio)}
