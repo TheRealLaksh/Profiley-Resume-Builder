@@ -70,12 +70,17 @@ export default {
         shimmer: {
           '100%': { transform: 'translateX(100%)' },
         },
+        sheet: {
+          from: { transform: 'translateY(100%)' },
+          to: { transform: 'translateY(0)' },
+        },
       },
       animation: {
         rise: 'rise 420ms cubic-bezier(0.32, 0.72, 0, 1) both',
         fade: 'fade 240ms ease-out both',
         pop: 'pop 260ms cubic-bezier(0.32, 0.72, 0, 1) both',
         shimmer: 'shimmer 1.6s infinite',
+        sheet: 'sheet 340ms cubic-bezier(0.32, 0.72, 0, 1) both',
       },
     },
   },
