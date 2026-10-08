@@ -37,6 +37,7 @@ Migrating off the expired lakshp.live. Site, canonical/meta, sitemap line, share
 - Laksh chose small commits, pushed after each (every push to `main` goes live). Session of 8 Oct 2026.
 
 ## Session log (newest first)
+- 2026-10-08: replaced lakshp.live with lakshpradhwani.com in `index.html` (canonical, og, twitter), `Robots.txt`, `ShareModal.jsx` and the default portfolio link; email default still pending.
 - 2026-10-08: added HANDOFF.md and the handoff hooks (Stop hook, pre-commit, `scripts/handoff.mjs`).
 
 <!-- handoff:auto:start -->
@@ -48,6 +49,7 @@ Branch: `main` · remote: https://github.com/TheRealLaksh/Profiley-Resume-Builde
 
 ### Last 15 commits
 
+- `28a34c5` 2026-10-08 23:59 Add HANDOFF.md and handoff hooks
 - `54d704b` 2026-02-01 18:04 Create vercel.json
 - `ab28c1b` 2026-01-13 14:16 Update App.jsx
 - `fa5bdae` 2026-01-13 14:12 zoomm
@@ -62,15 +64,14 @@ Branch: `main` · remote: https://github.com/TheRealLaksh/Profiley-Resume-Builde
 - `dac9c8a` 2025-12-15 14:17 update
 - `ee62761` 2025-12-15 14:04 added minor features
 - `ace0ca5` 2025-12-15 13:57 some fixes
-- `acfe30d` 2025-12-15 13:53 added Mobile UI
 
 ### Uncommitted changes at refresh time
 
 ```
-A  .claude/settings.json
-A  .githooks/pre-commit
-A  CLAUDE.md
-A  HANDOFF.md
-A  scripts/handoff.mjs
+M  HANDOFF.md
+M  Robots.txt
+M  index.html
+M  src/components/Modals/ShareModal.jsx
+M  src/data/initialState.js
 ```
 <!-- handoff:auto:end -->
