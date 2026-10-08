@@ -32,7 +32,8 @@ import {
   saveLocalResume,
   saveLocalDesignOnly
 } from './utils/resumeData';
-import { saveResumeToDB, saveResumeWithSlug, fetchResumeFromDB, makeSlug } from './firebase';
+// Firebase is only needed to open or create a share link, so it loads on demand (a faster first paint on phones).
+const loadFirebase = () => import('./firebase');
 import {
   initialData,
   initialConfig,
@@ -148,6 +149,7 @@ const App = () => {
 
       if (resumeId) {
         try {
+          const { fetchResumeFromDB } = await loadFirebase();
           const fetched = await fetchResumeFromDB(resumeId);
           if (cancelled) return;
           if (fetched) {
@@ -301,6 +303,7 @@ const App = () => {
     try {
       // Normalising drops unsafe links/photos before anything is published.
       const payload = normalizeResume({ data, config, sectionOrder });
+      const { makeSlug, saveResumeWithSlug, saveResumeToDB } = await loadFirebase();
       const slug = customSlug.trim() ? makeSlug(customSlug) : '';
       const resumeId = slug
         ? await saveResumeWithSlug(slug, payload)
