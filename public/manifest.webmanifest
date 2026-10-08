@@ -1,0 +1,17 @@
+{
+  "name": "Profiley: free resume builder",
+  "short_name": "Profiley",
+  "description": "Build an ATS-friendly resume, preview it live, export a PDF and share a link.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f3f0ea",
+  "theme_color": "#f3f0ea",
+  "categories": ["productivity", "business"],
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
