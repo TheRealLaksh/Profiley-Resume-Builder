@@ -37,6 +37,8 @@ const ContentTab = ({
     draggedItemIndex, handleDragStart, handleDragOver, handleDragEnd, notifyUndo, openImport
 }) => {
     const [editingId, setEditingId] = useState(null);
+    // Drag-and-drop is a mouse gesture; on a phone a long press would start a ghost drag, so reordering uses buttons there.
+    const canDrag = typeof window !== 'undefined' && window.matchMedia('(min-width: 768px)').matches;
     const [draftLabel, setDraftLabel] = useState('');
 
     const section = sectionOrder.find((s) => s.id === activeTab);
@@ -99,7 +101,7 @@ const ContentTab = ({
             <div className="animate-rise">
                 <PanelHeading
                     title="Your resume"
-                    subtitle="Pick a section to edit. Drag to reorder, or use the arrow keys on the handle."
+                    subtitle={<><span className="max-md:hidden">Pick a section to edit. Drag to reorder, or use the arrow keys on the handle.</span><span className="md:hidden">Tap a section to edit it.</span></>}
                     action={openImport && <button className="btn btn-secondary btn-sm shrink-0" onClick={openImport}><FileUp size={14} /> Import</button>}
                 />
 
@@ -129,7 +131,7 @@ const ContentTab = ({
                             <li
                                 key={s.id}
                                 style={{ '--i': index }}
-                                draggable={!editing}
+                                draggable={!editing && canDrag}
                                 onDragStart={(e) => handleDragStart(e, index)}
                                 onDragOver={(e) => handleDragOver(e, index)}
                                 onDragEnd={handleDragEnd}
@@ -137,7 +139,7 @@ const ContentTab = ({
                             >
                                 <button
                                     type="button"
-                                    className="grid h-9 w-7 shrink-0 cursor-grab place-items-center rounded-lg text-ink-3 hover:bg-sunken hover:text-ink active:cursor-grabbing"
+                                    className="grid h-9 w-7 shrink-0 cursor-grab place-items-center rounded-lg text-ink-3 hover:bg-sunken hover:text-ink active:cursor-grabbing max-md:hidden"
                                     aria-label={`Reorder ${s.label}. Press up or down arrow to move.`}
                                     onKeyDown={(e) => {
                                         if (e.key === 'ArrowUp') { e.preventDefault(); moveSection(index, -1); }
