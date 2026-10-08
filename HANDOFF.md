@@ -15,13 +15,12 @@ React 19, Vite, Tailwind, Firebase, html2canvas + jsPDF/html2pdf, lucide-react.
 
 ## Code map
 - `index.html`: meta, canonical, og/twitter tags
-- `Robots.txt` (repo root, not in `public/`, so it is not served as /robots.txt)
 - `src/data/initialState.js`: default resume data (email, portfolio link)
-- `src/components/Modals/ShareModal.jsx`: custom public-URL prefix shown to users
-- `public/`: favicon, og-image.png, `_redirects`
+- `src/components/Modals/ShareModal.jsx`: share dialog
+- `public/`: favicon, og-image.png, `_redirects`, `robots.txt` (served; moved here by the merged PR #1 `claude/pensive-meitner-opz77b`, which also hardened sharing/saved data, fixed preview/PDF export and dropped unused dependencies)
 
 ## Status
-Migrating off the expired lakshp.live. Site, canonical/meta, sitemap line, share prefix and default portfolio link now use lakshpradhwani.com. Default email `contact@lakshp.live` still to swap (waiting on email forwarding). `npm run build` not run here if `node_modules` is missing.
+Migrating off the expired lakshp.live. Canonical/og/twitter tags, the robots.txt sitemap line and the default portfolio link now use lakshpradhwani.com (the old share-link prefix text was removed by PR #1). Default email `contact@lakshp.live` still to swap (waiting on email forwarding). `npm run build` not run in this session.
 
 ## Next steps
 1. Replace `contact@lakshp.live` with `work@lakshpradhwani.com` in `src/data/initialState.js` once forwarding works.
@@ -29,7 +28,7 @@ Migrating off the expired lakshp.live. Site, canonical/meta, sitemap line, share
 3. Check the `/laksh` public resume page and the exported PDF carry the new links.
 
 ## Open questions / waiting on
-- There is no `sitemap.xml` in `public/`; `/sitemap.xml` returns the SPA index page (200) because of the catch-all rewrite. `Robots.txt` also sits outside `public/`. Decide whether to add a real sitemap and move robots.txt.
+- `public/robots.txt` points at `/sitemap.xml`, but there is no `sitemap.xml` in `public/`; that URL returns the SPA index page (200) because of the catch-all rewrite. Decide whether to add a real sitemap.
 - Email forwarding (ImprovMX) for work@ and me@lakshpradhwani.com: Laksh signs up first.
 
 ## Decisions not to undo
@@ -37,7 +36,7 @@ Migrating off the expired lakshp.live. Site, canonical/meta, sitemap line, share
 - Laksh chose small commits, pushed after each (every push to `main` goes live). Session of 8 Oct 2026.
 
 ## Session log (newest first)
-- 2026-10-08: replaced lakshp.live with lakshpradhwani.com in `index.html` (canonical, og, twitter), `Robots.txt`, `ShareModal.jsx` and the default portfolio link; email default still pending.
+- 2026-10-08: replaced lakshp.live with lakshpradhwani.com in `index.html` (canonical, og, twitter), `public/robots.txt` and the default portfolio link; email default still pending. Rebased onto remote PR #1 (kept its ShareModal and index.html structure).
 - 2026-10-08: added HANDOFF.md and the handoff hooks (Stop hook, pre-commit, `scripts/handoff.mjs`).
 
 <!-- handoff:auto:start -->
@@ -49,7 +48,12 @@ Branch: `main` · remote: https://github.com/TheRealLaksh/Profiley-Resume-Builde
 
 ### Last 15 commits
 
-- `28a34c5` 2026-10-08 23:59 Add HANDOFF.md and handoff hooks
+- `168ef15` 2026-10-08 23:59 Point Profiley URLs at lakshpradhwani.com
+- `940c187` 2026-10-08 23:59 Add HANDOFF.md and handoff hooks
+- `61cf5ba` 2026-10-08 23:30 Merge pull request #1 from TheRealLaksh/claude/pensive-meitner-opz77b
+- `97b7340` 2026-10-08 17:57 Define fonts, serve robots.txt, drop unused dependencies
+- `ca9f4dc` 2026-10-08 17:57 Fix preview layout, zoom, undo, PDF export and printing
+- `d2dded6` 2026-10-08 17:57 Harden sharing and saved data
 - `54d704b` 2026-02-01 18:04 Create vercel.json
 - `ab28c1b` 2026-01-13 14:16 Update App.jsx
 - `fa5bdae` 2026-01-13 14:12 zoomm
@@ -59,19 +63,10 @@ Branch: `main` · remote: https://github.com/TheRealLaksh/Profiley-Resume-Builde
 - `c9d99ed` 2026-01-13 13:30 fork
 - `04721bf` 2026-01-13 13:22 read only
 - `6be9724` 2026-01-13 09:31 Update PreviewHelpers.jsx
-- `a8d299c` 2026-01-13 09:29 Update PreviewHelpers.jsx
-- `9b42bc1` 2025-12-30 22:10 seo update
-- `dac9c8a` 2025-12-15 14:17 update
-- `ee62761` 2025-12-15 14:04 added minor features
-- `ace0ca5` 2025-12-15 13:57 some fixes
 
 ### Uncommitted changes at refresh time
 
 ```
 M  HANDOFF.md
-M  Robots.txt
-M  index.html
-M  src/components/Modals/ShareModal.jsx
-M  src/data/initialState.js
 ```
 <!-- handoff:auto:end -->
