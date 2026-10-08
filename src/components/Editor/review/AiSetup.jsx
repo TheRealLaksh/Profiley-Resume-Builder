@@ -47,7 +47,7 @@ const AiSetup = ({ ai, compact = false }) => {
               type="password"
               autoComplete="off"
               spellCheck={false}
-              className="input font-numeric text-[13px]"
+              className="input font-numeric text-[13px] phone:text-base"
               placeholder="sk-ant-..."
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
