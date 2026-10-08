@@ -83,16 +83,16 @@ const EntryEditor = ({ kind, items, setData, notifyUndo }) => {
                 type="button"
                 onClick={() => setOpenId(open ? null : item.id)}
                 aria-expanded={open}
-                className="flex min-w-0 flex-1 items-center gap-3 px-4 py-3 text-left"
+                className="flex min-w-0 flex-1 items-center gap-3 px-4 py-3 text-left max-md:min-h-[3.75rem]"
               >
-                <span className="grid h-6 w-6 shrink-0 place-items-center rounded-md bg-sunken font-numeric text-[11px] text-ink-2">{index + 1}</span>
+                <span className="grid h-6 w-6 shrink-0 place-items-center rounded-md bg-sunken font-numeric text-[11px] text-ink-2 max-md:h-8 max-md:w-8 max-md:rounded-lg max-md:text-xs">{index + 1}</span>
                 <span className="min-w-0">
-                  <span className={`block truncate text-[13px] font-medium ${item[cfg.primary] ? 'text-ink' : 'text-ink-3'}`}>{title}</span>
-                  {sub && <span className="block truncate text-xs text-ink-3">{sub}</span>}
+                  <span className={`block truncate text-[13px] font-medium max-md:text-[15px] ${item[cfg.primary] ? 'text-ink' : 'text-ink-3'}`}>{title}</span>
+                  {sub && <span className="block truncate text-xs text-ink-3 max-md:text-[13px]">{sub}</span>}
                 </span>
               </button>
-              <button className="btn btn-ghost btn-icon btn-sm !h-8 !w-8" onClick={() => move(index, -1)} disabled={index === 0} aria-label={`Move ${title} up`} title="Move up"><ChevronUp size={16} /></button>
-              <button className="btn btn-ghost btn-icon btn-sm !h-8 !w-8" onClick={() => move(index, 1)} disabled={index === items.length - 1} aria-label={`Move ${title} down`} title="Move down"><ChevronDown size={16} /></button>
+              <button className="btn btn-ghost btn-icon btn-sm !h-8 !w-8 max-md:!h-11 max-md:!w-10" onClick={() => move(index, -1)} disabled={index === 0} aria-label={`Move ${title} up`} title="Move up"><ChevronUp size={16} /></button>
+              <button className="btn btn-ghost btn-icon btn-sm !h-8 !w-8 max-md:!h-11 max-md:!w-10" onClick={() => move(index, 1)} disabled={index === items.length - 1} aria-label={`Move ${title} down`} title="Move down"><ChevronDown size={16} /></button>
             </div>
 
             {open && (
