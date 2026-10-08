@@ -96,7 +96,7 @@ export const Toggle = ({ label, hint, value, onChange }) => {
         aria-checked={Boolean(value)}
         aria-labelledby={id}
         onClick={() => onChange(!value)}
-        className={`relative h-6 w-10 shrink-0 rounded-full transition-colors duration-200 ease-snap phone:h-8 phone:w-[3.25rem] ${value ? 'bg-accent' : 'bg-line-strong'}`}
+        className={`relative h-6 w-10 shrink-0 rounded-full transition-colors duration-200 ease-snap phone:h-8 phone:w-[3.25rem] phone:before:absolute phone:before:-inset-3 phone:before:content-[''] ${value ? 'bg-accent' : 'bg-line-strong'}`}
       >
         <span
           className={`absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow-[0_1px_2px_rgb(0_0_0/0.3)] transition-transform duration-200 ease-snap phone:h-7 phone:w-7 ${value ? 'translate-x-4 phone:translate-x-5' : 'translate-x-0'}`}
