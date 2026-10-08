@@ -49,7 +49,7 @@ const SkillsEditor = ({ skills, setData, notifyUndo }) => {
               <li key={index} className="card flex items-center gap-3 px-3 py-2.5">
                 <div className="min-w-0 flex-1">
                   <input
-                    className="w-full bg-transparent text-[13px] font-medium text-ink outline-none placeholder:text-ink-3 phone:py-1 phone:text-base"
+                    className="w-full bg-transparent text-[13px] font-medium text-ink outline-none placeholder:text-ink-3 phone:min-h-10 phone:py-1 phone:text-base"
                     value={skill.name ?? ''}
                     onChange={(e) => setField(index, 'name', e.target.value)}
                     aria-label={`Skill ${index + 1} name`}
@@ -63,7 +63,7 @@ const SkillsEditor = ({ skills, setData, notifyUndo }) => {
                     value={skill.level ?? 80}
                     onChange={(e) => setField(index, 'level', Number(e.target.value))}
                     aria-label={`${skill.name || 'Skill'} level`}
-                    className="mt-1.5 h-1 w-full cursor-pointer accent-accent phone:mt-2"
+                    className="mt-1.5 h-1 w-full cursor-pointer accent-accent phone:mt-1 phone:h-9"
                   />
                 </div>
                 <span className="w-9 text-right font-numeric text-xs tabular text-ink-3">{skill.level ?? 80}%</span>
