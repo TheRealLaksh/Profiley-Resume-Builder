@@ -114,7 +114,7 @@ export const Swatch = ({ theme, selected, onClick }) => (
     title={theme.name}
     aria-label={`${theme.name} colour`}
     aria-pressed={selected}
-    className={`group relative grid h-9 w-9 place-items-center rounded-full transition-transform duration-200 ease-snap hover:scale-110 active:scale-95 ${selected ? 'ring-2 ring-accent ring-offset-2 ring-offset-surface' : ''}`}
+    className={`group relative grid h-9 w-9 place-items-center rounded-full max-md:h-11 max-md:w-11 transition-transform duration-200 ease-snap hover:scale-110 active:scale-95 ${selected ? 'ring-2 ring-accent ring-offset-2 ring-offset-surface' : ''}`}
   >
     <span className={`absolute inset-0 rounded-full ${theme.hex}`} />
     {selected && <Check size={15} strokeWidth={3} className="relative text-white drop-shadow" />}
