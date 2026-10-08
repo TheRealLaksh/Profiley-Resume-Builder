@@ -124,8 +124,8 @@ export const Swatch = ({ theme, selected, onClick }) => (
 /** Collapsible group used to keep long panels scannable. */
 export const Group = ({ title, meta, defaultOpen = true, children }) => (
   <details open={defaultOpen} className="group border-b border-line last:border-b-0">
-    <summary className="flex cursor-pointer list-none items-center justify-between gap-3 py-3.5 [&::-webkit-details-marker]:hidden">
-      <span className="text-[13px] font-semibold text-ink">{title}</span>
+    <summary className="flex cursor-pointer list-none items-center justify-between gap-3 py-3.5 max-md:min-h-[3.25rem] [&::-webkit-details-marker]:hidden">
+      <span className="text-[13px] font-semibold text-ink max-md:text-[15px]">{title}</span>
       <span className="flex items-center gap-2 text-xs text-ink-3">
         {meta}
         <ChevronDown size={16} className="transition-transform duration-200 ease-snap group-open:rotate-180" />

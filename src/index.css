@@ -182,6 +182,12 @@
     .seg-item {
       @apply min-h-10 text-[13px];
     }
+    .label {
+      @apply mb-2 text-[13px];
+    }
+    .hint {
+      @apply text-[13px] leading-snug;
+    }
   }
 
   /* ---- Surfaces & text ---- */
