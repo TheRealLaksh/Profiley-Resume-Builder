@@ -7,6 +7,8 @@ import ResumeDocument from '../Preview/ResumeDocument';
 import ZoomDock from '../Layout/ZoomDock';
 import Logo from '../UI/Logo';
 import useCanvasZoom from '../../hooks/useCanvasZoom';
+import useKeyboardOpen from '../../hooks/useKeyboardOpen';
+import { tap } from '../../utils/haptics';
 
 const NAV = [
     { id: 'content', label: 'Content', icon: FileText },
@@ -23,6 +25,7 @@ const MobileLayout = (props) => {
     } = props;
 
     const [showPreview, setShowPreview] = useState(false);
+    const keyboardOpen = useKeyboardOpen();
     const {
         setContainer, setContent, zoom, min, max, isFit, contentSize, zoomIn, zoomOut, fit, actualSize
     } = useCanvasZoom({ gutter: 16, min: 0.25, maxFit: 1 });
@@ -31,6 +34,7 @@ const MobileLayout = (props) => {
     const current = inPreview ? 'preview' : (['design', 'review', 'export'].includes(activeTab) ? activeTab : 'content');
 
     const go = (id) => {
+        tap();
         if (id === 'preview') { setShowPreview(true); return; }
         setShowPreview(false);
         setActiveTab(id === 'content' ? 'sections' : id);
@@ -114,23 +118,26 @@ const MobileLayout = (props) => {
                     <button className="btn btn-primary !h-11 flex-1" onClick={onForkTemplate}><FilePlus size={17} /> Use this template</button>
                 </div>
             ) : (
-                <nav aria-label="Primary" className="grid shrink-0 grid-cols-5 border-t border-line bg-panel px-2 pb-[max(0.25rem,env(safe-area-inset-bottom))] pt-1">
-                    {NAV.map(({ id, label, icon: Icon }) => {
-                        const active = current === id;
-                        return (
-                            <button
-                                key={id}
-                                onClick={() => go(id)}
-                                aria-current={active ? 'page' : undefined}
-                                className={`relative flex min-h-[3.25rem] flex-col items-center justify-center gap-1 rounded-xl text-[11px] font-medium transition-colors duration-200 ease-snap ${active ? 'text-accent-ink' : 'text-ink-3 hover:text-ink'}`}
-                            >
-                                <span className={`absolute left-1/2 top-0 h-0.5 -translate-x-1/2 rounded-full bg-accent transition-all duration-300 ease-snap ${active ? 'w-8 opacity-100' : 'w-0 opacity-0'}`} />
-                                <Icon size={20} strokeWidth={active ? 2 : 1.6} />
-                                {label}
-                            </button>
-                        );
-                    })}
-                </nav>
+                !keyboardOpen && (
+                    <nav aria-label="Primary" className="grid shrink-0 grid-cols-5 border-t border-line bg-panel/95 px-1.5 pb-[max(0.375rem,env(safe-area-inset-bottom))] pt-1.5 backdrop-blur-md">
+                        {NAV.map(({ id, label, icon: Icon }) => {
+                            const active = current === id;
+                            return (
+                                <button
+                                    key={id}
+                                    onClick={() => go(id)}
+                                    aria-current={active ? 'page' : undefined}
+                                    className={`group flex min-h-[3.5rem] flex-col items-center justify-center gap-0.5 rounded-xl text-[11px] font-medium transition-colors duration-200 ease-snap active:scale-[0.96] ${active ? 'text-accent-ink' : 'text-ink-3'}`}
+                                >
+                                    <span className={`grid h-8 w-14 place-items-center rounded-full transition-colors duration-300 ease-snap ${active ? 'bg-accent-soft' : 'group-active:bg-sunken'}`}>
+                                        <Icon size={21} strokeWidth={active ? 2.1 : 1.65} />
+                                    </span>
+                                    <span className={active ? 'font-semibold' : ''}>{label}</span>
+                                </button>
+                            );
+                        })}
+                    </nav>
+                )
             )}
         </div>
     );
