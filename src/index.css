@@ -169,6 +169,9 @@
     }
     textarea.input {
       @apply min-h-[6.5rem];
+      /* Grow with the text where the browser supports it, so nothing hides behind an inner scrollbar. */
+      field-sizing: content;
+      max-height: 55dvh;
     }
     .btn {
       @apply h-11 rounded-[0.875rem] px-4 text-sm;
