@@ -6,7 +6,7 @@ export const initialData = {
     phone: "xxxxxxxxxx",
     location: "Varanasi, Uttar Pradesh, India",
     linkedin: "https://www.linkedin.com/in/laksh-pradhwani/",
-    portfolio: "https://www.lakshp.live/",
+    portfolio: "https://lakshpradhwani.com/",
     photoUrl: "",
     summary:
       "Grade XII student aspiring to specialize in Artificial Intelligence and Machine Learning. Disciplined, analytical, and solution-driven with strong foundations in full-stack web development, data science, and algorithmic problem-solving. National-level shooter, hackathon performer, and student leader with proven ability to excel under pressure and deliver real-world technical solutions."
