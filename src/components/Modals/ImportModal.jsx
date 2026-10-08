@@ -158,10 +158,10 @@ const ImportModal = ({ isOpen, onClose, onApply, ai }) => {
                     onClick={() => fileInputRef.current?.click()}
                     onDragOver={(e) => e.preventDefault()}
                     onDrop={(e) => { e.preventDefault(); readFile(e.dataTransfer.files?.[0]); }}
-                    className="flex w-full flex-col items-center gap-2 rounded-2xl border border-dashed border-line-strong px-5 py-9 text-center transition-colors duration-200 ease-snap hover:border-accent hover:bg-accent-soft/40"
+                    className="flex w-full flex-col items-center gap-2 rounded-2xl border border-dashed border-line-strong px-5 py-9 text-center max-sm:py-12 transition-colors duration-200 ease-snap hover:border-accent hover:bg-accent-soft/40"
                   >
                     <FileText size={24} className="text-ink-3" />
-                    <span className="text-[13px] font-medium text-ink">Drop a file here, or click to choose</span>
+                    <span className="text-[13px] font-medium text-ink max-sm:text-[15px]"><span className="max-sm:hidden">Drop a file here, or click to choose</span><span className="sm:hidden">Choose a file from your phone</span></span>
                     <span className="text-xs text-ink-3">PDF · JSON (Profiley backup or JSON Resume) · TXT</span>
                   </button>
                 </>
