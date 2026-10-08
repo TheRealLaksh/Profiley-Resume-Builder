@@ -128,8 +128,8 @@ export const runChecks = ({ data, config, sectionOrder, reading }) => {
     }
   }
 
-  // 3. Text vs image PDF
-  checks.push(check('pdf', 'info', 'Export the text PDF, not the image PDF', '"Download PDF" saves a picture of the page that a parser cannot read. "Print or save as PDF" keeps real, selectable text. Use that one for applications.', { id: 'export', label: 'Open export' }));
+  // 3. PDF export
+  checks.push(check('pdf', 'info', 'Your PDF keeps real, selectable text', '"Download PDF" carries a hidden text layer, so applicant tracking systems can read it. "Print or save as PDF" is a little sharper and smaller if you prefer that.', { id: 'export', label: 'Open export' }));
 
   // 4. Section headings
   const odd = visible.filter((s) => !STANDARD_HEADING.test(data.custom?.[s.id]?.title || s.label));
