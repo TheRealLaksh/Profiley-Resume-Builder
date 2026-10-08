@@ -133,9 +133,10 @@ const ImportModal = ({ isOpen, onClose, onApply, ai }) => {
   const isBackup = result?.kind === 'profiley';
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-end justify-center bg-ink/40 p-4 backdrop-blur-[2px] animate-fade sm:items-center" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="import-title" className="flex max-h-[90dvh] w-full max-w-lg animate-pop flex-col rounded-3xl border border-line bg-panel shadow-pop">
-        <div className="flex items-start justify-between gap-4 p-6 pb-3">
+    <div className="fixed inset-0 z-[100] flex items-end justify-center bg-ink/40 p-4 backdrop-blur-[2px] animate-fade max-sm:p-0 sm:items-center" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="import-title" className="flex max-h-[90dvh] w-full max-w-lg animate-pop flex-col rounded-3xl border border-line bg-panel shadow-pop max-sm:max-h-[92dvh] max-sm:max-w-none max-sm:animate-sheet max-sm:rounded-b-none max-sm:border-x-0 max-sm:border-b-0">
+        <span aria-hidden="true" className="mx-auto mt-3 block h-1 w-10 shrink-0 rounded-full bg-line-strong sm:hidden" />
+        <div className="flex items-start justify-between gap-4 p-6 pb-3 max-sm:px-5 max-sm:pt-4">
           <div>
             <span className="mb-3 grid h-10 w-10 place-items-center rounded-xl bg-accent-soft text-accent-ink"><FileUp size={18} /></span>
             <h2 id="import-title" className="font-display text-[28px] leading-none tracking-tight text-ink">Import a resume</h2>
@@ -144,7 +145,7 @@ const ImportModal = ({ isOpen, onClose, onApply, ai }) => {
           <button onClick={onClose} aria-label="Close" className="btn btn-ghost btn-icon -mr-2 -mt-1"><X size={18} /></button>
         </div>
 
-        <div className="scroll-quiet min-h-0 flex-1 overflow-y-auto px-6 pb-6">
+        <div className="scroll-quiet min-h-0 flex-1 overflow-y-auto px-6 pb-6 max-sm:px-5 max-sm:pb-[max(1.5rem,env(safe-area-inset-bottom))]">
           {stage === 'pick' && (
             <div className="space-y-4">
               <Segmented value={mode} onChange={setMode} options={[{ value: 'file', label: 'Upload a file' }, { value: 'paste', label: 'Paste text' }]} />

@@ -32,7 +32,7 @@ const ShareModal = ({
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-end justify-center bg-ink/40 p-4 backdrop-blur-[2px] animate-fade sm:items-center"
+      className="fixed inset-0 z-[100] flex items-end justify-center bg-ink/40 p-4 backdrop-blur-[2px] animate-fade max-sm:p-0 sm:items-center"
       onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div
@@ -40,8 +40,9 @@ const ShareModal = ({
         role="dialog"
         aria-modal="true"
         aria-labelledby="share-modal-title"
-        className="w-full max-w-md animate-pop rounded-3xl border border-line bg-panel p-6 shadow-pop"
+        className="w-full max-w-md animate-pop rounded-3xl border border-line bg-panel p-6 shadow-pop max-sm:max-w-none max-sm:animate-sheet max-sm:rounded-b-none max-sm:border-x-0 max-sm:border-b-0 max-sm:px-5 max-sm:pb-[max(1.25rem,env(safe-area-inset-bottom))] max-sm:pt-3"
       >
+        <span aria-hidden="true" className="mx-auto mb-4 block h-1 w-10 rounded-full bg-line-strong sm:hidden" />
         <div className="mb-5 flex items-start justify-between gap-4">
           <div>
             <span className="mb-3 grid h-10 w-10 place-items-center rounded-xl bg-accent-soft text-accent-ink"><LinkIcon size={18} /></span>
