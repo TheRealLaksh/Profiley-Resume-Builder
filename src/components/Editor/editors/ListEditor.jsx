@@ -60,8 +60,8 @@ const ListEditor = ({ field, items, setData, notifyUndo, placeholder, noun = 'it
             aria-label={`${noun} ${index + 1}`}
           />
           <div className="flex shrink-0 flex-col opacity-60 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100 phone:opacity-100">
-            <button className="btn btn-ghost btn-icon !h-6 !w-7 phone:!h-8 phone:!w-10" onClick={() => move(index, -1)} disabled={index === 0} aria-label="Move up"><ChevronUp size={14} /></button>
-            <button className="btn btn-ghost btn-icon !h-6 !w-7 phone:!h-8 phone:!w-10" onClick={() => move(index, 1)} disabled={index === items.length - 1} aria-label="Move down"><ChevronDown size={14} /></button>
+            <button className="btn btn-ghost btn-icon !h-6 !w-7 phone:!h-9 phone:!w-11" onClick={() => move(index, -1)} disabled={index === 0} aria-label="Move up"><ChevronUp size={14} /></button>
+            <button className="btn btn-ghost btn-icon !h-6 !w-7 phone:!h-9 phone:!w-11" onClick={() => move(index, 1)} disabled={index === items.length - 1} aria-label="Move down"><ChevronDown size={14} /></button>
           </div>
           <button className="btn btn-ghost btn-danger btn-icon !h-8 !w-8 shrink-0 phone:!h-11 phone:!w-11" onClick={() => remove(index)} aria-label={`Remove ${noun} ${index + 1}`}><Trash2 size={15} /></button>
         </div>
