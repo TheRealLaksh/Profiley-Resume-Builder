@@ -1,5 +1,5 @@
 import React, { useDeferredValue, useMemo, useState } from 'react';
-import { Check, RotateCcw } from 'lucide-react';
+import { Check, Eye, RotateCcw } from 'lucide-react';
 import { colorThemes, initialConfig, templates, templateFilters } from '../../data/constants';
 import { Group, PanelHeading, Segmented, SelectField, Swatch, Toggle } from '../UI/FormElements';
 import TemplateThumb from './TemplateThumb';
@@ -27,7 +27,7 @@ const HEADING_FONTS = [
     { value: 'font-mono', label: 'Space Mono' }
 ];
 
-const DesignTab = ({ data, config, setConfig, sectionOrder, applyTemplate }) => {
+const DesignTab = ({ data, config, setConfig, sectionOrder, applyTemplate, openPreview }) => {
     const [filter, setFilter] = useState('all');
     const deferredData = useDeferredValue(data);
 
@@ -280,6 +280,14 @@ const DesignTab = ({ data, config, setConfig, sectionOrder, applyTemplate }) => 
                     options={[{ value: 'none', label: 'Hairline' }, { value: 'thick', label: 'Thick' }, { value: 'diamond', label: 'Diamond' }]}
                 />
             </Group>
+
+            {openPreview && (
+                <div className="pointer-events-none sticky bottom-3 z-10 mt-4 flex justify-center">
+                    <button type="button" onClick={openPreview} className="btn btn-primary pointer-events-auto gap-2 rounded-full px-5 shadow-pop">
+                        <Eye size={17} /> See it on your resume
+                    </button>
+                </div>
+            )}
         </div>
     );
 };
