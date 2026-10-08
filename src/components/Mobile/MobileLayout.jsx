@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-    Download, Eye, FileText, FilePlus, Link2, Loader2, Mail, Moon, Palette, Phone, Redo2, ScanSearch, Sun, Undo2
+    Download, Eye, FileText, FilePlus, Loader2, Mail, Moon, Palette, Phone, Redo2, ScanSearch, Sun, Undo2
 } from 'lucide-react';
 import { EditorBody } from '../Editor/EditorPanel';
 import ResumeDocument from '../Preview/ResumeDocument';
@@ -13,7 +13,7 @@ const NAV = [
     { id: 'design', label: 'Design', icon: Palette },
     { id: 'review', label: 'Review', icon: ScanSearch },
     { id: 'preview', label: 'Preview', icon: Eye },
-    { id: 'export', label: 'Export', icon: Link2 }
+    { id: 'export', label: 'Export', icon: Download }
 ];
 
 const MobileLayout = (props) => {
