@@ -34,7 +34,7 @@ Merged to `main` and deployed (9 Oct 2026): AI "tailor to job", ATS check, click
 ## Next steps
 00. PDF audit fixes (9 Oct 2026) are on branch `claude/pensive-meitner-opz77b`, not yet merged: after merging, download a PDF from production in a few templates and check the text selects/searches.
 0. Do NOT set `ANTHROPIC_API_KEY` unless Laksh decides to pay. Try Review > Job match (copy-paste mode) on production.
-1. Add `profiley.lakshpradhwani.com` to Firebase authorized domains (Auth settings), otherwise Google sign-in fails on the new domain.
+1. The app uses Firestore only (no Firebase Auth, so no authorized-domains step). If the Firebase browser API key has HTTP-referrer restrictions in Google Cloud Console (APIs & Services > Credentials), add `https://profiley.lakshpradhwani.com/*` or share links will fail on the new domain.
 3. After merging PR #2: create a share link on production and open it in a private window (never tested against real Firestore), and confirm the `/laksh` page still renders with the new `config.activeTemplate` (older shared docs have none and fall back to defaults).
 4. Check the `/laksh` public resume page and the exported PDF carry the new links.
 
