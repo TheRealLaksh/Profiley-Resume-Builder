@@ -4,6 +4,7 @@ import {
     ArrowDown, ArrowUp, GripVertical, Eye, EyeOff, Pencil, Check, X, ChevronRight, ChevronLeft, Trash2, Plus, FileUp
 } from 'lucide-react';
 import { PanelHeading, Toggle } from '../UI/FormElements';
+import { DESKTOP_QUERY } from '../../utils/layout';
 import PersonalEditor from './editors/PersonalEditor';
 import EntryEditor from './editors/EntryEditor';
 import SkillsEditor from './editors/SkillsEditor';
@@ -38,7 +39,7 @@ const ContentTab = ({
 }) => {
     const [editingId, setEditingId] = useState(null);
     // Drag-and-drop is a mouse gesture; on a phone a long press would start a ghost drag, so reordering uses buttons there.
-    const canDrag = typeof window !== 'undefined' && window.matchMedia('(min-width: 768px)').matches;
+    const canDrag = typeof window !== 'undefined' && window.matchMedia(DESKTOP_QUERY).matches;
     const [reorder, setReorder] = useState(false);
     const [draftLabel, setDraftLabel] = useState('');
 
@@ -102,10 +103,10 @@ const ContentTab = ({
             <div className="animate-rise">
                 <PanelHeading
                     title="Your resume"
-                    subtitle={<><span className="max-md:hidden">Pick a section to edit. Drag to reorder, or use the arrow keys on the handle.</span><span className="md:hidden">Tap a section to edit it.</span></>}
+                    subtitle={<><span className="phone:hidden">Pick a section to edit. Drag to reorder, or use the arrow keys on the handle.</span><span className="desk:hidden">Tap a section to edit it.</span></>}
                     action={(
                         <div className="flex shrink-0 items-center gap-2">
-                            <button className={`btn btn-sm shrink-0 md:hidden ${reorder ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setReorder((v) => !v)} aria-pressed={reorder}>
+                            <button className={`btn btn-sm shrink-0 desk:hidden ${reorder ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setReorder((v) => !v)} aria-pressed={reorder}>
                                 {reorder ? <><Check size={14} /> Done</> : <><ArrowUp size={13} /><ArrowDown size={13} className="-ml-2" /> Reorder</>}
                             </button>
                             {openImport && !reorder && <button className="btn btn-secondary btn-sm shrink-0" onClick={openImport}><FileUp size={14} /> Import</button>}
@@ -147,7 +148,7 @@ const ContentTab = ({
                             >
                                 <button
                                     type="button"
-                                    className="grid h-9 w-7 shrink-0 cursor-grab place-items-center rounded-lg text-ink-3 hover:bg-sunken hover:text-ink active:cursor-grabbing max-md:hidden"
+                                    className="grid h-9 w-7 shrink-0 cursor-grab place-items-center rounded-lg text-ink-3 hover:bg-sunken hover:text-ink active:cursor-grabbing phone:hidden"
                                     aria-label={`Reorder ${s.label}. Press up or down arrow to move.`}
                                     onKeyDown={(e) => {
                                         if (e.key === 'ArrowUp') { e.preventDefault(); moveSection(index, -1); }
@@ -175,12 +176,12 @@ const ContentTab = ({
                                         <button
                                             type="button"
                                             onClick={() => (reorder ? undefined : setActiveTab(s.id))}
-                                            className={`group flex min-w-0 flex-1 items-center gap-3 rounded-lg py-1.5 pl-1 text-left max-md:min-h-12 max-md:pl-2 ${s.visible ? '' : 'opacity-55'}`}
+                                            className={`group flex min-w-0 flex-1 items-center gap-3 rounded-lg py-1.5 pl-1 text-left phone:min-h-12 phone:pl-2 ${s.visible ? '' : 'opacity-55'}`}
                                         >
-                                            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-sunken text-ink-2 max-md:h-10 max-md:w-10 max-md:rounded-xl"><Icon size={16} /></span>
+                                            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-sunken text-ink-2 phone:h-10 phone:w-10 phone:rounded-xl"><Icon size={16} /></span>
                                             <span className="min-w-0 flex-1">
-                                                <span className="block truncate text-[13px] font-medium text-ink max-md:text-[15px]">{s.label}</span>
-                                                <span className="block truncate text-xs text-ink-3 max-md:text-[13px]">{s.visible ? describe(s, data) : 'Hidden from resume'}</span>
+                                                <span className="block truncate text-[13px] font-medium text-ink phone:text-[15px]">{s.label}</span>
+                                                <span className="block truncate text-xs text-ink-3 phone:text-[13px]">{s.visible ? describe(s, data) : 'Hidden from resume'}</span>
                                             </span>
                                         </button>
                                         {reorder ? (
@@ -190,9 +191,9 @@ const ContentTab = ({
                                             </>
                                         ) : (
                                             <>
-                                                <button className="btn btn-ghost btn-icon !h-8 !w-8 max-md:!h-11 max-md:!w-11" onClick={() => startRename(s)} aria-label={`Rename ${s.label}`} title="Rename"><Pencil size={14} /></button>
+                                                <button className="btn btn-ghost btn-icon !h-8 !w-8 phone:!h-11 phone:!w-11" onClick={() => startRename(s)} aria-label={`Rename ${s.label}`} title="Rename"><Pencil size={14} /></button>
                                                 <button
-                                                    className={`btn btn-ghost btn-icon !h-8 !w-8 max-md:!h-11 max-md:!w-11 ${s.visible ? '' : 'text-ink-3'}`}
+                                                    className={`btn btn-ghost btn-icon !h-8 !w-8 phone:!h-11 phone:!w-11 ${s.visible ? '' : 'text-ink-3'}`}
                                                     onClick={() => toggleVisible(s.id)}
                                                     aria-label={s.visible ? `Hide ${s.label}` : `Show ${s.label}`}
                                                     aria-pressed={s.visible}
@@ -251,7 +252,7 @@ const ContentTab = ({
 
     return (
         <div className="animate-rise" key={activeTab}>
-            <div className="max-md:hidden">
+            <div className="phone:hidden">
                 <button className="btn btn-ghost btn-sm -ml-2 mb-3" onClick={() => setActiveTab('sections')}>
                     <ChevronLeft size={16} /> All sections
                 </button>
@@ -259,7 +260,7 @@ const ContentTab = ({
             </div>
 
             {/* Phones: the title and the way back stay pinned while the form scrolls. */}
-            <div className="sticky top-0 z-10 -mx-4 -mt-4 mb-4 flex items-center gap-1 border-b border-line bg-panel px-2 py-2 shadow-[0_6px_12px_-10px_rgb(60_45_20/0.25)] md:hidden">
+            <div className="sticky top-0 z-10 -mx-4 -mt-4 mb-4 flex items-center gap-1 border-b border-line bg-panel px-2 py-2 shadow-[0_6px_12px_-10px_rgb(60_45_20/0.25)] desk:hidden">
                 <button className="btn btn-ghost btn-icon" onClick={() => setActiveTab('sections')} aria-label="Back to all sections"><ChevronLeft size={22} /></button>
                 <h2 className="min-w-0 flex-1 truncate font-display text-[22px] leading-none tracking-tight text-ink">{title}</h2>
             </div>

@@ -85,10 +85,10 @@ export const Segmented = ({ label, value, onChange, options, className = '' }) =
 export const Toggle = ({ label, hint, value, onChange }) => {
   const id = useId();
   return (
-    <div className="flex items-center justify-between gap-4 py-2 max-md:py-3">
+    <div className="flex items-center justify-between gap-4 py-2 phone:py-3">
       <div className="min-w-0">
-        <span id={id} className="block text-[13px] font-medium text-ink max-md:text-sm">{label}</span>
-        {hint && <span className="block text-xs text-ink-3 max-md:text-[13px] max-md:leading-snug">{hint}</span>}
+        <span id={id} className="block text-[13px] font-medium text-ink phone:text-sm">{label}</span>
+        {hint && <span className="block text-xs text-ink-3 phone:text-[13px] phone:leading-snug">{hint}</span>}
       </div>
       <button
         type="button"
@@ -96,10 +96,10 @@ export const Toggle = ({ label, hint, value, onChange }) => {
         aria-checked={Boolean(value)}
         aria-labelledby={id}
         onClick={() => onChange(!value)}
-        className={`relative h-6 w-10 shrink-0 rounded-full transition-colors duration-200 ease-snap max-md:h-8 max-md:w-[3.25rem] ${value ? 'bg-accent' : 'bg-line-strong'}`}
+        className={`relative h-6 w-10 shrink-0 rounded-full transition-colors duration-200 ease-snap phone:h-8 phone:w-[3.25rem] ${value ? 'bg-accent' : 'bg-line-strong'}`}
       >
         <span
-          className={`absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow-[0_1px_2px_rgb(0_0_0/0.3)] transition-transform duration-200 ease-snap max-md:h-7 max-md:w-7 ${value ? 'translate-x-4 max-md:translate-x-5' : 'translate-x-0'}`}
+          className={`absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow-[0_1px_2px_rgb(0_0_0/0.3)] transition-transform duration-200 ease-snap phone:h-7 phone:w-7 ${value ? 'translate-x-4 phone:translate-x-5' : 'translate-x-0'}`}
         />
       </button>
     </div>
@@ -114,7 +114,7 @@ export const Swatch = ({ theme, selected, onClick }) => (
     title={theme.name}
     aria-label={`${theme.name} colour`}
     aria-pressed={selected}
-    className={`group relative grid h-9 w-9 place-items-center rounded-full max-md:h-11 max-md:w-11 transition-transform duration-200 ease-snap hover:scale-110 active:scale-95 ${selected ? 'ring-2 ring-accent ring-offset-2 ring-offset-surface' : ''}`}
+    className={`group relative grid h-9 w-9 place-items-center rounded-full phone:h-11 phone:w-11 transition-transform duration-200 ease-snap hover:scale-110 active:scale-95 ${selected ? 'ring-2 ring-accent ring-offset-2 ring-offset-surface' : ''}`}
   >
     <span className={`absolute inset-0 rounded-full ${theme.hex}`} />
     {selected && <Check size={15} strokeWidth={3} className="relative text-white drop-shadow" />}
@@ -124,8 +124,8 @@ export const Swatch = ({ theme, selected, onClick }) => (
 /** Collapsible group used to keep long panels scannable. */
 export const Group = ({ title, meta, defaultOpen = true, children }) => (
   <details open={defaultOpen} className="group border-b border-line last:border-b-0">
-    <summary className="flex cursor-pointer list-none items-center justify-between gap-3 py-3.5 max-md:min-h-[3.25rem] [&::-webkit-details-marker]:hidden">
-      <span className="text-[13px] font-semibold text-ink max-md:text-[15px]">{title}</span>
+    <summary className="flex cursor-pointer list-none items-center justify-between gap-3 py-3.5 phone:min-h-[3.25rem] [&::-webkit-details-marker]:hidden">
+      <span className="text-[13px] font-semibold text-ink phone:text-[15px]">{title}</span>
       <span className="flex items-center gap-2 text-xs text-ink-3">
         {meta}
         <ChevronDown size={16} className="transition-transform duration-200 ease-snap group-open:rotate-180" />

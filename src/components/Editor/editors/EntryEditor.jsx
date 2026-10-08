@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ChevronDown, ChevronUp, Copy, Plus, Trash2 } from 'lucide-react';
 import { TextField, TextAreaField, EmptyState } from '../../UI/FormElements';
+import { PHONE_QUERY } from '../../../utils/layout';
 
 const KINDS = {
   experience: {
@@ -29,7 +30,7 @@ const EntryEditor = ({ kind, items, setData, notifyUndo }) => {
   // On a phone the form opens below the fold of a long list, so bring the opened entry to the top.
   useEffect(() => {
     if (firstRun.current) { firstRun.current = false; return undefined; }
-    if (openId == null || !window.matchMedia('(max-width: 767px)').matches) return undefined;
+    if (openId == null || !window.matchMedia(PHONE_QUERY).matches) return undefined;
     const timer = setTimeout(() => document.getElementById(`entry-${kind}-${openId}`)?.scrollIntoView({ block: 'start', behavior: 'smooth' }), 80);
     return () => clearTimeout(timer);
   }, [openId, kind]);
@@ -92,16 +93,16 @@ const EntryEditor = ({ kind, items, setData, notifyUndo }) => {
                 type="button"
                 onClick={() => setOpenId(open ? null : item.id)}
                 aria-expanded={open}
-                className="flex min-w-0 flex-1 items-center gap-3 px-4 py-3 text-left max-md:min-h-[3.75rem]"
+                className="flex min-w-0 flex-1 items-center gap-3 px-4 py-3 text-left phone:min-h-[3.75rem]"
               >
-                <span className="grid h-6 w-6 shrink-0 place-items-center rounded-md bg-sunken font-numeric text-[11px] text-ink-2 max-md:h-8 max-md:w-8 max-md:rounded-lg max-md:text-xs">{index + 1}</span>
+                <span className="grid h-6 w-6 shrink-0 place-items-center rounded-md bg-sunken font-numeric text-[11px] text-ink-2 phone:h-8 phone:w-8 phone:rounded-lg phone:text-xs">{index + 1}</span>
                 <span className="min-w-0">
-                  <span className={`block truncate text-[13px] font-medium max-md:text-[15px] ${item[cfg.primary] ? 'text-ink' : 'text-ink-3'}`}>{title}</span>
-                  {sub && <span className="block truncate text-xs text-ink-3 max-md:text-[13px]">{sub}</span>}
+                  <span className={`block truncate text-[13px] font-medium phone:text-[15px] ${item[cfg.primary] ? 'text-ink' : 'text-ink-3'}`}>{title}</span>
+                  {sub && <span className="block truncate text-xs text-ink-3 phone:text-[13px]">{sub}</span>}
                 </span>
               </button>
-              <button className="btn btn-ghost btn-icon btn-sm !h-8 !w-8 max-md:!h-11 max-md:!w-10" onClick={() => move(index, -1)} disabled={index === 0} aria-label={`Move ${title} up`} title="Move up"><ChevronUp size={16} /></button>
-              <button className="btn btn-ghost btn-icon btn-sm !h-8 !w-8 max-md:!h-11 max-md:!w-10" onClick={() => move(index, 1)} disabled={index === items.length - 1} aria-label={`Move ${title} down`} title="Move down"><ChevronDown size={16} /></button>
+              <button className="btn btn-ghost btn-icon btn-sm !h-8 !w-8 phone:!h-11 phone:!w-10" onClick={() => move(index, -1)} disabled={index === 0} aria-label={`Move ${title} up`} title="Move up"><ChevronUp size={16} /></button>
+              <button className="btn btn-ghost btn-icon btn-sm !h-8 !w-8 phone:!h-11 phone:!w-10" onClick={() => move(index, 1)} disabled={index === items.length - 1} aria-label={`Move ${title} down`} title="Move down"><ChevronDown size={16} /></button>
             </div>
 
             {open && (

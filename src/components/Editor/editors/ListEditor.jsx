@@ -45,7 +45,7 @@ const ListEditor = ({ field, items, setData, notifyUndo, placeholder, noun = 'it
       {items.map((item, index) => (
         <div key={index} className="card group flex items-start gap-1 p-1.5">
           <textarea
-            className="min-h-[2.5rem] flex-1 resize-none bg-transparent px-2.5 py-2 text-[13px] leading-snug text-ink outline-none placeholder:text-ink-3 max-md:min-h-[3rem] max-md:py-3 max-md:text-base"
+            className="min-h-[2.5rem] flex-1 resize-none bg-transparent px-2.5 py-2 text-[13px] leading-snug text-ink outline-none placeholder:text-ink-3 phone:min-h-[3rem] phone:py-3 phone:text-base"
             rows={Math.max(1, Math.ceil(item.length / 44))}
             value={item}
             autoFocus={focusIndex === index}
@@ -59,15 +59,15 @@ const ListEditor = ({ field, items, setData, notifyUndo, placeholder, noun = 'it
             placeholder={placeholder}
             aria-label={`${noun} ${index + 1}`}
           />
-          <div className="flex shrink-0 flex-col opacity-60 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100 max-md:opacity-100">
-            <button className="btn btn-ghost btn-icon !h-6 !w-7 max-md:!h-8 max-md:!w-10" onClick={() => move(index, -1)} disabled={index === 0} aria-label="Move up"><ChevronUp size={14} /></button>
-            <button className="btn btn-ghost btn-icon !h-6 !w-7 max-md:!h-8 max-md:!w-10" onClick={() => move(index, 1)} disabled={index === items.length - 1} aria-label="Move down"><ChevronDown size={14} /></button>
+          <div className="flex shrink-0 flex-col opacity-60 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100 phone:opacity-100">
+            <button className="btn btn-ghost btn-icon !h-6 !w-7 phone:!h-8 phone:!w-10" onClick={() => move(index, -1)} disabled={index === 0} aria-label="Move up"><ChevronUp size={14} /></button>
+            <button className="btn btn-ghost btn-icon !h-6 !w-7 phone:!h-8 phone:!w-10" onClick={() => move(index, 1)} disabled={index === items.length - 1} aria-label="Move down"><ChevronDown size={14} /></button>
           </div>
-          <button className="btn btn-ghost btn-danger btn-icon !h-8 !w-8 shrink-0 max-md:!h-11 max-md:!w-11" onClick={() => remove(index)} aria-label={`Remove ${noun} ${index + 1}`}><Trash2 size={15} /></button>
+          <button className="btn btn-ghost btn-danger btn-icon !h-8 !w-8 shrink-0 phone:!h-11 phone:!w-11" onClick={() => remove(index)} aria-label={`Remove ${noun} ${index + 1}`}><Trash2 size={15} /></button>
         </div>
       ))}
       <button className="btn btn-secondary w-full border-dashed" onClick={() => addAt(items.length)}><Plus size={16} /> Add {noun}</button>
-      <p className="hint max-md:hidden">Press Enter to add the next one, Backspace on an empty row to remove it.</p>
+      <p className="hint phone:hidden">Press Enter to add the next one, Backspace on an empty row to remove it.</p>
     </div>
   );
 };

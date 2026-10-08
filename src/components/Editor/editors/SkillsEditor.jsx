@@ -36,7 +36,7 @@ const SkillsEditor = ({ skills, setData, notifyUndo }) => {
           placeholder="Add a skill and press Enter"
           aria-label="New skill"
         />
-        <button className="btn btn-primary btn-icon !h-10 !w-10 max-md:!h-[2.875rem] max-md:!w-[2.875rem]" onClick={addDraft} disabled={!draft.trim()} aria-label="Add skill"><Plus size={18} /></button>
+        <button className="btn btn-primary btn-icon !h-10 !w-10 phone:!h-[2.875rem] phone:!w-[2.875rem]" onClick={addDraft} disabled={!draft.trim()} aria-label="Add skill"><Plus size={18} /></button>
       </div>
 
       {skills.length === 0 ? (
@@ -49,7 +49,7 @@ const SkillsEditor = ({ skills, setData, notifyUndo }) => {
               <li key={index} className="card flex items-center gap-3 px-3 py-2.5">
                 <div className="min-w-0 flex-1">
                   <input
-                    className="w-full bg-transparent text-[13px] font-medium text-ink outline-none placeholder:text-ink-3 max-md:py-1 max-md:text-base"
+                    className="w-full bg-transparent text-[13px] font-medium text-ink outline-none placeholder:text-ink-3 phone:py-1 phone:text-base"
                     value={skill.name ?? ''}
                     onChange={(e) => setField(index, 'name', e.target.value)}
                     aria-label={`Skill ${index + 1} name`}
@@ -63,11 +63,11 @@ const SkillsEditor = ({ skills, setData, notifyUndo }) => {
                     value={skill.level ?? 80}
                     onChange={(e) => setField(index, 'level', Number(e.target.value))}
                     aria-label={`${skill.name || 'Skill'} level`}
-                    className="mt-1.5 h-1 w-full cursor-pointer accent-accent max-md:mt-2"
+                    className="mt-1.5 h-1 w-full cursor-pointer accent-accent phone:mt-2"
                   />
                 </div>
                 <span className="w-9 text-right font-numeric text-xs tabular text-ink-3">{skill.level ?? 80}%</span>
-                <button className="btn btn-ghost btn-danger btn-icon !h-8 !w-8 max-md:!h-11 max-md:!w-11" onClick={() => remove(index)} aria-label={`Remove ${skill.name || 'skill'}`}><Trash2 size={15} /></button>
+                <button className="btn btn-ghost btn-danger btn-icon !h-8 !w-8 phone:!h-11 phone:!w-11" onClick={() => remove(index)} aria-label={`Remove ${skill.name || 'skill'}`}><Trash2 size={15} /></button>
               </li>
             );
           })}
