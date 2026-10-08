@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
     Briefcase, GraduationCap, Code, Award, Heart, User, FileText, FilePlus,
-    GripVertical, Eye, EyeOff, Pencil, Check, X, ChevronRight, ChevronLeft, Trash2, Plus, FileUp
+    ArrowDown, ArrowUp, GripVertical, Eye, EyeOff, Pencil, Check, X, ChevronRight, ChevronLeft, Trash2, Plus, FileUp
 } from 'lucide-react';
 import { PanelHeading, Toggle } from '../UI/FormElements';
 import PersonalEditor from './editors/PersonalEditor';
@@ -39,6 +39,7 @@ const ContentTab = ({
     const [editingId, setEditingId] = useState(null);
     // Drag-and-drop is a mouse gesture; on a phone a long press would start a ghost drag, so reordering uses buttons there.
     const canDrag = typeof window !== 'undefined' && window.matchMedia('(min-width: 768px)').matches;
+    const [reorder, setReorder] = useState(false);
     const [draftLabel, setDraftLabel] = useState('');
 
     const section = sectionOrder.find((s) => s.id === activeTab);
@@ -102,7 +103,14 @@ const ContentTab = ({
                 <PanelHeading
                     title="Your resume"
                     subtitle={<><span className="max-md:hidden">Pick a section to edit. Drag to reorder, or use the arrow keys on the handle.</span><span className="md:hidden">Tap a section to edit it.</span></>}
-                    action={openImport && <button className="btn btn-secondary btn-sm shrink-0" onClick={openImport}><FileUp size={14} /> Import</button>}
+                    action={(
+                        <div className="flex shrink-0 items-center gap-2">
+                            <button className={`btn btn-sm shrink-0 md:hidden ${reorder ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setReorder((v) => !v)} aria-pressed={reorder}>
+                                {reorder ? <><Check size={14} /> Done</> : <><ArrowUp size={13} /><ArrowDown size={13} className="-ml-2" /> Reorder</>}
+                            </button>
+                            {openImport && !reorder && <button className="btn btn-secondary btn-sm shrink-0" onClick={openImport}><FileUp size={14} /> Import</button>}
+                        </div>
+                    )}
                 />
 
                 <button
@@ -166,25 +174,34 @@ const ContentTab = ({
                                     <>
                                         <button
                                             type="button"
-                                            onClick={() => setActiveTab(s.id)}
-                                            className={`group flex min-w-0 flex-1 items-center gap-3 rounded-lg py-1.5 pl-1 text-left ${s.visible ? '' : 'opacity-55'}`}
+                                            onClick={() => (reorder ? undefined : setActiveTab(s.id))}
+                                            className={`group flex min-w-0 flex-1 items-center gap-3 rounded-lg py-1.5 pl-1 text-left max-md:min-h-12 max-md:pl-2 ${s.visible ? '' : 'opacity-55'}`}
                                         >
-                                            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-sunken text-ink-2"><Icon size={16} /></span>
+                                            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-sunken text-ink-2 max-md:h-10 max-md:w-10 max-md:rounded-xl"><Icon size={16} /></span>
                                             <span className="min-w-0 flex-1">
-                                                <span className="block truncate text-[13px] font-medium text-ink">{s.label}</span>
-                                                <span className="block truncate text-xs text-ink-3">{s.visible ? describe(s, data) : 'Hidden from resume'}</span>
+                                                <span className="block truncate text-[13px] font-medium text-ink max-md:text-[15px]">{s.label}</span>
+                                                <span className="block truncate text-xs text-ink-3 max-md:text-[13px]">{s.visible ? describe(s, data) : 'Hidden from resume'}</span>
                                             </span>
                                         </button>
-                                        <button className="btn btn-ghost btn-icon !h-8 !w-8" onClick={() => startRename(s)} aria-label={`Rename ${s.label}`} title="Rename"><Pencil size={14} /></button>
-                                        <button
-                                            className={`btn btn-ghost btn-icon !h-8 !w-8 ${s.visible ? '' : 'text-ink-3'}`}
-                                            onClick={() => toggleVisible(s.id)}
-                                            aria-label={s.visible ? `Hide ${s.label}` : `Show ${s.label}`}
-                                            aria-pressed={s.visible}
-                                            title={s.visible ? 'Hide from resume' : 'Show on resume'}
-                                        >
-                                            {s.visible ? <Eye size={16} /> : <EyeOff size={16} />}
-                                        </button>
+                                        {reorder ? (
+                                            <>
+                                                <button className="btn btn-secondary btn-icon" onClick={() => moveSection(index, -1)} disabled={index === 0} aria-label={`Move ${s.label} up`}><ArrowUp size={18} /></button>
+                                                <button className="btn btn-secondary btn-icon" onClick={() => moveSection(index, 1)} disabled={index === sectionOrder.length - 1} aria-label={`Move ${s.label} down`}><ArrowDown size={18} /></button>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <button className="btn btn-ghost btn-icon !h-8 !w-8 max-md:!h-11 max-md:!w-11" onClick={() => startRename(s)} aria-label={`Rename ${s.label}`} title="Rename"><Pencil size={14} /></button>
+                                                <button
+                                                    className={`btn btn-ghost btn-icon !h-8 !w-8 max-md:!h-11 max-md:!w-11 ${s.visible ? '' : 'text-ink-3'}`}
+                                                    onClick={() => toggleVisible(s.id)}
+                                                    aria-label={s.visible ? `Hide ${s.label}` : `Show ${s.label}`}
+                                                    aria-pressed={s.visible}
+                                                    title={s.visible ? 'Hide from resume' : 'Show on resume'}
+                                                >
+                                                    {s.visible ? <Eye size={16} /> : <EyeOff size={16} />}
+                                                </button>
+                                            </>
+                                        )}
                                     </>
                                 )}
                             </li>
