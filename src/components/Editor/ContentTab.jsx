@@ -251,10 +251,18 @@ const ContentTab = ({
 
     return (
         <div className="animate-rise" key={activeTab}>
-            <button className="btn btn-ghost btn-sm -ml-2 mb-3" onClick={() => setActiveTab('sections')}>
-                <ChevronLeft size={16} /> All sections
-            </button>
-            <PanelHeading title={title} />
+            <div className="max-md:hidden">
+                <button className="btn btn-ghost btn-sm -ml-2 mb-3" onClick={() => setActiveTab('sections')}>
+                    <ChevronLeft size={16} /> All sections
+                </button>
+                <PanelHeading title={title} />
+            </div>
+
+            {/* Phones: the title and the way back stay pinned while the form scrolls. */}
+            <div className="sticky top-0 z-10 -mx-4 -mt-4 mb-4 flex items-center gap-1 border-b border-line bg-panel/90 px-2 py-2 backdrop-blur-md md:hidden">
+                <button className="btn btn-ghost btn-icon" onClick={() => setActiveTab('sections')} aria-label="Back to all sections"><ChevronLeft size={22} /></button>
+                <h2 className="min-w-0 flex-1 truncate font-display text-[22px] leading-none tracking-tight text-ink">{title}</h2>
+            </div>
 
             {!isPersonal && (
                 <div className="mb-4 rounded-xl border border-line bg-sunken/40 px-3.5">
