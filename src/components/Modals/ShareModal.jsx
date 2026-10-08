@@ -78,7 +78,7 @@ const ShareModal = ({
           <form onSubmit={(e) => { e.preventDefault(); handleGenerateLink(); }}>
             <label htmlFor="share-slug" className="label">Custom address <span className="font-normal text-ink-3">(optional)</span></label>
             <div className="flex items-stretch max-sm:flex-col max-sm:gap-1.5">
-              <span className="flex items-center truncate rounded-l-xl border border-r-0 border-line bg-sunken px-3 font-numeric text-[13px] text-ink-3 max-sm:rounded-xl max-sm:border max-sm:py-2">{window.location.host}/</span>
+              <span className="flex items-center rounded-l-xl border border-r-0 border-line bg-sunken px-3 font-numeric text-[13px] text-ink-3 max-sm:truncate max-sm:rounded-xl max-sm:border max-sm:py-2">{window.location.host}/</span>
               <input
                 id="share-slug"
                 autoFocus={!window.matchMedia('(pointer: coarse)').matches}
