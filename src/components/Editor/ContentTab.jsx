@@ -259,7 +259,7 @@ const ContentTab = ({
             </div>
 
             {/* Phones: the title and the way back stay pinned while the form scrolls. */}
-            <div className="sticky top-0 z-10 -mx-4 -mt-4 mb-4 flex items-center gap-1 border-b border-line bg-panel/90 px-2 py-2 backdrop-blur-md md:hidden">
+            <div className="sticky top-0 z-10 -mx-4 -mt-4 mb-4 flex items-center gap-1 border-b border-line bg-panel px-2 py-2 shadow-[0_6px_12px_-10px_rgb(60_45_20/0.25)] md:hidden">
                 <button className="btn btn-ghost btn-icon" onClick={() => setActiveTab('sections')} aria-label="Back to all sections"><ChevronLeft size={22} /></button>
                 <h2 className="min-w-0 flex-1 truncate font-display text-[22px] leading-none tracking-tight text-ink">{title}</h2>
             </div>

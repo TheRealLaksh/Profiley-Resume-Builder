@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-    Download, Eye, FileText, FilePlus, Loader2, Mail, Moon, Palette, Phone, Redo2, ScanSearch, Sun, Undo2
+    Download, Eye, FileText, FilePlus, Loader2, Mail, Moon, Palette, Pencil, Phone, Redo2, ScanSearch, Sun, Undo2
 } from 'lucide-react';
 import { EditorBody } from '../Editor/EditorPanel';
 import ResumeDocument from '../Preview/ResumeDocument';
@@ -18,6 +18,10 @@ const NAV = [
     { id: 'export', label: 'Export', icon: Download }
 ];
 
+const HINT_KEY = 'profiley_preview_hint_seen';
+const hintSeen = () => { try { return localStorage.getItem(HINT_KEY) === '1'; } catch { return false; } };
+const markHintSeen = () => { try { localStorage.setItem(HINT_KEY, '1'); } catch { /* private mode: the hint just shows again */ } };
+
 const MobileLayout = (props) => {
     const {
         activeTab, setActiveTab, darkMode, toggleDarkMode, data, config, sectionOrder, isReadOnly,
@@ -25,6 +29,7 @@ const MobileLayout = (props) => {
     } = props;
 
     const [showPreview, setShowPreview] = useState(false);
+    const [showHint, setShowHint] = useState(() => !hintSeen());
     const keyboardOpen = useKeyboardOpen();
     const {
         setContainer, setContent, zoom, min, max, isFit, contentSize, zoomIn, zoomOut, fit, actualSize
@@ -32,6 +37,25 @@ const MobileLayout = (props) => {
 
     const inPreview = isReadOnly || showPreview;
     const current = inPreview ? 'preview' : (['design', 'review', 'export'].includes(activeTab) ? activeTab : 'content');
+
+    // The hint explains tap-to-edit once, then gets out of the way.
+    useEffect(() => {
+        if (!showHint || !inPreview || isReadOnly) return undefined;
+        const timer = setTimeout(() => { setShowHint(false); markHintSeen(); }, 7000);
+        return () => clearTimeout(timer);
+    }, [showHint, inPreview, isReadOnly]);
+
+    // Tapping a part of the page opens the editor for it.
+    const editFromPreview = (e) => {
+        if (isReadOnly) return;
+        const target = e.target.closest?.('[data-section]');
+        if (!target) return;
+        tap();
+        setShowHint(false);
+        markHintSeen();
+        setShowPreview(false);
+        setActiveTab(target.dataset.section);
+    };
 
     const go = (id) => {
         tap();
@@ -91,13 +115,21 @@ const MobileLayout = (props) => {
                                     className="absolute left-0 top-0 origin-top-left"
                                     style={{ width: contentSize.width || undefined, transform: `scale(${zoom})` }}
                                 >
-                                    <div ref={setContent} className="inline-block">
+                                    <div ref={setContent} className="inline-block" onClick={editFromPreview}>
                                         <ResumeDocument data={data} config={config} sectionOrder={sectionOrder} />
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+
+                    {inPreview && !isReadOnly && showHint && (
+                        <div className="pointer-events-none absolute inset-x-0 top-3 flex justify-center px-4">
+                            <p className="pointer-events-auto flex animate-pop items-center gap-2 rounded-full bg-ink px-4 py-2.5 text-[13px] font-medium text-canvas shadow-pop">
+                                <Pencil size={14} /> Tap any part of the page to edit it
+                            </p>
+                        </div>
+                    )}
 
                     <ZoomDock
                         className={`absolute left-1/2 -translate-x-1/2 ${isReadOnly ? 'bottom-24' : 'bottom-4'}`}
