@@ -116,7 +116,7 @@ The editor itself is a product — featuring a warm light and dark theme that fo
 
 ### AI setup (optional)
 
-The AI features need an Anthropic key. Either set `ANTHROPIC_API_KEY` in the Vercel project environment (the app then calls `/api/ai`; optional `ANTHROPIC_MODEL`, and `AI_RATE_LIMIT_PER_HOUR`, default 8 per IP, an in-memory best-effort limit), or let each user paste their own key under Review, which is kept in their browser and sent straight to Anthropic. Without either, everything else still works.
+The AI features need an Anthropic key. Either set `ANTHROPIC_API_KEY` in the Vercel project environment (the app then calls `/api/ai`; optional `ANTHROPIC_MODEL`, and `AI_RATE_LIMIT_PER_HOUR`, default 8 per IP, an in-memory best-effort limit), or let each user paste their own key under Review, which is kept in their browser and sent straight to Anthropic. Without either, Job match still works for free: copy the prompt, run it in your own Claude chat, and paste the reply back. Everything else works without AI.
 
 ---
 
