@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ChevronDown, ChevronUp, Copy, Plus, Trash2 } from 'lucide-react';
 import { TextField, TextAreaField, EmptyState } from '../../UI/FormElements';
 
@@ -24,6 +24,15 @@ const newId = () => `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 const EntryEditor = ({ kind, items, setData, notifyUndo }) => {
   const cfg = KINDS[kind];
   const [openId, setOpenId] = useState(items[0]?.id ?? null);
+  const firstRun = useRef(true);
+
+  // On a phone the form opens below the fold of a long list, so bring the opened entry to the top.
+  useEffect(() => {
+    if (firstRun.current) { firstRun.current = false; return undefined; }
+    if (openId == null || !window.matchMedia('(max-width: 767px)').matches) return undefined;
+    const timer = setTimeout(() => document.getElementById(`entry-${kind}-${openId}`)?.scrollIntoView({ block: 'start', behavior: 'smooth' }), 80);
+    return () => clearTimeout(timer);
+  }, [openId, kind]);
 
   const update = (fn) => setData((prev) => ({ ...prev, [kind]: fn(prev[kind]) }));
   const setField = (id, field, value) =>
@@ -77,7 +86,7 @@ const EntryEditor = ({ kind, items, setData, notifyUndo }) => {
         const sub = [item[cfg.secondary], item.year].filter(Boolean).join('  ·  ');
 
         return (
-          <div key={item.id} className={`card overflow-hidden transition-shadow duration-200 ${open ? 'shadow-soft' : ''}`}>
+          <div key={item.id} id={`entry-${kind}-${item.id}`} className={`card scroll-mt-16 overflow-hidden transition-shadow duration-200 ${open ? 'shadow-soft' : ''}`}>
             <div className="flex items-center gap-1 pr-2">
               <button
                 type="button"
