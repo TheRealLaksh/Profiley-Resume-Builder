@@ -86,7 +86,7 @@ const EntryEditor = ({ kind, items, setData, notifyUndo }) => {
         const sub = [item[cfg.secondary], item.year].filter(Boolean).join('  ·  ');
 
         return (
-          <div key={item.id} id={`entry-${kind}-${item.id}`} className={`card scroll-mt-16 overflow-hidden transition-shadow duration-200 ${open ? 'shadow-soft' : ''}`}>
+          <div key={item.id} id={`entry-${kind}-${item.id}`} className={`card scroll-mt-20 overflow-hidden transition-shadow duration-200 ${open ? 'shadow-soft' : ''}`}>
             <div className="flex items-center gap-1 pr-2">
               <button
                 type="button"
