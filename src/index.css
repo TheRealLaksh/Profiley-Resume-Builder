@@ -163,7 +163,7 @@
   }
 
   /* ---- Phones: 16px text stops iOS zooming into a focused field, and fields get a thumb-sized height ---- */
-  @media (max-width: 767px) {
+  @media (max-width: 767px), (pointer: coarse) and (max-height: 500px) {
     .input {
       @apply min-h-[2.875rem] text-base;
     }
@@ -355,7 +355,7 @@
 }
 
 /* Phones: a slider you can actually grab (the default 4px track and 16px thumb are too small for a finger). */
-@media (max-width: 767px) {
+@media (max-width: 767px), (pointer: coarse) and (max-height: 500px) {
   input[type="range"] {
     -webkit-appearance: none;
     appearance: none;
