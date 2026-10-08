@@ -65,8 +65,8 @@ const MobileLayout = (props) => {
     };
 
     return (
-        <div className="flex h-[100dvh] flex-col bg-canvas text-ink">
-            <header className="flex h-[calc(3.5rem+env(safe-area-inset-top))] land:h-[calc(2.75rem+env(safe-area-inset-top))] shrink-0 items-center gap-1 border-b border-line bg-panel pl-[max(0.75rem,env(safe-area-inset-left))] pr-[max(0.75rem,env(safe-area-inset-right))] pt-[env(safe-area-inset-top)]">
+        <div className="flex h-[100dvh] flex-col bg-canvas text-ink land:grid land:grid-cols-[5.25rem_minmax(0,1fr)] land:grid-rows-[auto_minmax(0,1fr)]">
+            <header className="flex h-[calc(3.5rem+env(safe-area-inset-top))] land:h-[calc(3rem+env(safe-area-inset-top))] shrink-0 items-center gap-1 border-b border-line bg-panel land:col-start-2 land:row-start-1 pl-[max(0.75rem,env(safe-area-inset-left))] pr-[max(0.75rem,env(safe-area-inset-right))] pt-[env(safe-area-inset-top)]">
                 {isReadOnly ? (
                     <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-semibold">{data.personal.name || 'Resume'}</p>
@@ -93,7 +93,7 @@ const MobileLayout = (props) => {
                 </button>
             </header>
 
-            <main id="main" className="relative min-h-0 flex-1">
+            <main id="main" className="relative min-h-0 flex-1 land:col-start-2 land:row-start-2">
                 {!inPreview && (
                     <div key={activeTab} className="scroll-quiet absolute inset-0 overflow-y-auto overscroll-contain bg-panel pb-8 pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] pt-4">
                         <div className="mx-auto w-full max-w-xl">
@@ -142,7 +142,7 @@ const MobileLayout = (props) => {
             </main>
 
             {isReadOnly ? (
-                <div className="flex shrink-0 items-center gap-2 border-t border-line bg-panel px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3">
+                <div className="flex shrink-0 items-center gap-2 border-t border-line bg-panel land:col-span-2 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3">
                     {data.personal.email && (
                         <button className="btn btn-secondary btn-icon !h-11 !w-11" onClick={onCopyEmail} aria-label="Copy email"><Mail size={18} /></button>
                     )}
@@ -153,7 +153,7 @@ const MobileLayout = (props) => {
                 </div>
             ) : (
                 !keyboardOpen && (
-                    <nav aria-label="Primary" className="grid shrink-0 grid-cols-5 border-t border-line bg-panel/95 pb-[max(0.375rem,env(safe-area-inset-bottom))] pl-[max(0.375rem,env(safe-area-inset-left))] pr-[max(0.375rem,env(safe-area-inset-right))] pt-1.5 backdrop-blur-md">
+                    <nav aria-label="Primary" className="grid shrink-0 grid-cols-5 land:col-start-1 land:row-span-2 land:row-start-1 land:grid-cols-1 land:content-center land:border-r land:border-t-0 border-t border-line bg-panel/95 pb-[max(0.375rem,env(safe-area-inset-bottom))] pl-[max(0.375rem,env(safe-area-inset-left))] pr-[max(0.375rem,env(safe-area-inset-right))] pt-1.5 backdrop-blur-md">
                         {NAV.map(({ id, label, icon: Icon }) => {
                             const active = current === id;
                             return (
@@ -161,9 +161,9 @@ const MobileLayout = (props) => {
                                     key={id}
                                     onClick={() => go(id)}
                                     aria-current={active ? 'page' : undefined}
-                                    className={`group flex min-h-[3.5rem] land:min-h-11 flex-col land:flex-row items-center justify-center gap-0.5 land:gap-1.5 rounded-xl text-[11px] font-medium transition-colors duration-200 ease-snap active:scale-[0.96] ${active ? 'text-accent-ink' : 'text-ink-3'}`}
+                                    className={`group flex min-h-[3.5rem] land:min-h-[3.25rem] flex-col items-center justify-center gap-0.5 rounded-xl text-[11px] font-medium transition-colors duration-200 ease-snap active:scale-[0.96] ${active ? 'text-accent-ink' : 'text-ink-3'}`}
                                 >
-                                    <span className={`grid h-8 w-14 land:h-7 land:w-9 place-items-center rounded-full transition-colors duration-300 ease-snap ${active ? 'bg-accent-soft' : 'group-active:bg-sunken'}`}>
+                                    <span className={`grid h-8 w-14 land:h-7 land:w-12 place-items-center rounded-full transition-colors duration-300 ease-snap ${active ? 'bg-accent-soft' : 'group-active:bg-sunken'}`}>
                                         <Icon size={21} strokeWidth={active ? 2.1 : 1.65} />
                                     </span>
                                     <span className={active ? 'font-semibold' : ''}>{label}</span>
