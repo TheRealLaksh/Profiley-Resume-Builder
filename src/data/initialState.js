@@ -2,7 +2,7 @@ export const initialData = {
   personal: {
     name: "Laksh Pradhwani",
     title: "Aspiring AI & ML Engineer | Full Stack Developer",
-    email: "contact@lakshp.live",
+    email: "work@lakshpradhwani.com",
     phone: "xxxxxxxxxx",
     location: "Varanasi, Uttar Pradesh, India",
     linkedin: "https://www.linkedin.com/in/laksh-pradhwani/",
