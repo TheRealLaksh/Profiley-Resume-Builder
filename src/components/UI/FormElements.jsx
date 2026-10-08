@@ -65,7 +65,7 @@ export const Select = ({ label, value, onChange, options, darkMode }) => (
   </div>
 );
 
-export const ColorButton = ({ colorKey, theme, selected, onClick }) => {
+export const ColorButton = ({ theme, selected, onClick }) => {
   return (
     <button 
       onClick={onClick}

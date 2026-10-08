@@ -7,11 +7,12 @@ import ExportTab from './ExportTab';
 const EditorPanel = ({ 
     activeTab, setActiveTab, data, setData, config, setConfig, 
     sectionOrder, setSectionOrder, applyTemplate, 
-    draggedItemIndex, setDraggedItemIndex, 
+    draggedItemIndex, 
     handleDragStart, handleDragOver, handleDragEnd,
     // Props
     darkMode, toggleDarkMode, undo, redo, canUndo, canRedo, 
-    pdfQuality, setPdfQuality, handleShare, isSharing
+    pdfQuality, setPdfQuality, handleShare, isSharing,
+    onDownloadPdf, onPrint, isExportingPdf
 }) => {
     
     // Helper for conditional styling
@@ -56,6 +57,9 @@ const EditorPanel = ({
                         setPdfQuality={setPdfQuality}
                         handleShare={handleShare}
                         isSharing={isSharing}
+                        onDownloadPdf={onDownloadPdf}
+                        onPrint={onPrint}
+                        isExportingPdf={isExportingPdf}
                         darkMode={darkMode}
                     />
                 ) : activeTab === 'design' ? (
