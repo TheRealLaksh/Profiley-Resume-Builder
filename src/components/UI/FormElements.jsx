@@ -85,10 +85,10 @@ export const Segmented = ({ label, value, onChange, options, className = '' }) =
 export const Toggle = ({ label, hint, value, onChange }) => {
   const id = useId();
   return (
-    <div className="flex items-center justify-between gap-4 py-2">
+    <div className="flex items-center justify-between gap-4 py-2 max-md:py-3">
       <div className="min-w-0">
-        <span id={id} className="block text-[13px] font-medium text-ink">{label}</span>
-        {hint && <span className="block text-xs text-ink-3">{hint}</span>}
+        <span id={id} className="block text-[13px] font-medium text-ink max-md:text-sm">{label}</span>
+        {hint && <span className="block text-xs text-ink-3 max-md:text-[13px] max-md:leading-snug">{hint}</span>}
       </div>
       <button
         type="button"
@@ -96,10 +96,10 @@ export const Toggle = ({ label, hint, value, onChange }) => {
         aria-checked={Boolean(value)}
         aria-labelledby={id}
         onClick={() => onChange(!value)}
-        className={`relative h-6 w-10 shrink-0 rounded-full transition-colors duration-200 ease-snap ${value ? 'bg-accent' : 'bg-line-strong'}`}
+        className={`relative h-6 w-10 shrink-0 rounded-full transition-colors duration-200 ease-snap max-md:h-8 max-md:w-[3.25rem] ${value ? 'bg-accent' : 'bg-line-strong'}`}
       >
         <span
-          className={`absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow-[0_1px_2px_rgb(0_0_0/0.3)] transition-transform duration-200 ease-snap ${value ? 'translate-x-4' : 'translate-x-0'}`}
+          className={`absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow-[0_1px_2px_rgb(0_0_0/0.3)] transition-transform duration-200 ease-snap max-md:h-7 max-md:w-7 ${value ? 'translate-x-4 max-md:translate-x-5' : 'translate-x-0'}`}
         />
       </button>
     </div>
