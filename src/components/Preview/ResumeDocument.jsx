@@ -231,7 +231,7 @@ const ResumeDocument = ({ data, config, sectionOrder, paperRole = 'main' }) => {
                     </div>
 
                     {sidebarSections.map(({ section, content }) => (
-                        <div key={section.id}>
+                        <div key={section.id} data-section={section.id}>
                             <Editable as="h3" path={`section:${section.id}`} value={getTitle(section)} placeholder="Section title" className={railTitle} />
                             {content}
                         </div>
@@ -239,14 +239,14 @@ const ResumeDocument = ({ data, config, sectionOrder, paperRole = 'main' }) => {
                 </aside>
 
                 <div className="flex-1 px-7 py-7 flex flex-col min-w-0">
-                    <header className={`flex flex-col gap-1.5 pb-4 mb-5 border-b ${theme.border} border-opacity-40 ${alignClass}`}>
+                    <header data-section="personal" className={`flex flex-col gap-1.5 pb-4 mb-5 border-b ${theme.border} border-opacity-40 ${alignClass}`}>
                         <Editable as="h1" path="personal:name" value={data.personal.name} placeholder="Your name" className={`${nameClass} ${theme.text}`} />
                         {(data.personal.title || edit) && <Editable as="p" path="personal:title" value={data.personal.title} placeholder="Your headline" className="text-[13px] font-medium text-gray-500 tracking-tight" />}
                     </header>
 
                     <div className={spacing.stack}>
                         {mainSections.map(({ section, content }) => (
-                            <section key={section.id}>
+                            <section key={section.id} data-section={section.id}>
                                 <SectionHeader
                                     title={getTitle(section)}
                                     editPath={`section:${section.id}`}
@@ -276,7 +276,7 @@ const ResumeDocument = ({ data, config, sectionOrder, paperRole = 'main' }) => {
         switch (headerStyle) {
             case 'banner':
                 return (
-                    <header className={`${theme.fill} text-white px-9 pt-9 pb-6`}>
+                    <header data-section="personal" className={`${theme.fill} text-white px-9 pt-9 pb-6`}>
                         <div className="flex items-center gap-5">
                             {photoBox('w-20 h-20', 'border-2 border-white/40')}
                             <div className="min-w-0">
@@ -298,7 +298,7 @@ const ResumeDocument = ({ data, config, sectionOrder, paperRole = 'main' }) => {
                         </div>
                     ) : <div className="h-px w-20 my-3.5 bg-gray-300" />;
                 return (
-                    <header className="flex flex-col items-center text-center mb-6">
+                    <header data-section="personal" className="flex flex-col items-center text-center mb-6">
                         {photoBox('w-20 h-20 mb-3', `border ${theme.border} border-opacity-30`)}
                         <Editable as="h1" path="personal:name" value={data.personal.name} placeholder="Your name" className={`${nameClass} ${theme.text}`} />
                         {(title || edit) && <Editable as="p" path="personal:title" value={title} placeholder="Your headline" className="text-[11px] mt-1.5 text-gray-500 uppercase tracking-[0.22em] font-medium" />}
@@ -309,7 +309,7 @@ const ResumeDocument = ({ data, config, sectionOrder, paperRole = 'main' }) => {
             }
             case 'split':
                 return (
-                    <header className={`flex justify-between items-end gap-8 pb-4 mb-6 border-b-2 ${theme.border}`}>
+                    <header data-section="personal" className={`flex justify-between items-end gap-8 pb-4 mb-6 border-b-2 ${theme.border}`}>
                         <div className="min-w-0">
                             <Editable as="h1" path="personal:name" value={data.personal.name} placeholder="Your name" className={`${nameClass} ${theme.text}`} />
                             {(title || edit) && <Editable as="p" path="personal:title" value={title} placeholder="Your headline" className="text-[13px] mt-1.5 text-gray-600 font-medium" />}
@@ -319,7 +319,7 @@ const ResumeDocument = ({ data, config, sectionOrder, paperRole = 'main' }) => {
                 );
             case 'poster':
                 return (
-                    <header className="mb-7">
+                    <header data-section="personal" className="mb-7">
                         <Editable as="h1" path="personal:name" value={data.personal.name} placeholder="Your name" className={`${nameClass} ${theme.text} !leading-[0.95] tracking-tighter`} />
                         {(title || edit) && <Editable as="p" path="personal:title" value={title} placeholder="Your headline" className="text-[15px] mt-3 text-gray-600 font-medium" />}
                         <div className={`h-1.5 w-20 mt-4 mb-4 ${theme.hex}`} />
@@ -328,7 +328,7 @@ const ResumeDocument = ({ data, config, sectionOrder, paperRole = 'main' }) => {
                 );
             default:
                 return (
-                    <header className={`flex flex-col gap-2.5 ${isGutter ? 'mb-6' : 'mb-5'} ${alignClass}`}>
+                    <header data-section="personal" className={`flex flex-col gap-2.5 ${isGutter ? 'mb-6' : 'mb-5'} ${alignClass}`}>
                         <div className={`flex items-center gap-4 w-full ${config.headerAlign === 'text-center' ? 'justify-center' : config.headerAlign === 'text-right' ? 'flex-row-reverse' : ''}`}>
                             {photoBox('w-[72px] h-[72px]', 'border border-gray-200')}
                             <div className="min-w-0">
@@ -352,7 +352,7 @@ const ResumeDocument = ({ data, config, sectionOrder, paperRole = 'main' }) => {
                 <div className="grid grid-cols-2 gap-x-4 gap-y-1">{contacts('default')}</div>
             </div>
             {bodySections.map(({ section, content }) => (
-                <section key={section.id} className="grid grid-cols-[23%_1fr] gap-x-6 py-3.5 border-t border-gray-200 break-inside-avoid">
+                <section key={section.id} data-section={section.id} className="grid grid-cols-[23%_1fr] gap-x-6 py-3.5 border-t border-gray-200 break-inside-avoid">
                     <Editable as="h3" path={`section:${section.id}`} value={getTitle(section)} placeholder="Section title" className={`${config.uppercaseHeaders !== false ? 'uppercase' : ''} ${heading} text-[10px] font-semibold tracking-[0.2em] pt-0.5 ${theme.text}`} />
                     <div>{content}</div>
                 </section>
@@ -363,6 +363,7 @@ const ResumeDocument = ({ data, config, sectionOrder, paperRole = 'main' }) => {
             {bodySections.map(({ section, content }) => (
                 <section
                     key={section.id}
+                    data-section={section.id}
                     className={isGrid && ['summary', 'experience'].includes(section.id) ? 'col-span-2 min-w-0' : 'min-w-0'}
                 >
                     <SectionHeader
