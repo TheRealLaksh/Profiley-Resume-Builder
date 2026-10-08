@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Check, ClipboardCheck, Copy, Loader2, Sparkles, X } from 'lucide-react';
+import { Check, ClipboardCheck, Copy, ExternalLink, Loader2, Sparkles, X } from 'lucide-react';
 import { AiError, runAiTask } from '../../../ai/client';
 import { AiInputError, LIMITS, buildManualPrompt, buildTailorRequest, cleanTailorResult, parseManualReply, resumeForAi } from '../../../ai/tasks';
 import { diffWords } from '../../../utils/diff';
@@ -189,6 +189,11 @@ const TailorPanel = ({ data, setData, notifyUndo, ai }) => {
               <button className="btn btn-primary h-10 w-full" onClick={copyPrompt} disabled={jobDescription.trim().length < 40}>
                 {copied ? <><ClipboardCheck size={16} /> Copied. Now paste it into Claude</> : <><Copy size={16} /> 1. Copy the prompt</>}
               </button>
+              {copied && (
+                <a className="btn btn-secondary w-full desk:hidden" href="https://claude.ai/new" target="_blank" rel="noopener noreferrer">
+                  <ExternalLink size={16} /> Open Claude
+                </a>
+              )}
               {promptText && (
                 <details className="text-xs text-ink-3">
                   <summary className="cursor-pointer">Show the prompt (if copying didn't work)</summary>
