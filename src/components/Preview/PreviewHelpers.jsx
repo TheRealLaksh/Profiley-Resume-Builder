@@ -2,157 +2,276 @@ import React from 'react';
 import { ExternalLink } from 'lucide-react';
 import { sanitizeUrl } from '../../utils/safeUrl';
 
-// --- HELPER: Renders an icon with fixed, PDF-safe sizing ---
-export const IconRenderer = ({ Icon, size = 16, className = "" }) => {
+// Text colour for content that sits on a dark fill (banner, dark sidebar).
+const LIGHT = '#ffffff';
+const INK = '#18181b';
+
+// --- Icon with fixed, PDF-safe sizing ---
+export const IconRenderer = ({ Icon, size = 16, className = "", tone = 'default' }) => {
     if (!Icon) return null;
     return (
-        <div 
-            style={{ 
-                width: size, 
-                height: size, 
-                minWidth: size, 
-                display: 'flex', 
-                alignItems: 'center', 
+        <div
+            style={{
+                width: size,
+                height: size,
+                minWidth: size,
+                display: 'flex',
+                alignItems: 'center',
                 justifyContent: 'center',
-                color: '#000000' // Force icon color to black for PDF
-            }} 
+                color: tone === 'light' ? LIGHT : INK
+            }}
             className={className}
         >
-            <Icon size={size} />
+            <Icon size={size} strokeWidth={1.75} />
         </div>
     );
 };
 
-// --- HELPER: Section Headers ---
+// --- Section headers: one component, seven looks (config.sectionHeaderStyle) ---
 export const SectionHeader = ({ title, icon, config, theme }) => {
-    const uppercase = config.uppercaseHeaders !== false;
-    const justifyClass = config.headerAlign === 'text-center' ? 'justify-center' : 
-                         config.headerAlign === 'text-right' ? 'justify-end' : 'justify-start';
-                         
+    const style = config.sectionHeaderStyle || 'underline';
+    const upper = config.uppercaseHeaders !== false ? 'uppercase' : '';
+    const heading = config.headingFont || '';
+    const showIcon = config.showSectionIcons && icon;
+    const iconEl = showIcon && (
+        <span className={theme.text}><IconRenderer Icon={icon} size={14} /></span>
+    );
+
+    switch (style) {
+        case 'left-bar':
+            return (
+                <div className="flex items-center gap-2 mb-2">
+                    <span className={`w-1 h-4 rounded-full ${theme.hex}`} />
+                    {iconEl}
+                    <h3 className={`${upper} ${heading} tracking-[0.14em] text-[11px] font-bold ${theme.text}`}>{title}</h3>
+                </div>
+            );
+        case 'box':
+            return (
+                <div className={`flex items-center gap-2 mb-2 px-2.5 py-1 rounded-sm ${theme.bg}`}>
+                    {iconEl}
+                    <h3 className={`${upper} ${heading} tracking-[0.14em] text-[11px] font-bold ${theme.text}`}>{title}</h3>
+                </div>
+            );
+        case 'plain':
+            return (
+                <div className="flex items-center gap-2 mb-2">
+                    {iconEl}
+                    <h3 className={`${upper} ${heading} tracking-[0.2em] text-[10px] font-semibold ${theme.text}`}>{title}</h3>
+                </div>
+            );
+        case 'centered':
+            return (
+                <div className="flex items-center gap-3 mb-2.5">
+                    <span className={`h-px flex-1 border-t opacity-40 ${theme.border}`} />
+                    {iconEl}
+                    <h3 className={`${upper} ${heading} tracking-[0.22em] text-[11px] font-semibold ${theme.text}`}>{title}</h3>
+                    <span className={`h-px flex-1 border-t opacity-40 ${theme.border}`} />
+                </div>
+            );
+        case 'caps-rule':
+            return (
+                <div className="flex items-center gap-3 mb-2">
+                    {iconEl}
+                    <h3 className={`${upper} ${heading} tracking-[0.16em] text-[11px] font-bold text-gray-900 whitespace-nowrap`}>{title}</h3>
+                    <span className={`h-px flex-1 border-t ${theme.border} opacity-60`} />
+                </div>
+            );
+        case 'prompt':
+            return (
+                <div className="flex items-center gap-1.5 mb-2 font-mono text-[11px] font-bold">
+                    <span className={theme.text}>&gt;</span>
+                    <h3 className={`${upper} tracking-wider text-gray-900`}>{title}</h3>
+                    <span className={`flex-1 border-t border-dashed ${theme.border} opacity-40 ml-1`} />
+                </div>
+            );
+        default: {
+            const justify = config.headerAlign === 'text-center' ? 'justify-center'
+                : config.headerAlign === 'text-right' ? 'justify-end' : 'justify-start';
+            return (
+                <div className={`flex items-center gap-2 mb-2 border-b pb-1 ${theme.border} ${justify}`}>
+                    {iconEl}
+                    <h3 className={`${upper} ${heading} tracking-widest text-[11px] font-bold ${theme.text}`}>{title}</h3>
+                </div>
+            );
+        }
+    }
+};
+
+// --- Free text: lines starting with - * • become bullets, everything else keeps its line breaks ---
+const BULLET = /^\s*[-*•–]\s+/;
+
+export const DetailText = ({ text, className = '', theme, onDark = false }) => {
+    if (!text) return null;
+    const lines = text.split('\n').filter((l) => l.trim() !== '');
+    const hasBullets = lines.some((l) => BULLET.test(l));
+
+    if (!hasBullets) {
+        return <p className={`${className} whitespace-pre-line`}>{text}</p>;
+    }
+
     return (
-        <div className={`flex items-center gap-2 mb-2 border-b pb-1 ${theme.border} ${justifyClass}`}>
-            {config.showSectionIcons && icon && (
-                <div className={`${theme.text}`}>
-                    <IconRenderer Icon={icon} size={18} />
+        <div className={`${className} space-y-0.5`}>
+            {lines.map((line, i) =>
+                BULLET.test(line) ? (
+                    <div key={i} className="flex items-start gap-1.5">
+                        <span className={`mt-[0.45em] w-1 h-1 rounded-full flex-shrink-0 ${onDark ? 'bg-white' : (theme?.hex ?? 'bg-gray-500')}`} />
+                        <span>{line.replace(BULLET, '')}</span>
+                    </div>
+                ) : (
+                    <p key={i}>{line}</p>
+                )
+            )}
+        </div>
+    );
+};
+
+// --- Experience / education entry. `compact` is used in narrow sidebars. ---
+export const Entry = ({ title, subtitle, date, details, config, theme, compact = false, subtitleCaps = false, onDark = false }) => {
+    const bodyText = config.fontScale || 'text-xs';
+    const dateBelow = compact || config.dateAlign === 'below';
+    const style = config.entryStyle || (config.entryBox === 'boxed' ? 'boxed' : 'clean');
+
+    const content = (
+        <>
+            <div className={dateBelow ? '' : 'flex justify-between items-baseline gap-3'}>
+                <h4 className={`font-bold ${onDark ? 'text-white' : 'text-gray-900'} text-xs leading-snug ${config.headingFont || ''}`}>{title}</h4>
+                {date && (
+                    <span className={`text-[10px] ${onDark ? 'text-white/60' : 'text-gray-500'} whitespace-nowrap tabular-nums ${dateBelow ? 'block mt-0.5' : ''}`}>
+                        {date}
+                    </span>
+                )}
+            </div>
+            {subtitle && (
+                <div className={`text-[10px] font-semibold mt-0.5 mb-1 ${subtitleCaps ? 'uppercase tracking-wide' : ''} ${onDark ? 'text-white/85' : theme.text}`}>
+                    {subtitle}
                 </div>
             )}
-            <h3 className={`${uppercase ? 'uppercase' : ''} tracking-widest text-xs font-bold ${theme.text}`}>
-                {title}
-            </h3>
+            <DetailText text={details} theme={theme} onDark={onDark} className={`${bodyText} ${onDark ? 'text-white/80' : 'text-gray-600'} leading-snug`} />
+        </>
+    );
+
+    if (style === 'timeline') {
+        return (
+            <div className="relative pl-4 pb-3 last:pb-0 break-inside-avoid">
+                <span className={`absolute left-0 top-0.5 bottom-0 w-px ${theme.hex} opacity-25`} />
+                <span className={`absolute -left-[3px] top-1 w-[7px] h-[7px] rounded-full ${theme.hex}`} />
+                {content}
+            </div>
+        );
+    }
+
+    if (style === 'boxed') {
+        return (
+            <div className={`p-2.5 rounded-lg border ${theme.border} border-opacity-30 bg-white/70 break-inside-avoid`}>
+                {content}
+            </div>
+        );
+    }
+
+    return <div className="break-inside-avoid">{content}</div>;
+};
+
+// --- Skills ---
+export const SkillTag = ({ skill, config, theme, onDark = false }) => {
+    const skillName = typeof skill === 'object' ? skill.name : skill;
+    const skillLevel = typeof skill === 'object' ? skill.level : null;
+    const style = config.skillStyle || 'tags';
+
+    const marginStyle = { marginRight: '5px', marginBottom: '5px' };
+    const baseText = onDark ? 'text-white' : 'text-gray-800';
+
+    if (style === 'tags') {
+        return (
+            <span
+                className={`text-[10px] font-medium break-inside-avoid inline-block px-2 py-[3px] rounded-md border leading-tight ${
+                    onDark ? 'border-white/25 bg-white/10 text-white' : `${theme.border} border-opacity-40 ${theme.bg} ${theme.text}`
+                }`}
+                style={marginStyle}
+            >
+                {skillName}
+            </span>
+        );
+    }
+
+    if (style === 'bars') {
+        return (
+            <div className="w-full break-inside-avoid" style={{ marginBottom: '7px' }}>
+                <div className={`flex justify-between text-[10px] mb-0.5 ${baseText}`}>
+                    <span className="font-semibold">{skillName}</span>
+                    {skillLevel != null && <span className="opacity-60 tabular-nums">{skillLevel}%</span>}
+                </div>
+                <div className={`w-full h-1 rounded-full overflow-hidden ${onDark ? 'bg-white/20' : 'bg-gray-200'}`}>
+                    <div
+                        className={`h-full rounded-full ${onDark ? 'bg-white' : theme.hex}`}
+                        style={{ width: `${skillLevel ?? 100}%` }}
+                    />
+                </div>
+            </div>
+        );
+    }
+
+    if (style === 'dots') {
+        const filled = Math.round(((skillLevel ?? 80) / 100) * 5);
+        return (
+            <div className={`w-full flex items-center justify-between gap-2 break-inside-avoid ${baseText}`} style={{ marginBottom: '6px' }}>
+                <span className="text-[10px] font-medium leading-tight">{skillName}</span>
+                <span className="flex gap-[3px] flex-shrink-0">
+                    {[0, 1, 2, 3, 4].map((i) => (
+                        <span
+                            key={i}
+                            className={`w-[6px] h-[6px] rounded-full ${i < filled ? (onDark ? 'bg-white' : theme.hex) : (onDark ? 'bg-white/25' : 'bg-gray-200')}`}
+                        />
+                    ))}
+                </span>
+            </div>
+        );
+    }
+
+    // list
+    return (
+        <div className="flex items-start break-inside-avoid w-full" style={{ marginBottom: '4px' }}>
+            <span className={`w-1 h-1 mt-[5px] rounded-full mr-2 flex-shrink-0 ${onDark ? 'bg-white' : theme.hex}`} />
+            <span className={`text-[10px] font-medium leading-snug ${baseText}`}>{skillName}</span>
         </div>
     );
 };
 
-// --- FIX: Contact Item (Critical Visibility Fix) ---
-export const ContactItem = ({ icon, text, link: rawLink }) => {
+// --- Contact line ---
+export const ContactItem = ({ icon, text, link: rawLink, tone = 'default' }) => {
     if (!text) return null;
 
     // Links come from user input (and from other people's shared resumes): only http(s) is allowed.
     const link = sanitizeUrl(rawLink);
+    const color = tone === 'light' ? LIGHT : INK;
 
-    // CRITICAL PDF STYLES:
-    // 1. color: '#000000' -> Ensures maximum contrast, no grey wash-out.
-    // 2. fontFamily: 'Arial...' -> Bypasses variable/web font loading failures.
-    // 3. textDecoration: 'none' -> Prevents browser link underlining.
-    const safeTextStyle = {
-        color: '#000000',
-        fontFamily: 'Arial, Helvetica, sans-serif', 
-        fontSize: '10px',
-        fontWeight: 600, // Semi-bold for readability
-        textDecoration: 'none',
-        lineHeight: '1.2',
-        whiteSpace: 'nowrap' // Keep on one line
-    };
-
-    // Remove 'truncate' to prevent text becoming "..." or disappearing.
-    const contentClasses = "flex items-center gap-1.5 min-w-0";
-    
-    // Icon Wrapper
-    const iconEl = icon && (
-        <div className="flex-shrink-0 flex items-center justify-center">
-            {/* Force icon color explicitly */}
-            <IconRenderer Icon={icon} size={12} className="text-black" />
-        </div>
-    );
-
-    // Text Wrapper
     const textEl = (
-        <span style={safeTextStyle} className="mt-[1px]">
+        <span
+            style={{ color, fontSize: '10px', fontWeight: 500, lineHeight: 1.3, textDecoration: 'none', overflowWrap: 'anywhere' }}
+        >
             {text}
         </span>
     );
 
-    const linkIconEl = link && (
-        <ExternalLink size={8} color="#000000" className="flex-shrink-0 opacity-70 ml-0.5" />
-    );
-
-    // Render Logic
-    if (link) {
-        return (
-            <div className="break-inside-avoid max-w-full flex">
-                <a
-                    href={link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={contentClasses}
-                    style={{ textDecoration: 'none' }} // Double enforcement
-                >
-                    {iconEl}
-                    {textEl}
-                    {linkIconEl}
-                </a>
-            </div>
-        );
-    }
-
-    return (
-        <div className={`break-inside-avoid max-w-full ${contentClasses}`}>
-            {iconEl}
+    const body = (
+        <>
+            {icon && (
+                <span className="flex-shrink-0 flex items-center justify-center">
+                    <IconRenderer Icon={icon} size={11} tone={tone} />
+                </span>
+            )}
             {textEl}
-        </div>
+            {link && <ExternalLink size={8} color={color} className="flex-shrink-0 opacity-60" />}
+        </>
     );
-};
 
-// --- HELPER: Skill Tag ---
-export const SkillTag = ({ skill, config, theme }) => {
-    const skillName = typeof skill === 'object' ? skill.name : skill;
-    const skillLevel = typeof skill === 'object' ? skill.level : null;
+    const cls = 'flex items-center gap-1.5 min-w-0 max-w-full break-inside-avoid';
 
-    const baseClasses = "text-[10px] font-medium break-inside-avoid inline-block";
-    const marginStyle = { marginRight: '6px', marginBottom: '6px' };
-
-    if (config.skillStyle === 'tags') {
-        return (
-            <span 
-                className={`${baseClasses} px-2 py-1 rounded-md border ${theme.border} ${theme.bg} ${theme.text}`}
-                style={marginStyle}
-            >
-                {skillName} {skillLevel ? `• ${skillLevel}%` : ''}
-            </span>
-        );
-    }
-    
-    if (config.skillStyle === 'bars') {
-        return (
-            <div className="w-full break-inside-avoid" style={{ marginBottom: '8px' }}>
-                <div className="flex justify-between text-[10px] mb-0.5">
-                    <span className="font-semibold">{skillName}</span>
-                    {skillLevel && <span className="opacity-70">{skillLevel}%</span>}
-                </div>
-                <div className="w-full h-1 bg-gray-200 rounded-full overflow-hidden">
-                    <div 
-                        className={`h-full ${theme.hex}`} 
-                        style={{ width: `${skillLevel || 100}%` }}
-                    ></div>
-                </div>
-            </div>
-        );
-    }
-
-    return (
-        <div className="flex items-center break-inside-avoid" style={marginStyle}>
-             <span className={`w-1.5 h-1.5 rounded-full mr-2 ${theme.bg}`}></span>
-             <span className={`${baseClasses} text-gray-700`}>{skillName}</span>
-        </div>
+    return link ? (
+        <a href={link} target="_blank" rel="noopener noreferrer" className={cls} style={{ textDecoration: 'none' }}>
+            {body}
+        </a>
+    ) : (
+        <div className={cls}>{body}</div>
     );
 };

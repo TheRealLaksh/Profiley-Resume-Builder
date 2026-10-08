@@ -1,381 +1,252 @@
-import React, { useRef, useState } from 'react';
-import { 
-    Layers, Plus, GripVertical, Eye, EyeOff, User, Upload, X, Trash2, 
-    Briefcase, GraduationCap, Code, Award, Heart, FilePlus, Pencil, Check 
+import React, { useState } from 'react';
+import {
+    Briefcase, GraduationCap, Code, Award, Heart, User, FileText, FilePlus,
+    GripVertical, Eye, EyeOff, Pencil, Check, X, ChevronRight, ChevronLeft, Trash2, Plus
 } from 'lucide-react';
-import { EditorSection } from '../UI/FormElements';
+import { PanelHeading, Toggle } from '../UI/FormElements';
+import PersonalEditor from './editors/PersonalEditor';
+import EntryEditor from './editors/EntryEditor';
+import SkillsEditor from './editors/SkillsEditor';
+import ListEditor from './editors/ListEditor';
+import { SummaryEditor, CustomSectionEditor } from './editors/TextSectionEditor';
 
-const ContentTab = ({ 
-    activeTab, 
-    setActiveTab, 
-    data, 
-    setData, 
-    sectionOrder, 
-    setSectionOrder, 
-    draggedItemIndex, 
-    handleDragStart, 
-    handleDragOver, 
-    handleDragEnd, 
-    darkMode 
-}) => {
-    
-    const fileInputRef = useRef(null);
-    
-    // State for renaming sections
-    const [editingSectionId, setEditingSectionId] = useState(null);
-    const [editLabel, setEditLabel] = useState("");
+const ICONS = {
+    summary: User, experience: Briefcase, education: GraduationCap,
+    skills: Code, achievements: Award, community: Heart
+};
 
-    // Styling helpers
-    const cardClass = darkMode ? 'bg-neutral-800 border-neutral-700' : 'bg-white border-gray-200';
-    const textClass = darkMode ? 'text-neutral-200' : 'text-gray-800';
-    const subTextClass = darkMode ? 'text-neutral-400' : 'text-gray-500';
-    const inputClass = darkMode 
-        ? 'bg-neutral-900 border-neutral-700 text-white focus:ring-blue-500' 
-        : 'bg-white border-gray-300 text-gray-900 focus:ring-blue-500';
-    const buttonClass = darkMode 
-        ? 'bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-neutral-200' 
-        : 'bg-white hover:bg-gray-50 border-gray-200 text-gray-700';
+const plural = (n, one, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
 
-    // --- Helper Functions ---
-    const handlePersonalChange = (e) => {
-        setData({
-            ...data,
-            personal: { ...data.personal, [e.target.name]: e.target.value }
-        });
-    };
-
-    const handleImageUpload = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setData(prev => ({
-                    ...prev,
-                    personal: { ...prev.personal, photoUrl: reader.result }
-                }));
-            };
-            reader.readAsDataURL(file);
+const describe = (section, data) => {
+    switch (section.id) {
+        case 'summary': {
+            const words = data.personal.summary.trim() ? data.personal.summary.trim().split(/\s+/).length : 0;
+            return words ? plural(words, 'word') : 'Empty';
         }
-    };
+        case 'experience': return plural(data.experience.length, 'role');
+        case 'education': return plural(data.education.length, 'entry', 'entries');
+        case 'skills': return plural(data.skills.length, 'skill');
+        case 'achievements': return plural(data.achievements.length, 'item');
+        case 'community': return plural(data.community.length, 'item');
+        default: return data.custom?.[section.id]?.content ? 'Custom' : 'Empty';
+    }
+};
 
-    const removeImage = () => {
-        setData(prev => ({
-            ...prev,
-            personal: { ...prev.personal, photoUrl: '' }
-        }));
-    };
+const ContentTab = ({
+    activeTab, setActiveTab, data, setData, sectionOrder, setSectionOrder,
+    draggedItemIndex, handleDragStart, handleDragOver, handleDragEnd, notifyUndo
+}) => {
+    const [editingId, setEditingId] = useState(null);
+    const [draftLabel, setDraftLabel] = useState('');
 
-    // Never mutate the existing item: undo history shares these objects with the current state.
-    const handleArrayChange = (section, index, field, value) => {
-        setData(prev => ({
-            ...prev,
-            [section]: prev[section].map((item, i) => (i === index ? { ...item, [field]: value } : item))
-        }));
-    };
+    const section = sectionOrder.find((s) => s.id === activeTab);
+    const isCustom = (s) => s?.type === 'custom' || s?.id?.startsWith('custom-');
 
-    // Fix for Achievements/Community (Simple Lists)
-    const handleSimpleListChange = (section, index, value) => {
-        setData(prev => ({
-            ...prev,
-            [section]: prev[section].map((item, i) => (i === index ? value : item))
-        }));
-    };
+    // ---- Section list actions ----
+    const toggleVisible = (id) =>
+        setSectionOrder((prev) => prev.map((s) => (s.id === id ? { ...s, visible: !s.visible } : s)));
 
-    const handleSkillChange = (index, field, value) => {
-        setData(prev => ({
-            ...prev,
-            skills: prev.skills.map((skill, i) => {
-                if (i !== index) return skill;
-                const base = typeof skill === 'string' ? { name: skill, level: 80 } : skill;
-                return { ...base, [field]: value };
-            })
-        }));
-    };
+    const moveSection = (index, delta) =>
+        setSectionOrder((prev) => {
+            const target = index + delta;
+            if (target < 0 || target >= prev.length) return prev;
+            const next = [...prev];
+            [next[index], next[target]] = [next[target], next[index]];
+            return next;
+        });
 
-    // Fix for Custom Sections
-    const handleCustomChange = (id, field, value) => {
-        setData(prev => ({
-            ...prev,
-            custom: {
-                ...prev.custom,
-                [id]: { ...prev.custom[id], [field]: value }
+    const startRename = (s) => { setEditingId(s.id); setDraftLabel(s.label); };
+    const cancelRename = () => { setEditingId(null); setDraftLabel(''); };
+    const saveRename = () => {
+        const label = draftLabel.trim();
+        if (label) {
+            setSectionOrder((prev) => prev.map((s) => (s.id === editingId ? { ...s, label } : s)));
+            if (isCustom({ id: editingId })) {
+                setData((prev) => ({
+                    ...prev,
+                    custom: { ...prev.custom, [editingId]: { ...prev.custom[editingId], title: label } }
+                }));
             }
-        }));
+        }
+        cancelRename();
     };
 
-    const addItem = (section, template) => {
-        setData({ ...data, [section]: [...data[section], template] });
-    };
-
-    const removeItem = (section, index) => {
-        const newSection = data[section].filter((_, i) => i !== index);
-        setData({ ...data, [section]: newSection });
-    };
-    
     const addCustomSection = () => {
         const id = `custom-${Date.now()}`;
-        const newSection = { id, label: 'New Custom Section', visible: true, type: 'custom' };
-        setSectionOrder([...sectionOrder, newSection]);
-        setData(prev => ({
-            ...prev,
-            custom: { ...prev.custom, [id]: { title: 'Custom Section', content: 'Add your details here...' } }
-        }));
-        // Automatically start editing the name of the new section
-        setEditingSectionId(id);
-        setEditLabel('New Custom Section');
+        setSectionOrder((prev) => [...prev, { id, label: 'New section', visible: true, type: 'custom' }]);
+        setData((prev) => ({ ...prev, custom: { ...prev.custom, [id]: { title: 'New section', content: '' } } }));
+        setActiveTab(id);
     };
-    
+
     const deleteCustomSection = (id) => {
-        setSectionOrder(prev => prev.filter(sec => sec.id !== id));
-        const newCustom = { ...data.custom };
-        delete newCustom[id];
-        setData({ ...data, custom: newCustom });
+        setSectionOrder((prev) => prev.filter((s) => s.id !== id));
+        setData((prev) => {
+            const custom = { ...prev.custom };
+            delete custom[id];
+            return { ...prev, custom };
+        });
         setActiveTab('sections');
+        notifyUndo?.('Section deleted');
     };
 
-    // --- Renaming Logic ---
-    const startRenaming = (section) => {
-        setEditingSectionId(section.id);
-        setEditLabel(section.label);
-    };
+    // =====================================================================
+    // Overview: personal card + sections list
+    // =====================================================================
+    if (activeTab === 'sections') {
+        const initials = (data.personal.name || '?').split(/\s+/).map((w) => w[0]).slice(0, 2).join('').toUpperCase();
 
-    const saveRename = () => {
-        if (editLabel.trim()) {
-            setSectionOrder(prev => prev.map(sec => 
-                sec.id === editingSectionId ? { ...sec, label: editLabel } : sec
-            ));
-            
-            // Also update custom section title data if it's a custom section to keep them in sync
-            if (editingSectionId.startsWith('custom-')) {
-                setData(prev => ({
-                    ...prev,
-                    custom: {
-                        ...prev.custom,
-                        [editingSectionId]: { ...prev.custom[editingSectionId], title: editLabel }
-                    }
-                }));
-            }
+        return (
+            <div className="animate-rise">
+                <PanelHeading title="Your resume" subtitle="Pick a section to edit. Drag to reorder, or use the arrow keys on the handle." />
+
+                <button
+                    type="button"
+                    onClick={() => setActiveTab('personal')}
+                    className="card group mb-5 flex w-full items-center gap-3.5 p-3.5 text-left transition-[border-color,box-shadow] duration-200 ease-snap hover:border-line-strong hover:shadow-soft"
+                >
+                    <span className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-full border border-line bg-accent-soft font-display text-lg text-accent-ink">
+                        {data.personal.photoUrl ? <img src={data.personal.photoUrl} alt="" className="h-full w-full object-cover" /> : initials}
+                    </span>
+                    <span className="min-w-0 flex-1">
+                        <span className="block truncate text-sm font-semibold text-ink">{data.personal.name || 'Add your name'}</span>
+                        <span className="block truncate text-xs text-ink-3">{data.personal.title || 'Headline, contact details and photo'}</span>
+                    </span>
+                    <ChevronRight size={18} className="text-ink-3 transition-transform duration-200 ease-snap group-hover:translate-x-0.5" />
+                </button>
+
+                <h3 className="eyebrow mb-2 px-1">Sections</h3>
+                <ul className="stagger space-y-1.5">
+                    {sectionOrder.map((s, index) => {
+                        const Icon = s.type === 'custom' ? FilePlus : (ICONS[s.id] ?? FileText);
+                        const dragging = draggedItemIndex === index;
+                        const editing = editingId === s.id;
+
+                        return (
+                            <li
+                                key={s.id}
+                                style={{ '--i': index }}
+                                draggable={!editing}
+                                onDragStart={(e) => handleDragStart(e, index)}
+                                onDragOver={(e) => handleDragOver(e, index)}
+                                onDragEnd={handleDragEnd}
+                                className={`card flex items-center gap-1 py-1 pl-1 pr-1.5 transition-[opacity,border-color,box-shadow] duration-200 ease-snap ${dragging ? 'border-accent opacity-60 shadow-pop' : 'hover:border-line-strong'} ${s.visible ? '' : 'bg-transparent'}`}
+                            >
+                                <button
+                                    type="button"
+                                    className="grid h-9 w-7 shrink-0 cursor-grab place-items-center rounded-lg text-ink-3 hover:bg-sunken hover:text-ink active:cursor-grabbing"
+                                    aria-label={`Reorder ${s.label}. Press up or down arrow to move.`}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'ArrowUp') { e.preventDefault(); moveSection(index, -1); }
+                                        if (e.key === 'ArrowDown') { e.preventDefault(); moveSection(index, 1); }
+                                    }}
+                                >
+                                    <GripVertical size={16} />
+                                </button>
+
+                                {editing ? (
+                                    <div className="flex min-w-0 flex-1 items-center gap-1">
+                                        <input
+                                            autoFocus
+                                            className="input !h-8 !rounded-lg"
+                                            value={draftLabel}
+                                            onChange={(e) => setDraftLabel(e.target.value)}
+                                            onKeyDown={(e) => { if (e.key === 'Enter') saveRename(); if (e.key === 'Escape') cancelRename(); }}
+                                            aria-label="Section name"
+                                        />
+                                        <button className="btn btn-ghost btn-icon !h-8 !w-8 text-accent" onClick={saveRename} aria-label="Save name"><Check size={16} /></button>
+                                        <button className="btn btn-ghost btn-icon !h-8 !w-8" onClick={cancelRename} aria-label="Cancel rename"><X size={16} /></button>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <button
+                                            type="button"
+                                            onClick={() => setActiveTab(s.id)}
+                                            className={`group flex min-w-0 flex-1 items-center gap-3 rounded-lg py-1.5 pl-1 text-left ${s.visible ? '' : 'opacity-55'}`}
+                                        >
+                                            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-sunken text-ink-2"><Icon size={16} /></span>
+                                            <span className="min-w-0 flex-1">
+                                                <span className="block truncate text-[13px] font-medium text-ink">{s.label}</span>
+                                                <span className="block truncate text-xs text-ink-3">{s.visible ? describe(s, data) : 'Hidden from resume'}</span>
+                                            </span>
+                                        </button>
+                                        <button className="btn btn-ghost btn-icon !h-8 !w-8" onClick={() => startRename(s)} aria-label={`Rename ${s.label}`} title="Rename"><Pencil size={14} /></button>
+                                        <button
+                                            className={`btn btn-ghost btn-icon !h-8 !w-8 ${s.visible ? '' : 'text-ink-3'}`}
+                                            onClick={() => toggleVisible(s.id)}
+                                            aria-label={s.visible ? `Hide ${s.label}` : `Show ${s.label}`}
+                                            aria-pressed={s.visible}
+                                            title={s.visible ? 'Hide from resume' : 'Show on resume'}
+                                        >
+                                            {s.visible ? <Eye size={16} /> : <EyeOff size={16} />}
+                                        </button>
+                                    </>
+                                )}
+                            </li>
+                        );
+                    })}
+                </ul>
+
+                <button className="btn btn-secondary mt-3 w-full border-dashed" onClick={addCustomSection}>
+                    <Plus size={16} /> Add custom section
+                </button>
+            </div>
+        );
+    }
+
+    // =====================================================================
+    // Detail editors
+    // =====================================================================
+    const isPersonal = activeTab === 'personal';
+    if (!isPersonal && !section) {
+        // The section was deleted (or the tab is stale): fall back to the list.
+        return (
+            <div className="animate-rise">
+                <button className="btn btn-secondary" onClick={() => setActiveTab('sections')}><ChevronLeft size={16} /> Back to sections</button>
+            </div>
+        );
+    }
+
+    const title = isPersonal ? 'Personal details' : section.label;
+
+    const renderEditor = () => {
+        if (isPersonal) return <PersonalEditor data={data} setData={setData} />;
+        switch (section.id) {
+            case 'summary': return <SummaryEditor summary={data.personal.summary} setData={setData} />;
+            case 'experience': return <EntryEditor kind="experience" items={data.experience} setData={setData} notifyUndo={notifyUndo} />;
+            case 'education': return <EntryEditor kind="education" items={data.education} setData={setData} notifyUndo={notifyUndo} />;
+            case 'skills': return <SkillsEditor skills={data.skills} setData={setData} notifyUndo={notifyUndo} />;
+            case 'achievements':
+                return <ListEditor field="achievements" items={data.achievements} setData={setData} notifyUndo={notifyUndo} noun="achievement" placeholder="Won the 2024 national design challenge" />;
+            case 'community':
+                return <ListEditor field="community" items={data.community} setData={setData} notifyUndo={notifyUndo} noun="activity" placeholder="Mentored 12 students through the coding club" />;
+            default:
+                return data.custom?.[section.id]
+                    ? <CustomSectionEditor id={section.id} section={data.custom[section.id]} setData={setData} setSectionOrder={setSectionOrder} />
+                    : null;
         }
-        setEditingSectionId(null);
-        setEditLabel("");
-    };
-
-    const cancelRename = () => {
-        setEditingSectionId(null);
-        setEditLabel("");
     };
 
     return (
-        <>
-            {/* Sections List Navigation */}
-            <div className="mb-6 flex flex-col gap-2">
-                <button onClick={() => setActiveTab('sections')} className={`w-full flex items-center p-3 mb-2 rounded-lg transition-all ${activeTab === 'sections' ? 'bg-blue-600 text-white shadow-md translate-x-1' : `${buttonClass}`}`}>
-                    <Layers size={18} className="mr-3" /> <span className="font-medium">Manage Sections</span>
+        <div className="animate-rise" key={activeTab}>
+            <button className="btn btn-ghost btn-sm -ml-2 mb-3" onClick={() => setActiveTab('sections')}>
+                <ChevronLeft size={16} /> All sections
+            </button>
+            <PanelHeading title={title} />
+
+            {!isPersonal && (
+                <div className="mb-4 rounded-xl border border-line bg-sunken/40 px-3.5">
+                    <Toggle label="Show on resume" value={section.visible} onChange={() => toggleVisible(section.id)} />
+                </div>
+            )}
+
+            {renderEditor()}
+
+            {!isPersonal && isCustom(section) && (
+                <button className="btn btn-danger mt-6 w-full" onClick={() => deleteCustomSection(section.id)}>
+                    <Trash2 size={16} /> Delete this section
                 </button>
-                
-                <h2 className={`text-xs font-bold uppercase tracking-wider mt-4 mb-2 pl-1 ${subTextClass}`}>Edit Section Content</h2>
-                
-                {sectionOrder.filter(s => s.visible).map(sec => (
-                    <EditorSection key={sec.id} title={sec.label} id={sec.id} activeTab={activeTab} setActiveTab={setActiveTab} 
-                        icon={sec.type === 'custom' ? FilePlus : (sec.id === 'summary' || sec.id === 'personal') ? User : sec.id === 'experience' ? Briefcase : sec.id === 'education' ? GraduationCap : sec.id === 'skills' ? Code : sec.id === 'achievements' ? Award : Heart} 
-                        onDelete={sec.type === 'custom' ? () => deleteCustomSection(sec.id) : null}
-                        darkMode={darkMode}
-                    />
-                ))}
-                <EditorSection title="Personal Info" icon={User} id="personal" activeTab={activeTab} setActiveTab={setActiveTab} darkMode={darkMode} />
-            </div>
-
-            <div className={`p-5 rounded-xl shadow-sm border ${cardClass}`}>
-                {/* 1. Reorder & Toggle View */}
-                {activeTab === 'sections' && (
-                    <div className="space-y-4">
-                        <div className={`flex justify-between items-center border-b pb-2 ${darkMode ? 'border-neutral-700' : 'border-gray-100'}`}>
-                            <h3 className={`font-bold ${textClass}`}>Reorder & Rename</h3>
-                            <button onClick={addCustomSection} className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded hover:bg-blue-100 font-semibold flex items-center gap-1"><FilePlus size={14} /> Add Custom</button>
-                        </div>
-                        <div className="space-y-2">
-                            {sectionOrder.map((section, index) => (
-                                <div 
-                                    key={section.id} 
-                                    draggable={editingSectionId === null} // Disable drag while editing
-                                    onDragStart={(e) => handleDragStart(e, index)} 
-                                    onDragOver={(e) => handleDragOver(e, index)} 
-                                    onDragEnd={handleDragEnd} 
-                                    className={`flex items-center gap-3 p-3 rounded-lg border transition-colors ${draggedItemIndex === index ? 'opacity-50 border-blue-400' : darkMode ? 'bg-neutral-900 border-neutral-700 hover:border-neutral-500' : 'bg-gray-50 border-gray-200 hover:border-blue-300'} ${editingSectionId === section.id ? 'ring-2 ring-blue-500 border-blue-500' : 'cursor-move'}`}
-                                >
-                                    <GripVertical size={16} className={`flex-shrink-0 ${darkMode ? 'text-neutral-600' : 'text-gray-400'}`} />
-                                    
-                                    {editingSectionId === section.id ? (
-                                        <div className="flex-grow flex items-center gap-2">
-                                            <input 
-                                                type="text" 
-                                                value={editLabel} 
-                                                onChange={(e) => setEditLabel(e.target.value)}
-                                                onKeyDown={(e) => e.key === 'Enter' && saveRename()}
-                                                autoFocus
-                                                className={`flex-grow p-1 text-sm rounded outline-none border-b ${darkMode ? 'bg-transparent border-blue-500 text-white' : 'bg-transparent border-blue-500 text-gray-900'}`}
-                                            />
-                                            <button onClick={saveRename} className="p-1 text-green-500 hover:bg-green-50 rounded"><Check size={16} /></button>
-                                            <button onClick={cancelRename} className="p-1 text-red-500 hover:bg-red-50 rounded"><X size={16} /></button>
-                                        </div>
-                                    ) : (
-                                        <div className="flex-grow flex items-center justify-between group/item pr-2">
-                                            <span className={`text-sm font-medium select-none ${textClass}`}>{section.label}</span>
-                                            <button 
-                                                onClick={() => startRenaming(section)} 
-                                                className={`p-1.5 rounded opacity-0 group-hover/item:opacity-100 transition-opacity ${darkMode ? 'hover:bg-neutral-800 text-neutral-400' : 'hover:bg-gray-100 text-gray-400'}`}
-                                                title="Rename Section"
-                                            >
-                                                <Pencil size={14} />
-                                            </button>
-                                        </div>
-                                    )}
-
-                                    <div className={`w-px h-6 mx-1 ${darkMode ? 'bg-neutral-800' : 'bg-gray-200'}`}></div>
-
-                                    <button onClick={() => setSectionOrder(prev => prev.map(sec => sec.id === section.id ? { ...sec, visible: !sec.visible } : sec))} className={`p-1.5 rounded-md transition-colors flex-shrink-0 ${section.visible ? 'text-blue-600 hover:bg-blue-50' : 'text-gray-400 hover:bg-gray-100'}`} title={section.visible ? "Hide" : "Show"}>
-                                        {section.visible ? <Eye size={18} /> : <EyeOff size={18} />}
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
-                        <p className={`text-[10px] text-center mt-4 ${subTextClass}`}>
-                            Drag to reorder • Click pencil to rename • Toggle eye to hide
-                        </p>
-                    </div>
-                )}
-
-                {/* 2. Personal Details Edit */}
-                {activeTab === 'personal' && (
-                    <div className="space-y-4">
-                        <h3 className={`font-bold border-b pb-2 ${textClass} ${darkMode ? 'border-neutral-700' : 'border-gray-100'}`}>Personal Details</h3>
-                        <div className="mb-4">
-                            <div className="flex items-center gap-4">
-                                <div className="relative w-16 h-16 rounded-full overflow-hidden bg-gray-100 border border-gray-300 flex-shrink-0">
-                                    {data.personal.photoUrl ? (
-                                        <img src={data.personal.photoUrl} alt="Preview" className="w-full h-full object-cover" />
-                                    ) : (
-                                        <User className="w-full h-full p-3 text-gray-400" />
-                                    )}
-                                </div>
-                                <div className="flex flex-col gap-2">
-                                    <input type="file" ref={fileInputRef} onChange={handleImageUpload} accept="image/*" className="hidden" />
-                                    <div className="flex gap-2">
-                                        <button onClick={() => fileInputRef.current.click()} className="px-3 py-1.5 bg-blue-50 text-blue-700 text-xs font-bold rounded-md hover:bg-blue-100 transition-colors flex items-center gap-1"><Upload size={14} /> Upload</button>
-                                        {data.personal.photoUrl && (
-                                            <button onClick={removeImage} className="px-3 py-1.5 bg-red-50 text-red-600 text-xs font-bold rounded-md hover:bg-red-100 transition-colors flex items-center gap-1"><X size={14} /> Remove</button>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <input type="text" name="name" value={data.personal.name} onChange={handlePersonalChange} placeholder="Full Name" className={`w-full p-2.5 border rounded-md outline-none text-sm ${inputClass}`} />
-                        <input type="text" name="title" value={data.personal.title} onChange={handlePersonalChange} placeholder="Job Title" className={`w-full p-2.5 border rounded-md outline-none text-sm ${inputClass}`} />
-                        <input type="email" name="email" value={data.personal.email} onChange={handlePersonalChange} placeholder="Email" className={`w-full p-2.5 border rounded-md outline-none text-sm ${inputClass}`} />
-                        <input type="text" name="phone" value={data.personal.phone} onChange={handlePersonalChange} placeholder="Phone" className={`w-full p-2.5 border rounded-md outline-none text-sm ${inputClass}`} />
-                        <input type="text" name="location" value={data.personal.location} onChange={handlePersonalChange} placeholder="Location" className={`w-full p-2.5 border rounded-md outline-none text-sm ${inputClass}`} />
-                        <input type="text" name="linkedin" value={data.personal.linkedin} onChange={handlePersonalChange} placeholder="LinkedIn URL" className={`w-full p-2.5 border rounded-md outline-none text-sm ${inputClass}`} />
-                        <input type="text" name="portfolio" value={data.personal.portfolio} onChange={handlePersonalChange} placeholder="Portfolio URL" className={`w-full p-2.5 border rounded-md outline-none text-sm ${inputClass}`} />
-                    </div>
-                )}
-
-                {/* 3. List Sections (Experience, Education) */}
-                {['experience', 'education'].includes(activeTab) && (
-                    <div className="space-y-6">
-                        <div className={`flex justify-between items-center border-b pb-2 ${darkMode ? 'border-neutral-700' : 'border-gray-100'}`}>
-                            <h3 className={`font-bold ${textClass}`}>{sectionOrder.find(s => s.id === activeTab)?.label || activeTab}</h3>
-                            <button onClick={() => addItem(activeTab, activeTab === 'experience' ? { id: Date.now(), role: '', company: '', year: '', details: '' } : { id: Date.now(), institution: '', degree: '', year: '', details: '' })} className="text-blue-600 hover:bg-blue-50 p-1.5 rounded-full transition-colors"><Plus size={20}/></button>
-                        </div>
-                        {data[activeTab].map((item, index) => (
-                            <div key={item.id} className={`p-4 rounded-lg border relative group ${darkMode ? 'bg-neutral-900 border-neutral-700' : 'bg-gray-50 border-gray-200'}`}>
-                                <button onClick={() => removeItem(activeTab, index)} className="absolute top-2 right-2 text-gray-400 hover:text-red-500 transition-colors"><Trash2 size={16}/></button>
-                                <input type="text" value={(activeTab === 'experience' ? item.role : item.institution) ?? ''} onChange={(e) => handleArrayChange(activeTab, index, activeTab === 'experience' ? 'role' : 'institution', e.target.value)} placeholder={activeTab === 'experience' ? 'Role' : 'Institution'} className={`w-full mb-2 p-1.5 bg-transparent border-b focus:border-blue-500 outline-none font-medium text-sm ${darkMode ? 'border-neutral-600 text-white' : 'border-gray-300 text-gray-900'}`} />
-                                <input type="text" value={(activeTab === 'experience' ? item.company : item.degree) ?? ''} onChange={(e) => handleArrayChange(activeTab, index, activeTab === 'experience' ? 'company' : 'degree', e.target.value)} placeholder={activeTab === 'experience' ? 'Company' : 'Degree'} className={`w-full mb-2 p-1.5 bg-transparent border-b focus:border-blue-500 outline-none text-sm ${darkMode ? 'border-neutral-600 text-gray-300' : 'border-gray-300 text-gray-700'}`} />
-                                <input type="text" value={item.year ?? ''} onChange={(e) => handleArrayChange(activeTab, index, 'year', e.target.value)} placeholder="Year/Duration" className={`w-full mb-2 p-1.5 bg-transparent border-b focus:border-blue-500 outline-none text-xs ${darkMode ? 'border-neutral-600 text-gray-400' : 'border-gray-300 text-gray-500'}`} />
-                                <textarea value={item.details ?? ''} onChange={(e) => handleArrayChange(activeTab, index, 'details', e.target.value)} placeholder="Details..." rows={3} className={`w-full p-2 border rounded text-sm focus:ring-1 focus:ring-blue-500 outline-none ${inputClass}`} />
-                            </div>
-                        ))}
-                    </div>
-                )}
-
-                {/* 4. Skills (Objects) */}
-                {activeTab === 'skills' && (
-                    <div className="space-y-4">
-                        <div className={`flex justify-between items-center border-b pb-2 ${darkMode ? 'border-neutral-700' : 'border-gray-100'}`}>
-                            <h3 className={`font-bold ${textClass}`}>{sectionOrder.find(s => s.id === activeTab)?.label || 'Skills'}</h3>
-                            <button onClick={() => addItem('skills', { name: '', level: 80 })} className="text-blue-600 hover:bg-blue-50 p-1.5 rounded-full"><Plus size={20}/></button>
-                        </div>
-                        {data.skills.map((skill, index) => (
-                            <div key={index} className={`flex flex-col gap-2 p-2 border rounded-md mb-2 ${darkMode ? 'bg-neutral-900 border-neutral-700' : 'bg-gray-50 border-gray-200'}`}>
-                                <div className="flex gap-2 items-center">
-                                    <input type="text" value={typeof skill === 'string' ? skill : skill.name ?? ''} onChange={(e) => handleSkillChange(index, 'name', e.target.value)} placeholder="Skill" className={`flex-grow p-2 border rounded-md outline-none text-sm ${inputClass}`} />
-                                    <button onClick={() => removeItem('skills', index)} className="text-gray-400 hover:text-red-500"><Trash2 size={16}/></button>
-                                </div>
-                                <input type="range" value={typeof skill === 'string' ? 80 : skill.level ?? 80} onChange={(e) => handleSkillChange(index, 'level', parseInt(e.target.value))} className="w-full h-1 bg-gray-300 rounded-lg appearance-none cursor-pointer" />
-                            </div>
-                        ))}
-                    </div>
-                )}
-
-                {/* 5. Simple Lists (Achievements, Community) */}
-                {['achievements', 'community'].includes(activeTab) && (
-                    <div className="space-y-4">
-                        <div className={`flex justify-between items-center border-b pb-2 ${darkMode ? 'border-neutral-700' : 'border-gray-100'}`}>
-                            <h3 className={`font-bold ${textClass}`}>{sectionOrder.find(s => s.id === activeTab)?.label || activeTab}</h3>
-                            <button onClick={() => addItem(activeTab, "")} className="text-blue-600 hover:bg-blue-50 p-1.5 rounded-full transition-colors"><Plus size={20}/></button>
-                        </div>
-                        {data[activeTab].map((item, index) => (
-                            <div key={index} className={`flex gap-2 items-center p-2 border rounded-md mb-2 ${darkMode ? 'bg-neutral-900 border-neutral-700' : 'bg-gray-50 border-gray-200'}`}>
-                                <input 
-                                    type="text" 
-                                    value={item} 
-                                    onChange={(e) => handleSimpleListChange(activeTab, index, e.target.value)} 
-                                    placeholder="Add item..." 
-                                    className={`flex-grow p-2 border rounded-md outline-none text-sm ${inputClass}`} 
-                                />
-                                <button onClick={() => removeItem(activeTab, index)} className="text-gray-400 hover:text-red-500"><Trash2 size={16}/></button>
-                            </div>
-                        ))}
-                    </div>
-                )}
-                
-                {/* 6. Summary */}
-                {activeTab === 'summary' && (
-                    <div className="space-y-4">
-                        <h3 className={`font-bold border-b pb-2 ${textClass} ${darkMode ? 'border-neutral-700' : 'border-gray-100'}`}>{sectionOrder.find(s => s.id === activeTab)?.label || 'Profile Summary'}</h3>
-                        <textarea name="summary" value={data.personal.summary} onChange={handlePersonalChange} placeholder="Write a professional summary..." rows={8} className={`w-full p-2.5 border rounded-md outline-none text-sm ${inputClass}`} />
-                    </div>
-                )}
-
-                {/* 7. Custom Sections */}
-                {activeTab.startsWith('custom-') && data.custom[activeTab] && (
-                    <div className="space-y-4">
-                        <div className={`flex justify-between items-center border-b pb-2 ${darkMode ? 'border-neutral-700' : 'border-gray-100'}`}>
-                            <h3 className={`font-bold ${textClass}`}>{sectionOrder.find(s => s.id === activeTab)?.label || 'Custom Section'}</h3>
-                        </div>
-                        <input 
-                            type="text" 
-                            value={data.custom[activeTab].title} 
-                            onChange={(e) => {
-                                // Update data content
-                                handleCustomChange(activeTab, 'title', e.target.value);
-                                // Also sync with section order label for list consistency
-                                setSectionOrder(prev => prev.map(sec => sec.id === activeTab ? { ...sec, label: e.target.value } : sec));
-                            }} 
-                            placeholder="Section Title" 
-                            className={`w-full p-2.5 border rounded-md outline-none text-sm mb-2 ${inputClass}`} 
-                        />
-                        <textarea 
-                            value={data.custom[activeTab].content} 
-                            onChange={(e) => handleCustomChange(activeTab, 'content', e.target.value)} 
-                            placeholder="Section Content..." 
-                            rows={8} 
-                            className={`w-full p-2.5 border rounded-md outline-none text-sm ${inputClass}`} 
-                        />
-                    </div>
-                )}
-            </div>
-        </>
+            )}
+        </div>
     );
 };
 
