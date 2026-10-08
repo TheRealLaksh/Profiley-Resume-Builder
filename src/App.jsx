@@ -75,7 +75,8 @@ const App = () => {
   const [theme, setTheme] = useState(getInitialTheme);
   const darkMode = theme === 'dark';
   const isDesktop = useMediaQuery('(min-width: 768px)');
-  const [pdfQuality, setPdfQuality] = useState('screen'); 
+  const [pdfQuality, setPdfQuality] = useState('screen');
+  const [fitOnePage, setFitOnePage] = useState(true);
   const [history, setHistory] = useState({ stack: [], index: -1 });
   const [saveState, setSaveState] = useState('idle'); // idle | saved | error
   const [isExportingPdf, setIsExportingPdf] = useState(false);
@@ -329,7 +330,10 @@ const App = () => {
     if (isExportingPdf) return;
     setIsExportingPdf(true);
     try {
-      await downloadResumePdf({ name: data.personal?.name, quality: pdfQuality });
+      const skills = (data.skills || []).map((skill) => (typeof skill === 'string' ? skill : skill?.name)).filter(Boolean);
+      const { pages, scale } = await downloadResumePdf({ name: data.personal?.name, quality: pdfQuality, fitOnePage, meta: { keywords: skills } });
+      const note = scale < 1 ? ` Shrunk to ${Math.round(scale * 100)}% to fit one page.` : pages > 1 ? ` It runs to ${pages} pages.` : '';
+      notify(`PDF downloaded.${note}`);
     } catch (error) {
       console.error('PDF export failed', error);
       notify('PDF export failed. Try again, or use Print / Save as PDF.', 'error');
@@ -472,9 +476,10 @@ const App = () => {
     applyTemplate,
     draggedItemIndex, handleDragStart, handleDragOver, handleDragEnd,
     pdfQuality, setPdfQuality,
+    fitOnePage, setFitOnePage,
     handleShare: openShareModal,
     onDownloadPdf: handleDownloadPdf,
-    onPrint: printResume,
+    onPrint: () => printResume({ fitOnePage }),
     isExportingPdf,
     openImport: () => setShowImport(true),
     onExportJson: handleExportJson,

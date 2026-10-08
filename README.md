@@ -78,7 +78,7 @@ The editor itself is a product — featuring a warm light and dark theme that fo
     <td width="50%">
       <h3 align="center">📄 High-Fidelity Export</h3>
       <p align="center">
-        Download an exact-design PDF (rendered with <code>html2pdf.js</code>), or print to a <b>text PDF with selectable text</b> that applicant tracking systems can read.  
+        Download an exact-design PDF with a hidden <b>selectable text layer</b> (ATS-readable), clean page breaks between lines and an optional fit-to-one-page, or print to a vector PDF from the browser.  
         Both options use A4 and keep colours and backgrounds.
       </p>
     </td>
