@@ -49,4 +49,25 @@
     .no-print {
         display: none !important;
     }
+
+    /* Print only the resume: the app is hidden and the print-only copy (see App.jsx) is shown. */
+    #root {
+        display: none !important;
+    }
+
+    #print-root {
+        display: block;
+    }
+
+    #print-root [data-resume-paper] {
+        box-shadow: none !important;
+        margin: 0 !important;
+    }
+}
+
+/* The print copy never shows on screen. */
+@media screen {
+    #print-root {
+        display: none;
+    }
 }
