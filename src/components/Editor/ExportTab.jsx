@@ -1,94 +1,77 @@
 import React from 'react';
-import { Settings, Monitor, Printer, Share2, Loader2, Download, FileText } from 'lucide-react';
+import { Download, FileText, Link2, Loader2, Printer } from 'lucide-react';
+import { PanelHeading, Segmented } from '../UI/FormElements';
 
-const ExportTab = ({ 
-    pdfQuality, 
-    setPdfQuality, 
-    handleShare, 
-    isSharing, 
-    onDownloadPdf,
-    onPrint,
-    isExportingPdf,
-    darkMode 
-}) => {
-    // Styling helpers
-    const cardClass = darkMode ? 'bg-neutral-800 border-neutral-700' : 'bg-white border-gray-200';
-    const textClass = darkMode ? 'text-neutral-200' : 'text-gray-800';
-    const subTextClass = darkMode ? 'text-neutral-400' : 'text-gray-500';
-    const buttonClass = darkMode 
-        ? 'bg-neutral-800 hover:bg-neutral-700 border-neutral-700 text-neutral-200' 
-        : 'bg-white hover:bg-gray-50 border-gray-200 text-gray-700';
+const SHORTCUTS = [
+    ['Undo', ['Ctrl', 'Z']],
+    ['Redo', ['Ctrl', 'Shift', 'Z']],
+    ['Zoom page', ['Ctrl', 'Scroll']],
+    ['Print or save as PDF', ['Ctrl', 'P']]
+];
 
-    return (
-        <div className={`p-5 rounded-xl shadow-sm border space-y-6 ${cardClass}`}>
-            <div>
-                <h3 className={`text-sm font-bold mb-3 flex items-center uppercase tracking-wider ${textClass}`}>
-                    <Settings size={16} className="mr-2 opacity-50"/> Export Settings
-                </h3>
-                <div className="space-y-4">
+const ExportTab = ({ pdfQuality, setPdfQuality, handleShare, onDownloadPdf, onPrint, isExportingPdf }) => (
+    <div className="animate-rise">
+        <PanelHeading title="Export" subtitle="Take your resume with you." />
+
+        <div className="space-y-3">
+            <section className="card p-4">
+                <div className="flex items-start gap-3">
+                    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-accent-soft text-accent-ink"><Download size={17} /></span>
                     <div>
-                        <label className={`block text-xs font-bold uppercase tracking-wide mb-2 ${subTextClass}`}>PDF Quality</label>
-                        <div className="grid grid-cols-2 gap-2">
-                            <button 
-                                onClick={() => setPdfQuality('screen')}
-                                className={`p-3 rounded-lg border flex flex-col items-center justify-center gap-2 transition-all ${pdfQuality === 'screen' ? 'border-blue-500 bg-blue-50 text-blue-700 ring-1 ring-blue-500' : `${darkMode ? 'border-neutral-600 hover:bg-neutral-700' : 'border-gray-200 hover:bg-gray-50'}`}`}
-                            >
-                                <Monitor size={20} />
-                                <span className="text-xs font-semibold">Screen (Fast)</span>
-                            </button>
-                            <button 
-                                onClick={() => setPdfQuality('print')}
-                                className={`p-3 rounded-lg border flex flex-col items-center justify-center gap-2 transition-all ${pdfQuality === 'print' ? 'border-blue-500 bg-blue-50 text-blue-700 ring-1 ring-blue-500' : `${darkMode ? 'border-neutral-600 hover:bg-neutral-700' : 'border-gray-200 hover:bg-gray-50'}`}`}
-                            >
-                                <Printer size={20} />
-                                <span className="text-xs font-semibold">Print (HD)</span>
-                            </button>
-                        </div>
-                        <p className="text-[10px] mt-2 text-gray-400">Print quality renders at 3x resolution (instead of 2x) but takes longer to generate.</p>
-                    </div>
-
-                    <div className="space-y-2">
-                        {onDownloadPdf && (
-                            <button
-                                onClick={onDownloadPdf}
-                                disabled={isExportingPdf}
-                                className={`w-full p-3 rounded-lg border flex items-center justify-center gap-2 transition-all font-semibold text-sm ${buttonClass} ${isExportingPdf ? 'opacity-50 cursor-wait' : ''}`}
-                            >
-                                {isExportingPdf ? <Loader2 className="animate-spin" size={16} /> : <Download size={16} />}
-                                {isExportingPdf ? 'Exporting...' : 'Download PDF (image)'}
-                            </button>
-                        )}
-                        {onPrint && (
-                            <>
-                                <button
-                                    onClick={onPrint}
-                                    className={`w-full p-3 rounded-lg border flex items-center justify-center gap-2 transition-all font-semibold text-sm ${buttonClass}`}
-                                >
-                                    <FileText size={16} /> Print / Save as PDF (text)
-                                </button>
-                                <p className="text-[10px] text-gray-400 text-center">Choose "Save as PDF" in the print dialog for selectable text that applicant tracking systems can read.</p>
-                            </>
-                        )}
-                    </div>
-                    
-                    <div className={`h-px w-full ${darkMode ? 'bg-neutral-700' : 'bg-gray-200'}`}></div>
-
-                    <div>
-                        <label className={`block text-xs font-bold uppercase tracking-wide mb-2 ${subTextClass}`}>Shareable Link</label>
-                        <button 
-                            onClick={handleShare}
-                            disabled={isSharing}
-                            className={`w-full p-3 rounded-lg border flex items-center justify-center gap-2 transition-all font-semibold text-sm ${buttonClass} ${isSharing ? 'opacity-50 cursor-wait' : ''}`}
-                        >
-                            {isSharing ? <Loader2 className="animate-spin" size={16} /> : <Share2 size={16} />}
-                            {isSharing ? 'Generating Link...' : 'Generate Public Link'}
-                        </button>
-                        <p className="text-[10px] mt-2 text-gray-400 text-center">Creates a permanent link to your current version.</p>
+                        <h3 className="text-[13px] font-semibold text-ink">PDF with the exact design</h3>
+                        <p className="mt-0.5 text-xs leading-relaxed text-ink-3">A faithful copy of the preview. The text is part of the image, so it can't be selected.</p>
                     </div>
                 </div>
-            </div>
+                <Segmented
+                    className="mt-4"
+                    label="Quality"
+                    value={pdfQuality}
+                    onChange={setPdfQuality}
+                    options={[{ value: 'screen', label: 'Standard (faster)' }, { value: 'print', label: 'High (sharper)' }]}
+                />
+                <button className="btn btn-primary mt-3 h-10 w-full" onClick={onDownloadPdf} disabled={isExportingPdf}>
+                    {isExportingPdf ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
+                    {isExportingPdf ? 'Exporting...' : 'Download PDF'}
+                </button>
+            </section>
+
+            <section className="card p-4">
+                <div className="flex items-start gap-3">
+                    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-sunken text-ink-2"><FileText size={17} /></span>
+                    <div>
+                        <h3 className="text-[13px] font-semibold text-ink">PDF with selectable text</h3>
+                        <p className="mt-0.5 text-xs leading-relaxed text-ink-3">Opens your browser's print dialog. Choose "Save as PDF". Best for applicant tracking systems that read the text.</p>
+                    </div>
+                </div>
+                <button className="btn btn-secondary mt-4 h-10 w-full" onClick={onPrint}>
+                    <Printer size={16} /> Print or save as PDF
+                </button>
+            </section>
+
+            <section className="card p-4">
+                <div className="flex items-start gap-3">
+                    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-sunken text-ink-2"><Link2 size={17} /></span>
+                    <div>
+                        <h3 className="text-[13px] font-semibold text-ink">Shareable link</h3>
+                        <p className="mt-0.5 text-xs leading-relaxed text-ink-3">Publish a read-only copy at a link you can send. It is a snapshot: changes you make later won't update it.</p>
+                    </div>
+                </div>
+                <button className="btn btn-secondary mt-4 h-10 w-full" onClick={handleShare}>
+                    <Link2 size={16} /> Create link
+                </button>
+            </section>
         </div>
-    );
-};
+
+        <h3 className="eyebrow mb-2 mt-7 px-1">Shortcuts</h3>
+        <dl className="card divide-y divide-line">
+            {SHORTCUTS.map(([label, keys]) => (
+                <div key={label} className="flex items-center justify-between px-4 py-2.5">
+                    <dt className="text-[13px] text-ink-2">{label}</dt>
+                    <dd className="flex gap-1">{keys.map((k) => <kbd key={k} className="kbd">{k}</kbd>)}</dd>
+                </div>
+            ))}
+        </dl>
+    </div>
+);
 
 export default ExportTab;

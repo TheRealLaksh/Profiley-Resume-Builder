@@ -1,20 +1,20 @@
-import React, { useState, useEffect, useRef, useLayoutEffect, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { Loader2, Save, Share2 } from 'lucide-react';
 
 // Components
 import EditorPanel from './components/Editor/EditorPanel';
-import PreviewPanel from './components/Preview/PreviewPanel';
 import ResumeDocument from './components/Preview/ResumeDocument';
 import MobileLayout from './components/Mobile/MobileLayout';
-import SEOFooter from './components/SEO/SEOFooter';
-
-// New Clean Components
-import GlobalStyles from './components/UI/GlobalStyles';
 import Toast from './components/UI/Toast';
 import ShareModal from './components/Modals/ShareModal';
-import ZoomToolbar from './components/Layout/ZoomToolbar';
-import ReadOnlyToolbar from './components/Layout/ReadOnlyToolbar';
+import TopBar from './components/Layout/TopBar';
+import ZoomDock from './components/Layout/ZoomDock';
+import AppSkeleton from './components/Layout/AppSkeleton';
+import Footer from './components/Layout/Footer';
+
+// Hooks
+import useCanvasZoom from './hooks/useCanvasZoom';
+import useMediaQuery from './hooks/useMediaQuery';
 
 // Utilities & Data
 import { downloadResumePdf, printResume } from './utils/pdfManager';
@@ -31,6 +31,18 @@ import {
   initialSections,
   templates
 } from './data/constants';
+
+const THEME_KEY = 'profiley_theme';
+
+const getInitialTheme = () => {
+  try {
+    const stored = localStorage.getItem(THEME_KEY);
+    if (stored === 'light' || stored === 'dark') return stored;
+  } catch {
+    // Storage can be blocked; fall through to the system preference.
+  }
+  return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+};
 
 const MAX_HISTORY = 50;
 
@@ -51,13 +63,14 @@ const App = () => {
   const [config, setConfig] = useState(initialConfig);
   const [sectionOrder, setSectionOrder] = useState(initialSections);
   const [activeTab, setActiveTab] = useState('sections');
-  const [activeTemplate, setActiveTemplate] = useState('modern'); 
   const [draggedItemIndex, setDraggedItemIndex] = useState(null);
 
-  const [darkMode, setDarkMode] = useState(true);
+  const [theme, setTheme] = useState(getInitialTheme);
+  const darkMode = theme === 'dark';
+  const isDesktop = useMediaQuery('(min-width: 768px)');
   const [pdfQuality, setPdfQuality] = useState('screen'); 
   const [history, setHistory] = useState({ stack: [], index: -1 });
-  const [isAutoSaving, setIsAutoSaving] = useState(false);
+  const [saveState, setSaveState] = useState('idle'); // idle | saved | error
   const [isExportingPdf, setIsExportingPdf] = useState(false);
   
   const [isLoading, setIsLoading] = useState(true);
@@ -72,25 +85,26 @@ const App = () => {
   const [linkCopied, setLinkCopied] = useState(false);
   
   // Notification State
-  const [toast, setToast] = useState({ show: false, message: '', variant: 'success' });
+  const [toast, setToast] = useState({ show: false, message: '', variant: 'success', action: null });
   const toastTimerRef = useRef(null);
   const storageWarnedRef = useRef(false);
 
   // Zoom & Fullscreen State
-  const [zoom, setZoom] = useState(0.8);
+  const canvas = useCanvasZoom();
   const [isFullScreen, setIsFullScreen] = useState(false);
-  const previewContainerRef = useRef(null);
   const fullScreenContainerRef = useRef(null);
 
-  // --- NEW: Accurate Zoom Layout State ---
-  const [contentSize, setContentSize] = useState({ width: 0, height: 0 });
-  const contentRef = useRef(null);
+  // Handlers captured by long-lived listeners (shortcuts, toast actions) read the latest through this ref.
+  const actionsRef = useRef({});
 
-  const notify = useCallback((message, variant = 'success') => {
+  const notify = useCallback((message, variant = 'success', action = null) => {
     clearTimeout(toastTimerRef.current);
-    setToast({ show: true, message, variant });
-    toastTimerRef.current = setTimeout(() => setToast((t) => ({ ...t, show: false })), 3500);
+    setToast({ show: true, message, variant, action });
+    toastTimerRef.current = setTimeout(() => setToast((t) => ({ ...t, show: false })), action ? 6000 : 3500);
   }, []);
+
+  // Destructive actions confirm with an Undo instead of an "are you sure?" dialog.
+  const notifyUndo = useCallback((message) => notify(message, 'success', { label: 'Undo' }), [notify]);
 
   useEffect(() => () => clearTimeout(toastTimerRef.current), []);
 
@@ -163,11 +177,14 @@ const App = () => {
       const saved = saveLocalResume({ data, config, sectionOrder });
       if (saved) {
         storageWarnedRef.current = false;
-        setIsAutoSaving(true);
-        indicatorTimer = setTimeout(() => setIsAutoSaving(false), 1000);
-      } else if (!storageWarnedRef.current) {
-        storageWarnedRef.current = true;
-        notify("Couldn't save to this browser (storage full or blocked). Try removing the photo.", 'error');
+        setSaveState('saved');
+        indicatorTimer = setTimeout(() => setSaveState('idle'), 2200);
+      } else {
+        setSaveState('error');
+        if (!storageWarnedRef.current) {
+          storageWarnedRef.current = true;
+          notify("Couldn't save to this browser (storage full or blocked). Try removing the photo.", 'error');
+        }
       }
 
       setHistory((prev) => pushSnapshot(prev, { data, config, sectionOrder }));
@@ -179,24 +196,6 @@ const App = () => {
     };
   }, [data, config, sectionOrder, isLoading, isReadOnly, notify]);
 
-  // 3. Zoom via Ctrl+Scroll
-  // The preview container only exists once loading has finished, so wait for that.
-  useEffect(() => {
-    if (isLoading) return;
-    const container = previewContainerRef.current;
-    if (!container) return;
-
-    const handleWheel = (e) => {
-      if (e.ctrlKey) {
-        e.preventDefault();
-        const delta = e.deltaY * -0.001; 
-        setZoom(prev => Math.min(Math.max(prev + delta, 0.3), 1.5));
-      }
-    };
-    container.addEventListener('wheel', handleWheel, { passive: false });
-    return () => container.removeEventListener('wheel', handleWheel);
-  }, [isLoading]);
-
   // 4. Fullscreen Listener
   useEffect(() => {
     const onFullScreenChange = () => setIsFullScreen(!!document.fullscreenElement);
@@ -204,24 +203,38 @@ const App = () => {
     return () => document.removeEventListener('fullscreenchange', onFullScreenChange);
   }, []);
 
-  // 5. Resize Observer to measure content height/width (the element only exists after loading)
-  useLayoutEffect(() => {
-    if (isLoading || !contentRef.current) return;
+  // 5. Theme: class on <html> drives every colour token, and the choice is remembered.
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+    try {
+      localStorage.setItem(THEME_KEY, theme);
+    } catch {
+      // Not persisted; the system preference applies next time.
+    }
+  }, [theme]);
 
-    const observer = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        // offsetWidth/Height give the untransformed border-box size, which is what the zoom layout needs.
-        const element = entry.target;
-        setContentSize({
-          width: element.offsetWidth,
-          height: element.offsetHeight
-        });
+  // 6. Keyboard shortcuts (typing in a field keeps the browser's own text undo)
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      if (!(e.ctrlKey || e.metaKey)) return;
+      const key = e.key.toLowerCase();
+      const typing = /^(input|textarea|select)$/i.test(e.target?.tagName) || e.target?.isContentEditable;
+
+      if (key === 's') {
+        e.preventDefault();
+        actionsRef.current.save?.();
+      } else if (!typing && key === 'z') {
+        e.preventDefault();
+        if (e.shiftKey) actionsRef.current.redo?.();
+        else actionsRef.current.undo?.();
+      } else if (!typing && key === 'y') {
+        e.preventDefault();
+        actionsRef.current.redo?.();
       }
-    });
-
-    observer.observe(contentRef.current);
-    return () => observer.disconnect();
-  }, [isLoading]);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, []);
 
   // --- HANDLERS ---
 
@@ -248,10 +261,11 @@ const App = () => {
     setHistory({ ...base, index: target });
   };
 
+  // A template replaces the whole design, so options from the previous one can't leak through.
   const applyTemplate = (templateKey) => {
-    setActiveTemplate(templateKey);
     const template = templates[templateKey];
-    if (template) setConfig(prev => ({ ...prev, ...template.config }));
+    if (!template) return;
+    setConfig({ ...initialConfig, ...template.config, activeTemplate: templateKey });
   };
 
   const openShareModal = () => {
@@ -315,11 +329,6 @@ const App = () => {
     }
   };
 
-  const handleZoomIn = () => setZoom(prev => Math.min(prev + 0.1, 1.5));
-  const handleZoomOut = () => setZoom(prev => Math.max(prev - 0.1, 0.3));
-  const handleResetZoom = () => setZoom(0.8);
-  const handleFitWidth = () => setZoom(1.0);
-  
   const toggleFullScreen = () => {
     if (!document.fullscreenElement && fullScreenContainerRef.current) {
         fullScreenContainerRef.current.requestFullscreen().catch(console.error);
@@ -345,46 +354,122 @@ const App = () => {
     window.location.href = '/'; 
   };
 
+  const handleSaveNow = () => {
+    const saved = saveLocalResume({ data, config, sectionOrder });
+    setSaveState(saved ? 'saved' : 'error');
+    notify(saved ? 'Saved to this browser' : "Couldn't save to this browser", saved ? 'success' : 'error');
+  };
+
+  const toggleTheme = () => setTheme((t) => (t === 'dark' ? 'light' : 'dark'));
+
+  useEffect(() => {
+    actionsRef.current = { undo: handleUndo, redo: handleRedo, save: handleSaveNow };
+  });
+
   // --- RENDER ---
 
-  if (isLoading) {
-    return (
-      <div className={`min-h-screen flex flex-col items-center justify-center font-sans transition-colors duration-300 ${darkMode ? 'dark bg-neutral-900 text-white' : 'bg-gray-100 text-gray-600'}`}>
-        <Loader2 className="animate-spin mb-4 text-blue-600" size={48} />
-        <p className="font-medium animate-pulse">Fetching profile...</p>
-      </div>
-    );
-  }
+  if (isLoading) return <AppSkeleton />;
 
-  const appProps = {
+  const editorProps = {
     activeTab, setActiveTab,
     data, setData,
     config, setConfig,
     sectionOrder, setSectionOrder,
     applyTemplate,
     draggedItemIndex, handleDragStart, handleDragOver, handleDragEnd,
-    darkMode, toggleDarkMode: () => setDarkMode(!darkMode),
-    undo: handleUndo, redo: handleRedo,
-    canUndo: history.index > 0,
-    canRedo: history.index < history.stack.length - 1,
     pdfQuality, setPdfQuality,
     handleShare: openShareModal,
-    isSharing: false,
     onDownloadPdf: handleDownloadPdf,
     onPrint: printResume,
     isExportingPdf,
-    activeTemplate,
-    isReadOnly
+    notifyUndo
   };
 
-  return (
-    <div className={`min-h-screen font-sans transition-colors duration-300 ${darkMode ? 'dark bg-neutral-900' : 'bg-gray-100'}`}>
-      <GlobalStyles />
+  const history_ = {
+    canUndo: history.index > 0,
+    canRedo: history.index < history.stack.length - 1,
+    undo: handleUndo,
+    redo: handleRedo
+  };
 
-      <ShareModal 
+  const templateName = templates[config.activeTemplate]?.name;
+
+  const desktop = (
+    <div className="flex h-[100dvh] flex-col bg-canvas">
+      <TopBar
+        data={data}
+        isReadOnly={isReadOnly}
+        darkMode={darkMode}
+        toggleDarkMode={toggleTheme}
+        {...history_}
+        saveState={saveState}
+        onShare={openShareModal}
+        onDownloadPdf={handleDownloadPdf}
+        isExportingPdf={isExportingPdf}
+        onCopyEmail={handleCopyEmail}
+        onForkTemplate={handleForkTemplate}
+      />
+
+      <div className="flex min-h-0 flex-1">
+        {!isReadOnly && <EditorPanel {...editorProps} />}
+
+        <main
+          id="main"
+          ref={fullScreenContainerRef}
+          aria-label="Resume preview"
+          className="canvas-dots relative min-w-0 flex-1 bg-canvas"
+        >
+          <div ref={canvas.setContainer} className="scroll-quiet absolute inset-0 overflow-auto">
+            <div className="px-12 pb-36 pt-10">
+              {/* Phantom box: takes the scaled size so the scroll area matches what you see */}
+              <div
+                className="relative mx-auto"
+                style={{
+                  width: canvas.contentSize.width ? canvas.contentSize.width * canvas.zoom : undefined,
+                  height: canvas.contentSize.height ? canvas.contentSize.height * canvas.zoom : undefined
+                }}
+              >
+                <div
+                  className="absolute left-0 top-0 origin-top-left transition-transform duration-150 ease-snap"
+                  style={{ width: canvas.contentSize.width || undefined, transform: `scale(${canvas.zoom})` }}
+                >
+                  <div ref={canvas.setContent} className="inline-block">
+                    <ResumeDocument data={data} config={config} sectionOrder={sectionOrder} />
+                  </div>
+                </div>
+              </div>
+
+              {!isFullScreen && <Footer />}
+            </div>
+          </div>
+
+          <p className="pointer-events-none absolute left-4 top-3 font-numeric text-[11px] text-ink-3">
+            A4{templateName ? ` · ${templateName}` : ''}
+          </p>
+
+          <ZoomDock
+            className="absolute bottom-5 left-1/2 -translate-x-1/2"
+            zoom={canvas.zoom} min={canvas.min} max={canvas.max} isFit={canvas.isFit}
+            zoomIn={canvas.zoomIn} zoomOut={canvas.zoomOut} fit={canvas.fit} actualSize={canvas.actualSize}
+            toggleFullScreen={toggleFullScreen} isFullScreen={isFullScreen}
+          />
+        </main>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="font-ui">
+      <a
+        href="#main"
+        className="btn btn-primary sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[200]"
+      >
+        Skip to preview
+      </a>
+
+      <ShareModal
         isOpen={showShareModal}
         onClose={() => setShowShareModal(false)}
-        darkMode={darkMode}
         customSlug={customSlug}
         setCustomSlug={setCustomSlug}
         shareError={shareError}
@@ -395,129 +480,34 @@ const App = () => {
         handleCopyShareUrl={handleCopyShareUrl}
       />
 
-      <Toast show={toast.show} message={toast.message} variant={toast.variant} />
+      <Toast
+        show={toast.show}
+        message={toast.message}
+        variant={toast.variant}
+        action={toast.action}
+        onAction={() => {
+          actionsRef.current.undo?.();
+          setToast((t) => ({ ...t, show: false }));
+        }}
+      />
 
-      {/* --- MOBILE LAYOUT --- */}
-      <div className="block md:hidden h-full">
-         <MobileLayout {...appProps} />
-      </div>
-
-      {/* --- DESKTOP LAYOUT --- */}
-      <div className={`hidden md:flex ${isReadOnly ? 'items-center justify-center flex-col' : 'flex-row h-screen'}`}>
-        
-        {!isReadOnly && <EditorPanel {...appProps} />}
-
-        <div 
-            ref={fullScreenContainerRef}
-            className={`${isReadOnly ? 'w-full max-w-5xl h-screen' : 'w-full md:w-2/3 lg:w-3/4 h-screen'} overflow-hidden relative flex flex-col transition-colors duration-300 ${
-              isReadOnly 
-                ? (darkMode ? 'bg-gradient-to-br from-neutral-900 via-neutral-800 to-neutral-900' : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-blue-50') 
-                : (darkMode ? 'bg-neutral-800' : 'bg-gray-200')
-            }`}
-        >
-            <ZoomToolbar 
-              darkMode={darkMode}
-              handleZoomIn={handleZoomIn}
-              handleZoomOut={handleZoomOut}
-              handleFitWidth={handleFitWidth}
-              toggleFullScreen={toggleFullScreen}
-              handleResetZoom={handleResetZoom}
-              zoom={zoom}
-              isFullScreen={isFullScreen}
-            />
-
-            {isReadOnly && (
-              <div className="absolute top-4 left-6 z-50 px-6 py-3 bg-blue-600 text-white rounded-full shadow-lg font-semibold text-sm flex items-center gap-2">
-                  <Share2 size={16} /> Viewing Shared Resume
-              </div>
-            )}
-
-            {/* --- IMPROVED PREVIEW AREA --- */}
-            {/* Using "flex flex-col" with "overflow-auto" ensures native scrolling */}
-            <div 
-              ref={previewContainerRef}
-              className="w-full h-full overflow-auto custom-scrollbar flex flex-col p-8 md:p-12 relative"
-            >
-                {/* 1. Phantom Container: Resizes physically to force scrollbars */}
-                {/* "mx-auto" keeps it perfectly centered when smaller than viewport */}
-                <div 
-                  style={{
-                    width: contentSize.width > 0 ? contentSize.width * zoom : 'auto',
-                    height: contentSize.height > 0 ? contentSize.height * zoom : 'auto',
-                    // Smoothly transition size changes
-                    transition: 'width 0.15s ease-out, height 0.15s ease-out' 
-                  }}
-                  className="relative mx-auto shrink-0 z-10" 
-                >
-                    {/* 2. Transform Container: Pins the scaled content to the phantom container */}
-                    <div 
-                       style={{
-                          transform: `scale(${zoom})`,
-                          transformOrigin: 'top left', // Important: Scale from top-left of the box
-                          position: 'absolute',
-                          top: 0,
-                          left: 0,
-                          width: contentSize.width > 0 ? contentSize.width : 'auto'
-                       }}
-                       className="transition-transform duration-150 ease-out"
-                    >
-                        {/* 3. Actual Content: Measured by ResizeObserver */}
-                        {/* Shadow and visual styles go here on the "Paper" */}
-                        <div 
-                          id="resume-preview-content" 
-                          ref={contentRef} 
-                          className="inline-block shadow-2xl origin-top"
-                        >
-                           <PreviewPanel 
-                              data={data} 
-                              config={config} 
-                              sectionOrder={sectionOrder} 
-                              activeTemplate={activeTemplate} 
-                              onDownloadPdf={handleDownloadPdf}
-                              isExportingPdf={isExportingPdf}
-                           />
-                        </div>
-                    </div>
-                </div>
-
-                {/* Footer stays below the Phantom Box content naturally */}
-                <div className={`mt-16 mb-20 text-xs font-medium uppercase tracking-widest text-center shrink-0 ${darkMode ? 'text-neutral-500' : 'text-gray-400'}`}>
-                   Profiley • Resume Builder • Laksh Pradhwani 
-                </div>
-
-                {!isFullScreen && (
-                  <div className="w-full mt-2 shrink-0">
-                    <SEOFooter darkMode={darkMode} />
-                  </div>
-                )}
-            </div>
-
-            {/* Auto-save Indicator */}
-            <div className="fixed bottom-8 right-8 z-50 flex flex-col gap-3 pointer-events-none">
-              {!isReadOnly && (
-                  <div className={`flex items-center gap-2 px-4 py-2 rounded-lg shadow-lg backdrop-blur-sm text-xs font-semibold ${isAutoSaving ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'} transition-all duration-300 ${darkMode ? 'text-green-400 bg-neutral-900/80' : 'text-green-700 bg-white/80'}`}>
-                  <Save size={14} /> Auto-saved
-                  </div>
-              )}
-            </div>
-        </div>
-      </div>
-
-      {isReadOnly && (
-        <ReadOnlyToolbar 
-          data={data}
+      {isDesktop ? desktop : (
+        <MobileLayout
+          {...editorProps}
+          {...history_}
+          isReadOnly={isReadOnly}
           darkMode={darkMode}
-          handleCopyEmail={handleCopyEmail}
-          handleDownloadPdf={handleDownloadPdf}
-          isExportingPdf={isExportingPdf}
-          handleForkTemplate={handleForkTemplate}
+          toggleDarkMode={toggleTheme}
+          saveState={saveState}
+          onCopyEmail={handleCopyEmail}
+          onForkTemplate={handleForkTemplate}
         />
       )}
 
       {/* Print-only copy of the page: Ctrl+P / "Save as PDF" gives a real text PDF. See index.css. */}
       {createPortal(
         <div id="print-root">
-          <ResumeDocument data={data} config={config} sectionOrder={sectionOrder} />
+          <ResumeDocument data={data} config={config} sectionOrder={sectionOrder} paperRole="print" />
         </div>,
         document.body
       )}

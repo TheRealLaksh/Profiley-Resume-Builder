@@ -5,7 +5,7 @@ export const PDF_SCALE = { screen: 2, print: 3 };
 // The editor, the mobile layout and the print copy each render a paper.
 // Export the one that is actually on screen.
 const findVisiblePaper = () =>
-  Array.from(document.querySelectorAll('#root [data-resume-paper]')).find(
+  Array.from(document.querySelectorAll('#root [data-resume-paper="main"]')).find(
     (el) => el.getClientRects().length > 0
   );
 

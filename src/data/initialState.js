@@ -105,41 +105,39 @@ export const initialSections = [
   { id: "community", label: "Volunteering", visible: true, type: "standard" }
 ];
 
+// Every design option the resume renderer understands. Templates override a subset of these.
 export const initialConfig = {
-  activeTemplate: "leafy",
+  activeTemplate: "modern",
   themeColor: "midnight",
   fontFamily: "font-inter",
+  headingFont: "",              // optional second family for the name and section titles
   paperTint: "bg-white",
-  layoutType: "sidebar",
+
+  // Structure
+  layoutType: "sidebar",        // sidebar | single | grid | gutter
   layoutReverse: false,
+  sidebarBg: "gray",            // none | gray | theme | dark
+  headerStyle: "default",       // default | banner | centered | split | poster
   headerAlign: "text-left",
-  sidebarBg: "none",
-  fontScale: "text-xs", // Decreased from text-base
-  spacingScale: "compact", // Changed to compact
-  nameSize: "text-2xl", // Decreased from text-4xl
+  spacingScale: "compact",      // compact | normal | spacious
+
+  // Type
+  fontScale: "text-xs",
+  nameSize: "text-2xl",
   nameWeight: "font-extrabold",
   uppercaseHeaders: true,
-  jobTitleColor: "theme",
+
+  // Sections and entries
+  sectionHeaderStyle: "underline", // underline | left-bar | box | plain | centered | caps-rule | prompt
+  entryStyle: "clean",             // clean | boxed | timeline
+  dateAlign: "right",              // right | below
+  skillStyle: "tags",              // tags | bars | list | dots | comma
+  showSectionIcons: true,
+
+  // Details
   showPhoto: true,
   photoShape: "rounded-full",
-  photoBorder: "none",
-  contactLayout: "row",
-  sectionHeaderStyle: "underline",
-  sectionTitleSize: "text-sm", // Decreased from text-lg
-  dividerStyle: "none",
-  borderStyle: "none",
-  entryBox: "clean",
-  dateAlign: "right",
-  companyStyle: "font-semibold",
-  timeline: false,
-  skillStyle: "tags",
-  skillShape: "rounded-md",
-  socialStyle: "simple",
-  bulletStyle: "disc",
-  dateStyle: "default",
   showIcons: true,
-  showSectionIcons: true,
-  showSummary: true,
-  watermark: "",
-  customFooter: ""
+  dividerStyle: "none",         // none | thick | diamond
+  borderStyle: "none"           // none | simple | double | offset
 };
