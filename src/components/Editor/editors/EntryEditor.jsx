@@ -97,10 +97,10 @@ const EntryEditor = ({ kind, items, setData, notifyUndo }) => {
 
             {open && (
               <div className="animate-fade space-y-4 border-t border-line px-4 pb-4 pt-4">
-                <TextField label={cfg.primaryLabel} value={item[cfg.primary] ?? ''} onChange={(e) => setField(item.id, cfg.primary, e.target.value)} placeholder={cfg.primaryPlaceholder} />
+                <TextField label={cfg.primaryLabel} autoCapitalize="words" enterKeyHint="next" value={item[cfg.primary] ?? ''} onChange={(e) => setField(item.id, cfg.primary, e.target.value)} placeholder={cfg.primaryPlaceholder} />
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_9.5rem]">
-                  <TextField label={cfg.secondaryLabel} value={item[cfg.secondary] ?? ''} onChange={(e) => setField(item.id, cfg.secondary, e.target.value)} placeholder={cfg.secondaryPlaceholder} />
-                  <TextField label="Dates" value={item.year ?? ''} onChange={(e) => setField(item.id, 'year', e.target.value)} placeholder="2022 – Present" />
+                  <TextField label={cfg.secondaryLabel} autoCapitalize="words" enterKeyHint="next" value={item[cfg.secondary] ?? ''} onChange={(e) => setField(item.id, cfg.secondary, e.target.value)} placeholder={cfg.secondaryPlaceholder} />
+                  <TextField label="Dates" enterKeyHint="next" value={item.year ?? ''} onChange={(e) => setField(item.id, 'year', e.target.value)} placeholder="2022 – Present" />
                 </div>
                 <TextAreaField
                   label="Details"
