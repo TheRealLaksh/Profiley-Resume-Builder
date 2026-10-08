@@ -162,6 +162,16 @@
     @apply mt-1.5 text-xs text-ink-3;
   }
 
+  /* ---- Phones: 16px text stops iOS zooming into a focused field, and fields get a thumb-sized height ---- */
+  @media (max-width: 767px) {
+    .input {
+      @apply min-h-[2.875rem] text-base;
+    }
+    textarea.input {
+      @apply min-h-[6.5rem];
+    }
+  }
+
   /* ---- Surfaces & text ---- */
   .card {
     @apply rounded-2xl border border-line bg-surface;
