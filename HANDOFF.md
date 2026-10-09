@@ -27,7 +27,7 @@ React 19, Vite, Tailwind, Firebase, html2canvas + jsPDF/html2pdf, lucide-react.
 - `src/components/Preview/Editable.jsx` + `editContext.js`: click-to-edit on the main canvas only (not shared/read-only, thumbs or print)
 - `src/utils/pdfManager.js`: Download PDF (html2canvas image per page + invisible text layer + link annotations, page breaks planned in text gaps, fit-to-one-page shrink up to 15%, margins and sidebar colour on continuation pages) and `printResume` (browser print with the same fit via the `--print-fit` CSS variable)
 - `src/components/UI/Logo.jsx`: the logo (page-shaped P + outlined Instrument Serif wordmark, inline SVG, colours from theme tokens incl. `--c-accent-fold`); used by TopBar, AppSkeleton, MobileLayout
-- `public/`: favicon, og-image.png, `_redirects`, `robots.txt` (served; moved here by the merged PR #1 `claude/pensive-meitner-opz77b`, which also hardened sharing/saved data, fixed preview/PDF export and dropped unused dependencies)
+- `public/`: `favicon.svg` (adaptive tile, light/dark), `favicon.ico`, `apple-touch-icon.png`, `icon-192/512(.maskable).png` + `site.webmanifest`, og-image.png, `_redirects`, `robots.txt` (served; moved here by the merged PR #1 `claude/pensive-meitner-opz77b`, which also hardened sharing/saved data, fixed preview/PDF export and dropped unused dependencies)
 
 ## Status
 Merged to `main` and deployed (9 Oct 2026): AI "tailor to job", ATS check, click-to-edit and import/export (PDF/text/backup/JSON Resume), on top of the PR #2 redesign (design system with light/dark, new editor, mobile fit/pinch, 16 templates). Lint, `npm run build`, API handler test (stubbed fetch) and Playwright suites pass. Real Anthropic calls and real Firestore shares are untested (no key / no Firestore in the sandbox). `ANTHROPIC_API_KEY` is deliberately NOT set (Laksh doesn't want to pay): with no server key and no user key, Job match runs in a free copy-paste mode (Copy prompt, run it in claude.ai or Claude in Chrome, paste the JSON reply back; `buildManualPrompt`/`parseManualReply` in `src/ai/tasks.js`, UI in `TailorPanel.jsx`). Import's AI read is still key-only; the basic reader is free. Print CSS caps letter-spacing at 0.05em so the text PDF extracts cleanly. `vercel.json` rewrite excludes `/api/`. Domain migration: the default email is `work@lakshpradhwani.com` (Cloudflare Email Routing forwards it to Laksh's Gmail).
@@ -51,6 +51,7 @@ Merged to `main` and deployed (9 Oct 2026): AI "tailor to job", ATS check, click
 - Laksh chose small commits, pushed after each (every push to `main` goes live). Session of 8 Oct 2026.
 
 ## Session log (newest first)
+- 2026-10-09: new favicon set (SVG + ICO + apple-touch + 192/512/maskable PNG + `site.webmanifest`) wired in `index.html`; removed the 4 MB neon `favicon.png` and unused `vite.svg`.
 - 2026-10-09: PDF audit. Download PDF used to be image-only (no selectable/ATS text), sliced lines and columns at the page edge, left continuation pages without margins or sidebar colour, and had no metadata. Rewrote `pdfManager.js` (dropped html2pdf.js for direct html2canvas + jsPDF), added "Fit to one page" toggle in Export, print path fit/break rules in `index.css`. Verified on all 16 templates plus an 11-role stress resume with a photo: text extracts cleanly, links kept, no cut lines.
 - 2026-10-09: merged the AI/ATS/click-to-edit/import branch into `main` (merged `main` first; kept both sides of HANDOFF).
 - 2026-10-09: new logo. `Logo.jsx` now draws the Page-P mark + outlined wordmark as inline SVG; added `--c-accent-fold` token (light/dark).
@@ -64,12 +65,20 @@ Merged to `main` and deployed (9 Oct 2026): AI "tailor to job", ATS check, click
 <!-- handoff:auto:start -->
 ## Auto: repo state
 
-_Refreshed 9 Oct 2026, 1:40 pm IST by `scripts/handoff.mjs` (runs on every commit). Don't edit inside this block._
+_Refreshed 9 Oct 2026, 1:43 pm IST by `scripts/handoff.mjs` (runs on every commit). Don't edit inside this block._
 
 Branch: `main` · remote: https://github.com/TheRealLaksh/Profiley-Resume-Builder
 
 ### Last 15 commits
 
+- `9054d3b` 2026-10-09 13:40 Add the Page-P logo to the app header
+- `9a3f78a` 2026-10-09 03:19 Merge pull request #4 from TheRealLaksh/claude/pensive-meitner-opz77b
+- `4c00e99` 2026-10-08 20:50 Correct the Firebase domain note in HANDOFF (Firestore only, no Auth)
+- `181c8d5` 2026-10-08 20:49 Fix the downloaded PDF: real text layer, clean page breaks, fit to one page
+- `3ba52fb` 2026-10-09 01:48 Merge pull request #3 from TheRealLaksh/claude/pensive-meitner-opz77b
+- `bd3bd50` 2026-10-08 20:18 Merge main into the AI features branch
+- `b887246` 2026-10-08 19:53 Add free copy-paste Job match for people without an API key
+- `895cb20` 2026-10-08 19:38 Add AI job tailoring, ATS check, click-to-edit and resume import
 - `3f7cd39` 2026-10-09 00:33 Default resume email to work@lakshpradhwani.com
 - `fdb119a` 2026-10-09 00:14 Merge pull request #2 from TheRealLaksh/claude/pensive-meitner-opz77b
 - `f5ee859` 2026-10-08 18:43 Merge main into the redesign branch
@@ -77,20 +86,20 @@ Branch: `main` · remote: https://github.com/TheRealLaksh/Profiley-Resume-Builde
 - `168ef15` 2026-10-08 23:59 Point Profiley URLs at lakshpradhwani.com
 - `940c187` 2026-10-08 23:59 Add HANDOFF.md and handoff hooks
 - `6f5ec88` 2026-10-08 18:26 Redesign the editor and add six new resume templates
-- `61cf5ba` 2026-10-08 23:30 Merge pull request #1 from TheRealLaksh/claude/pensive-meitner-opz77b
-- `97b7340` 2026-10-08 17:57 Define fonts, serve robots.txt, drop unused dependencies
-- `ca9f4dc` 2026-10-08 17:57 Fix preview layout, zoom, undo, PDF export and printing
-- `d2dded6` 2026-10-08 17:57 Harden sharing and saved data
-- `54d704b` 2026-02-01 18:04 Create vercel.json
-- `ab28c1b` 2026-01-13 14:16 Update App.jsx
-- `fa5bdae` 2026-01-13 14:12 zoomm
-- `5b26b97` 2026-01-13 14:06 organising code
 
 ### Uncommitted changes at refresh time
 
 ```
 M  HANDOFF.md
-M  src/components/UI/Logo.jsx
-M  src/index.css
+M  index.html
+A  public/apple-touch-icon.png
+A  public/favicon.ico
+D  public/favicon.png
+A  public/favicon.svg
+A  public/icon-192.png
+A  public/icon-512-maskable.png
+A  public/icon-512.png
+A  public/site.webmanifest
+D  public/vite.svg
 ```
 <!-- handoff:auto:end -->
