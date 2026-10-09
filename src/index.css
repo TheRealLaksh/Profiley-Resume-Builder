@@ -21,6 +21,7 @@
   --c-accent-soft: 227 238 233;
   --c-accent-fg: 255 255 255;
   --c-accent-ink: 31 77 64;
+  --c-accent-fold: 108 176 152; /* the dog-ear on the logo */
   --c-danger: 178 52 43;
   --c-danger-soft: 249 231 228;
 
@@ -47,6 +48,7 @@
   --c-accent-soft: 30 50 44;
   --c-accent-fg: 12 24 19;
   --c-accent-ink: 150 205 186;
+  --c-accent-fold: 169 210 194;
   --c-danger: 236 120 108;
   --c-danger-soft: 62 31 28;
 
