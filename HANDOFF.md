@@ -51,6 +51,7 @@ Merged to `main` and deployed (9 Oct 2026): AI "tailor to job", ATS check, click
 - Laksh chose small commits, pushed after each (every push to `main` goes live). Session of 8 Oct 2026.
 
 ## Session log (newest first)
+- 2026-10-09: new 1200x630 social card (`public/og-image.png`, logo lockup + tagline) replacing the old one. Link-preview scrapers cache the old image; re-scrape with the Facebook Sharing Debugger / LinkedIn Post Inspector if it doesn't update.
 - 2026-10-09: new favicon set (SVG + ICO + apple-touch + 192/512/maskable PNG + `site.webmanifest`) wired in `index.html`; removed the 4 MB neon `favicon.png` and unused `vite.svg`.
 - 2026-10-09: PDF audit. Download PDF used to be image-only (no selectable/ATS text), sliced lines and columns at the page edge, left continuation pages without margins or sidebar colour, and had no metadata. Rewrote `pdfManager.js` (dropped html2pdf.js for direct html2canvas + jsPDF), added "Fit to one page" toggle in Export, print path fit/break rules in `index.css`. Verified on all 16 templates plus an 11-role stress resume with a photo: text extracts cleanly, links kept, no cut lines.
 - 2026-10-09: merged the AI/ATS/click-to-edit/import branch into `main` (merged `main` first; kept both sides of HANDOFF).
@@ -71,6 +72,7 @@ Branch: `main` · remote: https://github.com/TheRealLaksh/Profiley-Resume-Builde
 
 ### Last 15 commits
 
+- `fb7ad38` 2026-10-09 13:43 Replace the neon favicon with the Page-P icon set
 - `9054d3b` 2026-10-09 13:40 Add the Page-P logo to the app header
 - `9a3f78a` 2026-10-09 03:19 Merge pull request #4 from TheRealLaksh/claude/pensive-meitner-opz77b
 - `4c00e99` 2026-10-08 20:50 Correct the Firebase domain note in HANDOFF (Firestore only, no Auth)
@@ -85,21 +87,11 @@ Branch: `main` · remote: https://github.com/TheRealLaksh/Profiley-Resume-Builde
 - `45f256b` 2026-10-08 23:59 Update HANDOFF after rebase onto PR #1
 - `168ef15` 2026-10-08 23:59 Point Profiley URLs at lakshpradhwani.com
 - `940c187` 2026-10-08 23:59 Add HANDOFF.md and handoff hooks
-- `6f5ec88` 2026-10-08 18:26 Redesign the editor and add six new resume templates
 
 ### Uncommitted changes at refresh time
 
 ```
 M  HANDOFF.md
-M  index.html
-A  public/apple-touch-icon.png
-A  public/favicon.ico
-D  public/favicon.png
-A  public/favicon.svg
-A  public/icon-192.png
-A  public/icon-512-maskable.png
-A  public/icon-512.png
-A  public/site.webmanifest
-D  public/vite.svg
+M  public/og-image.png
 ```
 <!-- handoff:auto:end -->
