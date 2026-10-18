@@ -13,7 +13,7 @@ const TopBar = ({
     data, isReadOnly, darkMode, toggleDarkMode,
     canUndo, canRedo, undo, redo,
     saveState, onShare, onDownloadPdf, isExportingPdf,
-    onCopyEmail, onForkTemplate
+    onCopyEmail, onForkTemplate, viewSwitch
 }) => {
     const name = data.personal?.name?.trim();
 
@@ -58,6 +58,7 @@ const TopBar = ({
 
             {isReadOnly ? (
                 <>
+                    {viewSwitch}
                     {data.personal?.email && (
                         <button className="btn btn-ghost" onClick={onCopyEmail}><Mail size={16} /><span className="hidden xl:inline">Copy email</span></button>
                     )}

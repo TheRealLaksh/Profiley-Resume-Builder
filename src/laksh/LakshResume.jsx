@@ -13,6 +13,8 @@ import {
 } from './content';
 import { useReveal, useCountUp, magnet, tilt, useLiveStatus, useActiveSection, useScrollProgress, safeStorage } from './hooks';
 import Sheet from './Sheet';
+import ViewSwitch from './ViewSwitch';
+import './switch.css';
 import './laksh.css';
 
 const ICONS = {
@@ -416,6 +418,7 @@ export default function LakshResume() {
           ))}
         </div>
         <div className="lk-actions">
+          <ViewSwitch creative />
           <button type="button" className="lk-btn lk-btn-ghost lk-icon" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}>
             {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
           </button>

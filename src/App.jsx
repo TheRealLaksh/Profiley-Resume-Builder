@@ -64,7 +64,7 @@ const pushSnapshot = (history, snapshot) => {
   return { stack, index: stack.length - 1 };
 };
 
-const App = () => {
+const App = ({ preset = null, viewSwitch = null }) => {
   // --- STATE MANAGEMENT ---
   const [data, setData] = useState(initialData);
   const [config, setConfig] = useState(initialConfig);
@@ -135,6 +135,19 @@ const App = () => {
 
     const init = async () => {
       setIsLoading(true);
+
+      // A built-in resume (the standard /laksh view): shown read-only, no Firestore lookup.
+      if (preset) {
+        const resume = normalizeResume(preset);
+        setData(resume.data);
+        setConfig(resume.config);
+        setSectionOrder(resume.sectionOrder);
+        setIsReadOnly(true);
+        document.title = `${resume.data.personal.name} - Resume`;
+        setIsLoading(false);
+        return;
+      }
+
       const params = new URLSearchParams(window.location.search);
       let resumeId = params.get('id');
       
@@ -176,7 +189,7 @@ const App = () => {
     init();
 
     return () => { cancelled = true; };
-  }, [notify]);
+  }, [notify, preset]);
 
   // 2. Auto-save & History
   useEffect(() => {
@@ -510,6 +523,7 @@ const App = () => {
         isExportingPdf={isExportingPdf}
         onCopyEmail={handleCopyEmail}
         onForkTemplate={handleForkTemplate}
+        viewSwitch={viewSwitch}
       />
 
       <div className="flex min-h-0 flex-1">
@@ -608,6 +622,7 @@ const App = () => {
           saveState={saveState}
           onCopyEmail={handleCopyEmail}
           onForkTemplate={handleForkTemplate}
+          viewSwitch={viewSwitch}
         />
       )}
 
