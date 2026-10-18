@@ -79,6 +79,7 @@ Branch: `feat/laksh-resume-custom` · remote: https://github.com/TheRealLaksh/Pr
 
 ### Last 15 commits
 
+- `448d2a2` 2026-10-18 11:32 Add real ShiftsDeal and freelance numbers to the resume
 - `e72ac11` 2026-10-18 11:16 HANDOFF: refresh auto block
 - `c64fe95` 2026-10-18 11:16 Make the standard /laksh view a strict one-page resume; add GitHub field and visible link URLs
 - `b57f6ad` 2026-10-18 10:49 HANDOFF: refresh auto block
@@ -93,13 +94,10 @@ Branch: `feat/laksh-resume-custom` · remote: https://github.com/TheRealLaksh/Pr
 - `9a3f78a` 2026-10-09 03:19 Merge pull request #4 from TheRealLaksh/claude/pensive-meitner-opz77b
 - `4c00e99` 2026-10-08 20:50 Correct the Firebase domain note in HANDOFF (Firestore only, no Auth)
 - `181c8d5` 2026-10-08 20:49 Fix the downloaded PDF: real text layer, clean page breaks, fit to one page
-- `3ba52fb` 2026-10-09 01:48 Merge pull request #3 from TheRealLaksh/claude/pensive-meitner-opz77b
 
 ### Uncommitted changes at refresh time
 
 ```
 M  HANDOFF.md
-M  src/laksh/classic.js
-M  src/laksh/content.js
 ```
 <!-- handoff:auto:end -->
