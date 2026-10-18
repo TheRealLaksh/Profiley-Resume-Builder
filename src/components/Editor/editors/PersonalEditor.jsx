@@ -85,6 +85,16 @@ const PersonalEditor = ({ data, setData }) => {
           error={urlProblem(personal.linkedin)}
         />
         <TextField
+          label="GitHub"
+          value={personal.github || ''}
+          onChange={setField('github')}
+          inputMode="url"
+          autoCapitalize="none"
+          spellCheck={false}
+          placeholder="github.com/priya-raman"
+          error={urlProblem(personal.github || '')}
+        />
+        <TextField
           label="Portfolio or website"
           value={personal.portfolio}
           onChange={setField('portfolio')}
