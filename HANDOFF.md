@@ -27,7 +27,7 @@ React 19, Vite, Tailwind, Firebase, html2canvas + jsPDF/html2pdf, lucide-react.
 - `src/components/Preview/Editable.jsx` + `editContext.js`: click-to-edit on the main canvas only (not shared/read-only, thumbs or print)
 - `src/utils/pdfManager.js`: Download PDF (html2canvas image per page + invisible text layer + link annotations, page breaks planned in text gaps, fit-to-one-page shrink up to 15%, margins and sidebar colour on continuation pages) and `printResume` (browser print with the same fit via the `--print-fit` CSS variable)
 - `src/components/UI/Logo.jsx`: the logo (page-shaped P + outlined Instrument Serif wordmark, inline SVG, colours from theme tokens incl. `--c-accent-fold`); used by TopBar, AppSkeleton, MobileLayout
-- `src/laksh/` (branch `feat/laksh-resume-custom`, not merged): Laksh's own resume at `/laksh`, deliberately outside the template system. `main.jsx` lazy-loads `LakshResume.jsx` when the path is `/laksh` (App and Firebase load only for other paths). `content.js` holds all the facts + lens rules (client / recruiter / dev, `?lens=` param, saved in localStorage), `LakshResume.jsx` the page (hero, tinted sections, timeline, project cards with live up/down pings, changelog diff, live ATS card that runs `ats/analyze.js` on the print sheet), `Sheet.jsx` the A4 text version (table with repeating spacer rows so `@page` margin stays 0 and the browser adds no header/footer; printed via the PDF button), `hooks.js` (reveal-on-view, count-up, magnet, tilt, status, scroll progress), `laksh.css` (scoped to `.lk`, light + dark). Photo: `public/laksh/photo.webp`.
+- `src/laksh/` (branch `feat/laksh-resume-custom`, pushed, not merged): Laksh's own resume at `/laksh`, deliberately outside the template system. `main.jsx` lazy-loads `LakshResume.jsx` when the path is `/laksh` (App and Firebase load only for other paths). `content.js` holds all the facts + lens rules (client / recruiter / dev, `?lens=` param, saved in localStorage), `LakshResume.jsx` the page (hero, tinted sections, timeline, project cards with live up/down pings, changelog diff, live ATS card that runs `ats/analyze.js` on the print sheet), `Sheet.jsx` the A4 text version (table with repeating spacer rows so `@page` margin stays 0 and the browser adds no header/footer; printed via the PDF button), `hooks.js` (reveal-on-view, count-up, magnet, tilt, status, scroll progress), `laksh.css` (scoped to `.lk`, light + dark). Photo: `public/laksh/photo.webp`.
 - `public/`: `favicon.svg` (adaptive tile, light/dark), `favicon.ico`, `apple-touch-icon.png`, `icon-192/512(.maskable).png` + `site.webmanifest`, og-image.png, `_redirects`, `robots.txt` (served; moved here by the merged PR #1 `claude/pensive-meitner-opz77b`, which also hardened sharing/saved data, fixed preview/PDF export and dropped unused dependencies)
 
 ## Status
@@ -54,7 +54,7 @@ Merged to `main` and deployed (9 Oct 2026): AI "tailor to job", ATS check, click
 - Laksh chose small commits, pushed after each (every push to `main` goes live). Session of 8 Oct 2026.
 
 ## Session log (newest first)
-- 2026-10-18: built the new `/laksh` resume on branch `feat/laksh-resume-custom` (content from LinkedIn + Obsidian, three lenses, live ATS badge, project status pings, changelog, A4 print sheet, light/dark). Lint and build pass; checked in Chrome desktop, mobile width, light and dark, print sheet on screen. Nothing pushed.
+- 2026-10-18: built the new `/laksh` resume on branch `feat/laksh-resume-custom` (content from LinkedIn + Obsidian, three lenses, live ATS badge, project status pings, changelog, A4 print sheet, light/dark). Lint and build pass; checked in Chrome desktop, mobile width, light and dark, print sheet on screen. Branch pushed to origin (not main) on Laksh's OK so Vercel can build a preview; main untouched.
 - 2026-10-09: new 1200x630 social card (`public/og-image.png`, logo lockup + tagline) replacing the old one. Link-preview scrapers cache the old image; re-scrape with the Facebook Sharing Debugger / LinkedIn Post Inspector if it doesn't update.
 - 2026-10-09: new favicon set (SVG + ICO + apple-touch + 192/512/maskable PNG + `site.webmanifest`) wired in `index.html`; removed the 4 MB neon `favicon.png` and unused `vite.svg`.
 - 2026-10-09: PDF audit. Download PDF used to be image-only (no selectable/ATS text), sliced lines and columns at the page edge, left continuation pages without margins or sidebar colour, and had no metadata. Rewrote `pdfManager.js` (dropped html2pdf.js for direct html2canvas + jsPDF), added "Fit to one page" toggle in Export, print path fit/break rules in `index.css`. Verified on all 16 templates plus an 11-role stress resume with a photo: text extracts cleanly, links kept, no cut lines.
@@ -70,12 +70,13 @@ Merged to `main` and deployed (9 Oct 2026): AI "tailor to job", ATS check, click
 <!-- handoff:auto:start -->
 ## Auto: repo state
 
-_Refreshed 18 Oct 2026, 10:43 am IST by `scripts/handoff.mjs` (runs on every commit). Don't edit inside this block._
+_Refreshed 18 Oct 2026, 10:44 am IST by `scripts/handoff.mjs` (runs on every commit). Don't edit inside this block._
 
 Branch: `feat/laksh-resume-custom` · remote: https://github.com/TheRealLaksh/Profiley-Resume-Builder
 
 ### Last 15 commits
 
+- `b0f207c` 2026-10-18 10:43 Route /laksh to the custom page and update HANDOFF
 - `6106795` 2026-10-18 10:43 Add the /laksh resume page: lenses, live ATS check, project status, changelog, print sheet
 - `0be32a7` 2026-10-18 10:43 Add content and photo for Laksh's custom resume page
 - `1a5f5a5` 2026-10-09 13:43 Refresh the social card with the new logo
@@ -90,11 +91,10 @@ Branch: `feat/laksh-resume-custom` · remote: https://github.com/TheRealLaksh/Pr
 - `895cb20` 2026-10-08 19:38 Add AI job tailoring, ATS check, click-to-edit and resume import
 - `3f7cd39` 2026-10-09 00:33 Default resume email to work@lakshpradhwani.com
 - `fdb119a` 2026-10-09 00:14 Merge pull request #2 from TheRealLaksh/claude/pensive-meitner-opz77b
-- `f5ee859` 2026-10-08 18:43 Merge main into the redesign branch
 
 ### Uncommitted changes at refresh time
 
 ```
-M  src/main.jsx
+M  HANDOFF.md
 ```
 <!-- handoff:auto:end -->
