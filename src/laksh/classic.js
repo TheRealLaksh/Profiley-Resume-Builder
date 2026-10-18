@@ -35,7 +35,7 @@ export const classicResume = () => {
       {
         id: 'shiftsdeal', role: 'Tech & Growth Intern', company: 'ShiftsDeal, Delhi (hybrid)', year: 'Aug 2026 - Present',
         details: bullets([
-          'Sole engineer on an early-stage venue-booking marketplace: built the website from scratch and shipped it to production.',
+          'Sole engineer on an early-stage venue-booking marketplace: built the website from scratch and shipped it to production, now listing 120+ venues.',
           'Integrated Razorpay payments and ship new features and fixes daily.',
           'Support growth alongside engineering: outreach calls and operations.',
         ]),
@@ -43,7 +43,7 @@ export const classicResume = () => {
       {
         id: 'freelance', role: 'Freelance Full-Stack Developer', company: 'Self-employed, Delhi NCR (remote)', year: '2026 - Present',
         details: bullets([
-          'Built company websites with custom CMS admin panels for agency clients, covering scoping, build, testing and handover.',
+          'Delivered 5+ company websites with custom CMS admin panels for agency clients, covering scoping, build, testing and handover.',
           'Added booking flows, dashboards and Razorpay payments; MySQL-backed so clients deploy and run the sites themselves.',
         ]),
       },

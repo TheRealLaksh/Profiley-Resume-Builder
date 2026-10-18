@@ -54,7 +54,7 @@ export const EXPERIENCE = [
     dates: 'Aug 2026 - Present',
     lenses: ALL,
     bullets: [
-      { t: 'Sole engineer at an early-stage venue-booking marketplace: built the website from scratch and took it to production.', lenses: ALL },
+      { t: 'Sole engineer at an early-stage venue-booking marketplace: built the website from scratch and took it to production, now listing 120+ venues.', lenses: ALL },
       { t: 'Integrated Razorpay payments and ship new features every day.', lenses: ALL },
       { t: 'Support growth alongside the tech work: outreach calls, operations and social media.', lenses: ['client', 'recruiter'] },
     ],
@@ -68,7 +68,7 @@ export const EXPERIENCE = [
     dates: '2026 - Present',
     lenses: ALL,
     bullets: [
-      { t: 'Company websites with CMS admin panels, delivered end to end for agency clients: scoping, build, testing and handover.', lenses: ALL },
+      { t: 'Delivered 5+ company websites with CMS admin panels for agency clients: scoping, build, testing and handover.', lenses: ALL },
       { t: 'Booking flows, dashboards and Razorpay payments on top of the sites that need them.', lenses: ['client', 'dev'] },
       { t: 'MySQL-backed builds that the client\'s own team can deploy and run.', lenses: ['dev'] },
     ],
