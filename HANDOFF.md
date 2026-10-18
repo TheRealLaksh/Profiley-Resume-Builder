@@ -78,6 +78,7 @@ Branch: `feat/laksh-resume-custom` · remote: https://github.com/TheRealLaksh/Pr
 
 ### Last 15 commits
 
+- `c64fe95` 2026-10-18 11:16 Make the standard /laksh view a strict one-page resume; add GitHub field and visible link URLs
 - `b57f6ad` 2026-10-18 10:49 HANDOFF: refresh auto block
 - `4a49983` 2026-10-18 10:49 Default /laksh to the standard Profiley view with a Creative view switch
 - `b07c26e` 2026-10-18 10:44 HANDOFF: note the pushed preview branch
@@ -92,16 +93,10 @@ Branch: `feat/laksh-resume-custom` · remote: https://github.com/TheRealLaksh/Pr
 - `181c8d5` 2026-10-08 20:49 Fix the downloaded PDF: real text layer, clean page breaks, fit to one page
 - `3ba52fb` 2026-10-09 01:48 Merge pull request #3 from TheRealLaksh/claude/pensive-meitner-opz77b
 - `bd3bd50` 2026-10-08 20:18 Merge main into the AI features branch
-- `b887246` 2026-10-08 19:53 Add free copy-paste Job match for people without an API key
 
 ### Uncommitted changes at refresh time
 
 ```
 M  HANDOFF.md
-M  src/components/Editor/editors/PersonalEditor.jsx
-M  src/components/Preview/ResumeDocument.jsx
-M  src/laksh/classic.js
-D  src/laksh/photoData.js
-M  src/utils/resumeData.js
 ```
 <!-- handoff:auto:end -->
