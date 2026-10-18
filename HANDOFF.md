@@ -1,7 +1,7 @@
 # Profiley Resume Builder handoff
 
 ## Project
-Profiley: a React resume builder with real-time WYSIWYG editing, 16 templates, drag-and-drop layouts, Firebase persistence and client-side PDF export. Built by Laksh as a personal project (2025); his own resume is published at `/laksh`.
+Profiley: a React resume builder with real-time WYSIWYG editing, 16 templates, drag-and-drop layouts, Firebase persistence and client-side PDF export. Built by Laksh as a personal project (2025); his own resume is published at `/laksh` (since 18 Oct 2026 a hand-built page, not a Firestore share; see Code map).
 
 ## Links
 - Live: https://profiley.lakshpradhwani.com (old profiley.lakshp.live is dead)
@@ -27,12 +27,14 @@ React 19, Vite, Tailwind, Firebase, html2canvas + jsPDF/html2pdf, lucide-react.
 - `src/components/Preview/Editable.jsx` + `editContext.js`: click-to-edit on the main canvas only (not shared/read-only, thumbs or print)
 - `src/utils/pdfManager.js`: Download PDF (html2canvas image per page + invisible text layer + link annotations, page breaks planned in text gaps, fit-to-one-page shrink up to 15%, margins and sidebar colour on continuation pages) and `printResume` (browser print with the same fit via the `--print-fit` CSS variable)
 - `src/components/UI/Logo.jsx`: the logo (page-shaped P + outlined Instrument Serif wordmark, inline SVG, colours from theme tokens incl. `--c-accent-fold`); used by TopBar, AppSkeleton, MobileLayout
+- `src/laksh/` (branch `feat/laksh-resume-custom`, not merged): Laksh's own resume at `/laksh`, deliberately outside the template system. `main.jsx` lazy-loads `LakshResume.jsx` when the path is `/laksh` (App and Firebase load only for other paths). `content.js` holds all the facts + lens rules (client / recruiter / dev, `?lens=` param, saved in localStorage), `LakshResume.jsx` the page (hero, tinted sections, timeline, project cards with live up/down pings, changelog diff, live ATS card that runs `ats/analyze.js` on the print sheet), `Sheet.jsx` the A4 text version (table with repeating spacer rows so `@page` margin stays 0 and the browser adds no header/footer; printed via the PDF button), `hooks.js` (reveal-on-view, count-up, magnet, tilt, status, scroll progress), `laksh.css` (scoped to `.lk`, light + dark). Photo: `public/laksh/photo.webp`.
 - `public/`: `favicon.svg` (adaptive tile, light/dark), `favicon.ico`, `apple-touch-icon.png`, `icon-192/512(.maskable).png` + `site.webmanifest`, og-image.png, `_redirects`, `robots.txt` (served; moved here by the merged PR #1 `claude/pensive-meitner-opz77b`, which also hardened sharing/saved data, fixed preview/PDF export and dropped unused dependencies)
 
 ## Status
 Merged to `main` and deployed (9 Oct 2026): AI "tailor to job", ATS check, click-to-edit and import/export (PDF/text/backup/JSON Resume), on top of the PR #2 redesign (design system with light/dark, new editor, mobile fit/pinch, 16 templates). Lint, `npm run build`, API handler test (stubbed fetch) and Playwright suites pass. Real Anthropic calls and real Firestore shares are untested (no key / no Firestore in the sandbox). `ANTHROPIC_API_KEY` is deliberately NOT set (Laksh doesn't want to pay): with no server key and no user key, Job match runs in a free copy-paste mode (Copy prompt, run it in claude.ai or Claude in Chrome, paste the JSON reply back; `buildManualPrompt`/`parseManualReply` in `src/ai/tasks.js`, UI in `TailorPanel.jsx`). Import's AI read is still key-only; the basic reader is free. Print CSS caps letter-spacing at 0.05em so the text PDF extracts cleanly. `vercel.json` rewrite excludes `/api/`. Domain migration: the default email is `work@lakshpradhwani.com` (Cloudflare Email Routing forwards it to Laksh's Gmail).
 
 ## Next steps
+000. Review `feat/laksh-resume-custom` at `/laksh` on a preview, then merge to `main` (push deploys live; Laksh said push only when he says). The old Firestore doc `laksh` is untouched (Laksh chose replace and delete; deleting it needs Firebase access, so it just stops being used). Not tested: window.print() in real Chrome PDF output beyond the on-screen sheet, Safari/Firefox.
 00. PDF audit fixes (9 Oct 2026) are on branch `claude/pensive-meitner-opz77b`, not yet merged: after merging, download a PDF from production in a few templates and check the text selects/searches.
 0. Do NOT set `ANTHROPIC_API_KEY` unless Laksh decides to pay. Try Review > Job match (copy-paste mode) on production.
 1. The app uses Firestore only (no Firebase Auth, so no authorized-domains step). If the Firebase browser API key has HTTP-referrer restrictions in Google Cloud Console (APIs & Services > Credentials), add `https://profiley.lakshpradhwani.com/*` or share links will fail on the new domain.
@@ -46,11 +48,13 @@ Merged to `main` and deployed (9 Oct 2026): AI "tailor to job", ATS check, click
 - Email forwarding for work@ and me@lakshpradhwani.com is set up (Cloudflare Email Routing); a real delivery test mail has not been sent yet.
 
 ## Decisions not to undo
+- `/laksh` (18 Oct 2026): hand-built, not a template. Public data rules: no phone, no marks, no client names (Bestow's), shooting = just "National-level shooter", ShiftsDeal title = "Tech & Growth Intern" (matches LinkedIn), freelance listed without client names, Delhi NCR. Animation = entrance + hover micro-motion only (Laksh declined pinned scroll scenes, scroll-fill text and cursor effects). Light + dark. The ATS card downgrades two checks on purpose (phone left off; image-PDF tip n/a) and says so.
 - Logo (9 Oct 2026): "Page-P", a P whose silhouette is a dog-eared page (spruce body, lighter fold), wordmark in Instrument Serif with an accent-coloured i-dot. Chosen over a document-icon-with-P (too generic) and a stacked-layers P (reads as a drop shadow). Source art and exports: Obsidian `05 Resources/Profiley Logo/`. The old glowing 3D neon favicon is retired; don't bring it back.
 - Domain is lakshpradhwani.com. Never reintroduce lakshp.live.
 - Laksh chose small commits, pushed after each (every push to `main` goes live). Session of 8 Oct 2026.
 
 ## Session log (newest first)
+- 2026-10-18: built the new `/laksh` resume on branch `feat/laksh-resume-custom` (content from LinkedIn + Obsidian, three lenses, live ATS badge, project status pings, changelog, A4 print sheet, light/dark). Lint and build pass; checked in Chrome desktop, mobile width, light and dark, print sheet on screen. Nothing pushed.
 - 2026-10-09: new 1200x630 social card (`public/og-image.png`, logo lockup + tagline) replacing the old one. Link-preview scrapers cache the old image; re-scrape with the Facebook Sharing Debugger / LinkedIn Post Inspector if it doesn't update.
 - 2026-10-09: new favicon set (SVG + ICO + apple-touch + 192/512/maskable PNG + `site.webmanifest`) wired in `index.html`; removed the 4 MB neon `favicon.png` and unused `vite.svg`.
 - 2026-10-09: PDF audit. Download PDF used to be image-only (no selectable/ATS text), sliced lines and columns at the page edge, left continuation pages without margins or sidebar colour, and had no metadata. Rewrote `pdfManager.js` (dropped html2pdf.js for direct html2canvas + jsPDF), added "Fit to one page" toggle in Export, print path fit/break rules in `index.css`. Verified on all 16 templates plus an 11-role stress resume with a photo: text extracts cleanly, links kept, no cut lines.
@@ -66,12 +70,13 @@ Merged to `main` and deployed (9 Oct 2026): AI "tailor to job", ATS check, click
 <!-- handoff:auto:start -->
 ## Auto: repo state
 
-_Refreshed 9 Oct 2026, 1:43 pm IST by `scripts/handoff.mjs` (runs on every commit). Don't edit inside this block._
+_Refreshed 18 Oct 2026, 10:43 am IST by `scripts/handoff.mjs` (runs on every commit). Don't edit inside this block._
 
-Branch: `main` · remote: https://github.com/TheRealLaksh/Profiley-Resume-Builder
+Branch: `feat/laksh-resume-custom` · remote: https://github.com/TheRealLaksh/Profiley-Resume-Builder
 
 ### Last 15 commits
 
+- `1a5f5a5` 2026-10-09 13:43 Refresh the social card with the new logo
 - `fb7ad38` 2026-10-09 13:43 Replace the neon favicon with the Page-P icon set
 - `9054d3b` 2026-10-09 13:40 Add the Page-P logo to the app header
 - `9a3f78a` 2026-10-09 03:19 Merge pull request #4 from TheRealLaksh/claude/pensive-meitner-opz77b
@@ -86,12 +91,17 @@ Branch: `main` · remote: https://github.com/TheRealLaksh/Profiley-Resume-Builde
 - `f5ee859` 2026-10-08 18:43 Merge main into the redesign branch
 - `45f256b` 2026-10-08 23:59 Update HANDOFF after rebase onto PR #1
 - `168ef15` 2026-10-08 23:59 Point Profiley URLs at lakshpradhwani.com
-- `940c187` 2026-10-08 23:59 Add HANDOFF.md and handoff hooks
 
 ### Uncommitted changes at refresh time
 
 ```
-M  HANDOFF.md
-M  public/og-image.png
+M HANDOFF.md
+A  public/laksh/photo.webp
+A  src/laksh/content.js
+ M src/main.jsx
+?? src/laksh/LakshResume.jsx
+?? src/laksh/Sheet.jsx
+?? src/laksh/hooks.js
+?? src/laksh/laksh.css
 ```
 <!-- handoff:auto:end -->
