@@ -81,6 +81,7 @@ Branch: `main` · remote: https://github.com/TheRealLaksh/Profiley-Resume-Builde
 
 ### Last 15 commits
 
+- `6f946f9` 2026-10-18 11:37 HANDOFF: /laksh is live
 - `fbbe005` 2026-10-18 11:32 HANDOFF: refresh auto block
 - `448d2a2` 2026-10-18 11:32 Add real ShiftsDeal and freelance numbers to the resume
 - `e72ac11` 2026-10-18 11:16 HANDOFF: refresh auto block
@@ -95,7 +96,6 @@ Branch: `main` · remote: https://github.com/TheRealLaksh/Profiley-Resume-Builde
 - `fb7ad38` 2026-10-09 13:43 Replace the neon favicon with the Page-P icon set
 - `9054d3b` 2026-10-09 13:40 Add the Page-P logo to the app header
 - `9a3f78a` 2026-10-09 03:19 Merge pull request #4 from TheRealLaksh/claude/pensive-meitner-opz77b
-- `4c00e99` 2026-10-08 20:50 Correct the Firebase domain note in HANDOFF (Firestore only, no Auth)
 
 ### Uncommitted changes at refresh time
 
