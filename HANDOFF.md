@@ -76,6 +76,7 @@ Branch: `feat/laksh-resume-custom` · remote: https://github.com/TheRealLaksh/Pr
 
 ### Last 15 commits
 
+- `0be32a7` 2026-10-18 10:43 Add content and photo for Laksh's custom resume page
 - `1a5f5a5` 2026-10-09 13:43 Refresh the social card with the new logo
 - `fb7ad38` 2026-10-09 13:43 Replace the neon favicon with the Page-P icon set
 - `9054d3b` 2026-10-09 13:40 Add the Page-P logo to the app header
@@ -90,18 +91,14 @@ Branch: `feat/laksh-resume-custom` · remote: https://github.com/TheRealLaksh/Pr
 - `fdb119a` 2026-10-09 00:14 Merge pull request #2 from TheRealLaksh/claude/pensive-meitner-opz77b
 - `f5ee859` 2026-10-08 18:43 Merge main into the redesign branch
 - `45f256b` 2026-10-08 23:59 Update HANDOFF after rebase onto PR #1
-- `168ef15` 2026-10-08 23:59 Point Profiley URLs at lakshpradhwani.com
 
 ### Uncommitted changes at refresh time
 
 ```
-M HANDOFF.md
-A  public/laksh/photo.webp
-A  src/laksh/content.js
+A  src/laksh/LakshResume.jsx
+A  src/laksh/Sheet.jsx
+A  src/laksh/hooks.js
+A  src/laksh/laksh.css
  M src/main.jsx
-?? src/laksh/LakshResume.jsx
-?? src/laksh/Sheet.jsx
-?? src/laksh/hooks.js
-?? src/laksh/laksh.css
 ```
 <!-- handoff:auto:end -->
