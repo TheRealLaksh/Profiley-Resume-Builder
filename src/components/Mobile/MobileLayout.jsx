@@ -19,7 +19,7 @@ const NAV = [
 const MobileLayout = (props) => {
     const {
         activeTab, setActiveTab, darkMode, toggleDarkMode, data, config, sectionOrder, isReadOnly,
-        canUndo, canRedo, undo, redo, onDownloadPdf, isExportingPdf, onCopyEmail, onForkTemplate
+        canUndo, canRedo, undo, redo, onDownloadPdf, isExportingPdf, onCopyEmail, onForkTemplate, viewSwitch
     } = props;
 
     const [showPreview, setShowPreview] = useState(false);
@@ -54,6 +54,7 @@ const MobileLayout = (props) => {
                         <button className="btn btn-ghost btn-icon" onClick={redo} disabled={!canRedo} aria-label="Redo"><Redo2 size={17} /></button>
                     </>
                 )}
+                {isReadOnly && viewSwitch}
                 {inPreview && (
                     <button className="btn btn-primary" onClick={onDownloadPdf} disabled={isExportingPdf}>
                         {isExportingPdf ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
