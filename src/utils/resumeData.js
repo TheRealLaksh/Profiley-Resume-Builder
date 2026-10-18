@@ -56,6 +56,7 @@ export const normalizeData = (raw) => {
       location: asString(personal.location),
       linkedin: sanitizeUrl(personal.linkedin),
       portfolio: sanitizeUrl(personal.portfolio),
+      github: sanitizeUrl(personal.github),
       photoUrl: sanitizeImageSrc(personal.photoUrl),
       summary: asString(personal.summary)
     },

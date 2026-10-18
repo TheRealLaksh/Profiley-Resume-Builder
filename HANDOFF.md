@@ -27,7 +27,7 @@ React 19, Vite, Tailwind, Firebase, html2canvas + jsPDF/html2pdf, lucide-react.
 - `src/components/Preview/Editable.jsx` + `editContext.js`: click-to-edit on the main canvas only (not shared/read-only, thumbs or print)
 - `src/utils/pdfManager.js`: Download PDF (html2canvas image per page + invisible text layer + link annotations, page breaks planned in text gaps, fit-to-one-page shrink up to 15%, margins and sidebar colour on continuation pages) and `printResume` (browser print with the same fit via the `--print-fit` CSS variable)
 - `src/components/UI/Logo.jsx`: the logo (page-shaped P + outlined Instrument Serif wordmark, inline SVG, colours from theme tokens incl. `--c-accent-fold`); used by TopBar, AppSkeleton, MobileLayout
-- `src/laksh/` (branch `feat/laksh-resume-custom`, pushed, not merged): Laksh's own resume at `/laksh`. **Default `/laksh` = the standard Profiley read-only view** (`LakshClassic.jsx` renders `App` with `preset` from `classic.js`: same facts as the creative page mapped to the builder schema, Leafy template, recruiter lens, inline photo in `photoData.js`; change `activeTemplate` to `ats` for plain single column). A "Creative view" switch (`ViewSwitch.jsx`, `switch.css`; shown by TopBar and MobileLayout via the `viewSwitch` prop when read-only) goes to `/laksh?view=creative`, the hand-built page; its switch goes back. Strict readers therefore never see the creative page unless they opt in. `main.jsx` lazy-loads both (App and Firebase load only for the standard view and other paths). `content.js` holds all the facts + lens rules (client / recruiter / dev, `?lens=` param, saved in localStorage), `LakshResume.jsx` the page (hero, tinted sections, timeline, project cards with live up/down pings, changelog diff, live ATS card that runs `ats/analyze.js` on the print sheet), `Sheet.jsx` the A4 text version (table with repeating spacer rows so `@page` margin stays 0 and the browser adds no header/footer; printed via the PDF button), `hooks.js` (reveal-on-view, count-up, magnet, tilt, status, scroll progress), `laksh.css` (scoped to `.lk`, light + dark). Photo: `public/laksh/photo.webp`.
+- `src/laksh/` (branch `feat/laksh-resume-custom`, pushed, not merged): Laksh's own resume at `/laksh`. **Default `/laksh` = the standard Profiley read-only view** (`LakshClassic.jsx` renders `App` with `preset` from `classic.js`). Since the 18 Oct research (vault note `01 About Me/Top Package Resume Research (Oct 2026).md`) it is the strict one-page version: ATS Friendly template, no photo, no summary, Education first (all schools, no marks), Experience, Projects (with visible URLs and proof: tests, audits), grouped Skills, Awards. New builder features it uses: `personal.github` field (editor + header) and the `showLinkUrls` config key (prints the real URL instead of the label "LinkedIn"). It overflows A4 by about 6%, which the app's fit-to-one-page print/PDF handles. Missing real numbers to add when Laksh has them: ShiftsDeal venues/bookings/users, freelance sites delivered, Unified Mentor users, Calibridge audit/Lighthouse result. A "Creative view" switch (`ViewSwitch.jsx`, `switch.css`; shown by TopBar and MobileLayout via the `viewSwitch` prop when read-only) goes to `/laksh?view=creative`, the hand-built page; its switch goes back. Strict readers therefore never see the creative page unless they opt in. `main.jsx` lazy-loads both (App and Firebase load only for the standard view and other paths). `content.js` holds all the facts + lens rules (client / recruiter / dev, `?lens=` param, saved in localStorage), `LakshResume.jsx` the page (hero, tinted sections, timeline, project cards with live up/down pings, changelog diff, live ATS card that runs `ats/analyze.js` on the print sheet), `Sheet.jsx` the A4 text version (table with repeating spacer rows so `@page` margin stays 0 and the browser adds no header/footer; printed via the PDF button), `hooks.js` (reveal-on-view, count-up, magnet, tilt, status, scroll progress), `laksh.css` (scoped to `.lk`, light + dark). Photo: `public/laksh/photo.webp`.
 - `public/`: `favicon.svg` (adaptive tile, light/dark), `favicon.ico`, `apple-touch-icon.png`, `icon-192/512(.maskable).png` + `site.webmanifest`, og-image.png, `_redirects`, `robots.txt` (served; moved here by the merged PR #1 `claude/pensive-meitner-opz77b`, which also hardened sharing/saved data, fixed preview/PDF export and dropped unused dependencies)
 
 ## Status
@@ -54,6 +54,7 @@ Merged to `main` and deployed (9 Oct 2026): AI "tailor to job", ATS check, click
 - Laksh chose small commits, pushed after each (every push to `main` goes live). Session of 8 Oct 2026.
 
 ## Session log (newest first)
+- 2026-10-18: deep research on ₹60L-1Cr CS/AI resumes (8 real resumes read; Reddit unreadable; report in the vault) and rebuilt the standard `/laksh` view from its blueprint; added the `github` field and `showLinkUrls`. Lint passes; checked in Chrome. Local commit only.
 - 2026-10-18: `/laksh` now defaults to the standard Profiley view with the updated data; the creative page is behind a Creative view switch (`?view=creative`). Lint passes; checked both directions of the switch in Chrome. Not pushed since the first branch push.
 - 2026-10-18: built the new `/laksh` resume on branch `feat/laksh-resume-custom` (content from LinkedIn + Obsidian, three lenses, live ATS badge, project status pings, changelog, A4 print sheet, light/dark). Lint and build pass; checked in Chrome desktop, mobile width, light and dark, print sheet on screen. Branch pushed to origin (not main) on Laksh's OK so Vercel can build a preview; main untouched.
 - 2026-10-09: new 1200x630 social card (`public/og-image.png`, logo lockup + tagline) replacing the old one. Link-preview scrapers cache the old image; re-scrape with the Facebook Sharing Debugger / LinkedIn Post Inspector if it doesn't update.
@@ -71,12 +72,13 @@ Merged to `main` and deployed (9 Oct 2026): AI "tailor to job", ATS check, click
 <!-- handoff:auto:start -->
 ## Auto: repo state
 
-_Refreshed 18 Oct 2026, 10:49 am IST by `scripts/handoff.mjs` (runs on every commit). Don't edit inside this block._
+_Refreshed 18 Oct 2026, 11:16 am IST by `scripts/handoff.mjs` (runs on every commit). Don't edit inside this block._
 
 Branch: `feat/laksh-resume-custom` · remote: https://github.com/TheRealLaksh/Profiley-Resume-Builder
 
 ### Last 15 commits
 
+- `b57f6ad` 2026-10-18 10:49 HANDOFF: refresh auto block
 - `4a49983` 2026-10-18 10:49 Default /laksh to the standard Profiley view with a Creative view switch
 - `b07c26e` 2026-10-18 10:44 HANDOFF: note the pushed preview branch
 - `b0f207c` 2026-10-18 10:43 Route /laksh to the custom page and update HANDOFF
@@ -91,11 +93,15 @@ Branch: `feat/laksh-resume-custom` · remote: https://github.com/TheRealLaksh/Pr
 - `3ba52fb` 2026-10-09 01:48 Merge pull request #3 from TheRealLaksh/claude/pensive-meitner-opz77b
 - `bd3bd50` 2026-10-08 20:18 Merge main into the AI features branch
 - `b887246` 2026-10-08 19:53 Add free copy-paste Job match for people without an API key
-- `895cb20` 2026-10-08 19:38 Add AI job tailoring, ATS check, click-to-edit and resume import
 
 ### Uncommitted changes at refresh time
 
 ```
 M  HANDOFF.md
+M  src/components/Editor/editors/PersonalEditor.jsx
+M  src/components/Preview/ResumeDocument.jsx
+M  src/laksh/classic.js
+D  src/laksh/photoData.js
+M  src/utils/resumeData.js
 ```
 <!-- handoff:auto:end -->

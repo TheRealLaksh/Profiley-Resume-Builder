@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-    Mail, Phone, MapPin, Linkedin, Globe,
+    Mail, Phone, MapPin, Linkedin, Github, Globe,
     Briefcase, User, GraduationCap, Code, Award, Heart, FileText
 } from 'lucide-react';
 
@@ -54,6 +54,13 @@ const ResumeDocument = ({ data, config, sectionOrder, paperRole = 'main' }) => {
     const photoSrc = sanitizeImageSrc(data.personal.photoUrl);
     const linkedinUrl = sanitizeUrl(data.personal.linkedin);
     const portfolioUrl = sanitizeUrl(data.personal.portfolio);
+    const githubUrl = sanitizeUrl(data.personal.github);
+    // "Show link URLs": print the address itself (linkedin.com/in/you) instead of a label, so parsers and
+    // readers of a printed copy get the real link. Off by default to keep sidebars tidy.
+    const linkText = (url, label) => {
+        if (!url) return '';
+        return config.showLinkUrls ? url.replace(/^https?:\/\/(www\.)?/i, '').replace(/\/$/, '') : label;
+    };
 
     // Renamed custom sections keep their title in data.custom; everything else uses the section label.
     const getTitle = (section) => data.custom?.[section.id]?.title || section.label;
@@ -180,8 +187,9 @@ const ResumeDocument = ({ data, config, sectionOrder, paperRole = 'main' }) => {
         <ContactItem key="email" icon={contactIcon(Mail)} text={data.personal.email} tone={tone} editPath="personal:email" placeholder="Email" />,
         <ContactItem key="phone" icon={contactIcon(Phone)} text={data.personal.phone} tone={tone} editPath="personal:phone" placeholder="Phone" />,
         <ContactItem key="loc" icon={contactIcon(MapPin)} text={data.personal.location} tone={tone} editPath="personal:location" placeholder="Location" />,
-        withLinks && <ContactItem key="in" icon={contactIcon(Linkedin)} text={linkedinUrl ? 'LinkedIn' : ''} link={linkedinUrl} tone={tone} />,
-        withLinks && <ContactItem key="web" icon={contactIcon(Globe)} text={portfolioUrl ? 'Portfolio' : ''} link={portfolioUrl} tone={tone} />
+        withLinks && <ContactItem key="in" icon={contactIcon(Linkedin)} text={linkText(linkedinUrl, 'LinkedIn')} link={linkedinUrl} tone={tone} />,
+        withLinks && <ContactItem key="gh" icon={contactIcon(Github)} text={linkText(githubUrl, 'GitHub')} link={githubUrl} tone={tone} />,
+        withLinks && <ContactItem key="web" icon={contactIcon(Globe)} text={linkText(portfolioUrl, 'Portfolio')} link={portfolioUrl} tone={tone} />
     ];
 
     const paperTint = config.paperTint || 'bg-white';
