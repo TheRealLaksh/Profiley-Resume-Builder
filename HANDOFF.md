@@ -76,6 +76,7 @@ Branch: `feat/laksh-resume-custom` · remote: https://github.com/TheRealLaksh/Pr
 
 ### Last 15 commits
 
+- `6106795` 2026-10-18 10:43 Add the /laksh resume page: lenses, live ATS check, project status, changelog, print sheet
 - `0be32a7` 2026-10-18 10:43 Add content and photo for Laksh's custom resume page
 - `1a5f5a5` 2026-10-09 13:43 Refresh the social card with the new logo
 - `fb7ad38` 2026-10-09 13:43 Replace the neon favicon with the Page-P icon set
@@ -90,15 +91,10 @@ Branch: `feat/laksh-resume-custom` · remote: https://github.com/TheRealLaksh/Pr
 - `3f7cd39` 2026-10-09 00:33 Default resume email to work@lakshpradhwani.com
 - `fdb119a` 2026-10-09 00:14 Merge pull request #2 from TheRealLaksh/claude/pensive-meitner-opz77b
 - `f5ee859` 2026-10-08 18:43 Merge main into the redesign branch
-- `45f256b` 2026-10-08 23:59 Update HANDOFF after rebase onto PR #1
 
 ### Uncommitted changes at refresh time
 
 ```
-A  src/laksh/LakshResume.jsx
-A  src/laksh/Sheet.jsx
-A  src/laksh/hooks.js
-A  src/laksh/laksh.css
- M src/main.jsx
+M  src/main.jsx
 ```
 <!-- handoff:auto:end -->
